@@ -13,7 +13,7 @@ describe('Domain', function(){
     // });
 
     describe('get data(s)', function(){
-        it('should get many data of a specific doamain', function(done){
+        it('should get many data of a specific doamain', function(){
             // BFast.domain('invoices').many().then(values=>{
             //     console.log(values);
             //     done();
