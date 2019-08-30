@@ -27,8 +27,9 @@ export class FunctionController implements FunctionI{
     }
 
     names(): Promise<any>{
+        // console.log(`${this.config.getFaasApi()}/names`);
         return new Promise((resolve, reject)=>{
-            axios.post(`${this.config.getFaasApi}/names`,{},{
+            axios.post(`${this.config.getFaasApi()}/names`,{},{
                 headers: this.config.getHeaders()
             }).then((value: any)=>{
                 resolve(value.data);
