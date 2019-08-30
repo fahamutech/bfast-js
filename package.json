@@ -1,6 +1,6 @@
 {
   "name": "bfastjs",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "javascript client sdk for bfast project",
   "main": "./dist/bfast_js.js",
   "scripts": {
