@@ -17,7 +17,19 @@ export class Config{
         }
     }
 
+    getFaasApi(){
+        return `${Config.serverUrl}/ide/faas`;
+    }
+
     getApiUrl(domain: string): string{
         return `${Config.serverUrl}/ide/api/${domain}`
+    }
+
+    getSearchApi(domain: string, queryName: string): string{
+        return `${this.getApiUrl(domain)}/search/${queryName}`
+    }
+
+    getFunctionApi(name: string): string{
+        return `${Config.serverUrl}/ide/function/${name}`;
     }
 }
