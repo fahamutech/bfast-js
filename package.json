@@ -1,12 +1,13 @@
 {
-  "name": "bfastnode",
-  "version": "1.0.0",
+  "name": "bfastjs",
+  "version": "1.0.3",
   "description": "javascript client sdk for bfast project",
-  "main": "./src/index.ts",
+  "main": "./dist/bfast_js.js",
   "scripts": {
     "start": "webpack-dev-server --open",
     "test": "mocha ./specs",
-    "build": "npx webpack"
+    "buildWeb": "npx webpack --config webpack.web.config.js",
+    "build": "npm run buildWeb"
   },
   "author": "Joshua",
   "license": "ISC",
