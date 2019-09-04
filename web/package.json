@@ -1,0 +1,27 @@
+{
+  "name": "bfastjs",
+  "version": "1.0.3",
+  "description": "javascript client sdk for bfast project",
+  "main": "./dist/bfast_js.js",
+  "scripts": {
+    "start": "webpack-dev-server --open",
+    "test": "mocha ./specs",
+    "buildWeb": "npx webpack --config webpack.web.config.js",
+    "buildNode": "npx webpack --config webpack.node.config.js",
+    "build": "npm run buildWeb"
+  },
+  "author": "Joshua",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^12.7.3",
+    "mocha": "^6.2.0",
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.6.2",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.7",
+    "webpack-dev-server": "^3.8.0"
+  }
+}
