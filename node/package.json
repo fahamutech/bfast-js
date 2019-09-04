@@ -2,7 +2,7 @@
   "name": "bfastnode",
   "version": "1.0.0",
   "description": "javascript client sdk for bfast project",
-  "main": "./dist/bfast_js.js",
+  "main": "./src/index.ts",
   "scripts": {
     "start": "webpack-dev-server --open",
     "test": "mocha ./specs",
