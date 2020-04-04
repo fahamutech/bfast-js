@@ -1,24 +1,24 @@
 import {DomainI, DomainModel} from "../core/domainInterface";
 import {BFastConfig} from "../conf";
+import {QueryController} from "./QueryController";
 
 const axios = require('axios').default;
 
 export class DomainController implements DomainI {
 
     domainName: string;
-    model: DomainModel;
     private readonly cloudObj: Parse.Object;
 
-    constructor(private name: string, private _parse:any) {
+    constructor(private name: string, private _parse: any) {
         this.domainName = name;
         const CloudObj = _parse.Object.extend(this.domainName);
         this.cloudObj = new CloudObj;
     }
 
-    async save(): Promise<any> {
-        if (this.model) {
+    async save(model: DomainModel): Promise<any> {
+        if (model) {
             try {
-                const response = await this.cloudObj.save(this.model);
+                const response = await this.cloudObj.save(model);
                 return response.toJSON();
             } catch (e) {
                 throw e;
@@ -50,6 +50,7 @@ export class DomainController implements DomainI {
 
     async delete(objectId: string): Promise<any> {
         try {
+            console.log(`${BFastConfig.getCloudDatabaseUrl()}/classes/${this.domainName}/${objectId}`);
             const response = await axios.delete(`${BFastConfig.getCloudDatabaseUrl()}/classes/${this.domainName}/${objectId}`, {
                 headers: BFastConfig.getHeaders()
             });
@@ -61,7 +62,8 @@ export class DomainController implements DomainI {
 
     query(): Parse.Query {
         try {
-            return new this._parse.Query(this.domainName);
+            return new QueryController(this.domainName);
+            // this._parse.Query(this.domainName);
         } catch (e) {
             throw e;
         }

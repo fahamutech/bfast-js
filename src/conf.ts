@@ -16,7 +16,7 @@ export namespace BFastConfig {
         if (cloudFunctionsUrl && cloudFunctionsUrl.startsWith('http')) {
             return cloudFunctionsUrl;
         }
-        return `https://${projectId}-faas.bfast.fahamutech.com/${path}`
+        return `https://${projectId}-faas.bfast.fahamutech.com${path}`
     };
 
     export const getCloudDatabaseUrl = function () {

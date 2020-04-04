@@ -28,8 +28,6 @@ export namespace BFast {
         BFastConfig.applicationId = options.applicationId;
         BFastConfig.projectId = options.projectId;
 
-        console.log(BFastConfig);
-
         _parse.initialize(BFastConfig.applicationId);
         // @ts-ignore
         _parse.serverURL = BFastConfig.getCloudDatabaseUrl();
@@ -60,8 +58,8 @@ export namespace BFast {
         return new FunctionController(functionPath);
     };
 
-    export const auth = function () {
-        return new AuthController(new _parse.User());
+    export const auth = function (user?: { username: string, password: string }) {
+        return new _parse.User(user?user:null);
     };
 
     export const storage = function (options: {
