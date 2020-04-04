@@ -1,6 +1,6 @@
 {
-  "name": "@bfast/js",
-  "version": "0.1.0",
+  "name": "bfastjs",
+  "version": "1.1.2",
   "description": "javascript client sdk for bfast::cloud project",
   "main": "./dist/bfast_js.js",
   "scripts": {
@@ -12,10 +12,13 @@
   "author": "Fahamu Tech",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.19.2"
+    "axios": "^0.19.2",
+    "parse": "^2.12.0"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/node": "^13.11.0",
+    "@types/parse": "^2.10.18",
     "mocha": "^7.1.1",
     "ts-loader": "^6.2.2",
     "typescript": "^3.8.3",

@@ -7,14 +7,14 @@ describe('Domain', function(){
    //  var main;
     // beforeEach(function(){
     //     BFast.init({
-    //         serverUrl: 'https://ssm.fahamutech.com:8001',
+    //         cloudDatabaseUrl: 'https://ssm.fahamutech.com:8001',
     //         apiKey: 'ut778567ghj'
     //     });
     // });
 
     describe('get data(s)', function(){
-        it('should get many data of a specific doamain', function(){
-            // BFast.domain('invoices').many().then(values=>{
+        it('should get getAll data of a specific doamain', function(){
+            // BFast.domain('invoices').getAll().then(values=>{
             //     console.log(values);
             //     done();
             //     assert(1,1);
