@@ -1,4 +1,10 @@
-export interface FunctionI{
-    run(body? : {[key: string]: any}): Promise<any>;
-    names(): Promise<any>;
+export interface FunctionI {
+    post<T>(body?: { [key: string]: any }, query?: { [key: string]: any }): Promise<T>;
+
+    get<T>(query?: { [key: string]: any }): Promise<T>;
+
+    delete<T>(query?: { [key: string]: any }): Promise<T>;
+
+    put<T>(body?: { [key: string]: any }): Promise<T>;
+
 }

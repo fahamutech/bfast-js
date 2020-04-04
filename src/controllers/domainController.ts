@@ -1,188 +1,84 @@
-import { DomainI, DomainModel } from "../core/domainInterface";
-import { Config } from "../configuration";
-import { link } from "fs";
-var axios = require('axios');
+import {DomainI, DomainModel} from "../core/domainInterface";
+import {BFastConfig} from "../conf";
 
-export class DomainController implements DomainI{
+const axios = require('axios').default;
 
-    private  domainName: string;
-    private model: DomainModel;
+export class DomainController implements DomainI {
 
-    constructor(name: string, private config: Config){
+    domainName: string;
+    model: DomainModel;
+    private readonly cloudObj: Parse.Object;
+
+    constructor(private name: string, private _parse:any) {
         this.domainName = name;
+        const CloudObj = _parse.Object.extend(this.domainName);
+        this.cloudObj = new CloudObj;
     }
 
-    set(name: string, value: any): DomainModel {
-        this.model[name] = value;
-        return this.model;
-    }
-
-    setValues(model: DomainModel): DomainModel {
-        this.model = model;
-        return this.model;
-    }
-
-    save(): Promise<any>{
-        if(this.model){
-            return new Promise<any>((resolve, reject)=>{
-                axios.post(this.config.getApiUrl(this.domainName),this.model,{
-                    headers: this.config.getHeaders()
-                }).then((value: any)=>{
-                    resolve(value.data);
-                }).catch((reason: any)=>{
-                    reject(reason);
-                }).finally((_:any)=>{
-                    this.model = undefined;
-                });
-            });
-        }else{
+    async save(): Promise<any> {
+        if (this.model) {
+            try {
+                const response = await this.cloudObj.save(this.model);
+                return response.toJSON();
+            } catch (e) {
+                throw e;
+            }
+        } else {
             return Promise.reject({code: -1, message: 'please provide data to save'});
         }
     }
 
-    many(options?: {[name: string]: any}): Promise<any>{
-        return new Promise((resolve, reject)=>{
-            axios.get(this.config.getApiUrl(this.domainName), {
-                headers: this.config.getHeaders(),
-                params: options?options:{},
-            }).then((values: any)=>{
-                const domains = this.config.parseApiUrl(values.data);
-                resolve({
-                    [this.domainName]: domains._embedded[this.domainName],
-                    links: domains._links,
-                    page: domains.page
-                })
-            }).catch((reason: any)=>{
-                reject(reason);
+    async getAll(): Promise<any> {
+        try {
+            const number = await this.query().count();
+            const response = await this.query().limit(number).find();
+            return JSON.parse(JSON.stringify(response));
+        } catch (e) {
+            throw e;
+        }
+    }
+
+
+    async get<T>(objectId: string): Promise<any> {
+        try {
+            const response = await this.query().get(objectId);
+            return response.toJSON();
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    async delete(objectId: string): Promise<any> {
+        try {
+            const response = await axios.delete(`${BFastConfig.getCloudDatabaseUrl()}/classes/${this.domainName}/${objectId}`, {
+                headers: BFastConfig.getHeaders()
             });
-        });
+            return response.data;
+        } catch (e) {
+            throw e;
+        }
     }
 
-    one(options: {link: string, id: string}): Promise<any>{
-        return new Promise((resolve, reject)=>{
-            if(options.link){
-               axios.get(options.link, {
-                   headers: this.config.getHeaders()
-               }).then((value:any)=>{
-                   const domain = this.config.parseApiUrl(value.data);
-                   resolve({
-                       [this.domainName]: domain
-                   });
-               }).catch((reason: any)=>{
-                   reject(reason);
-               });
-            }else if(options.id){
-                axios.get(`${this.config.getApiUrl(this.domainName)}/${options.id}`, {
-                    headers: this.config.getHeaders()
-                }).then((value:any)=>{
-                    const domain = this.config.parseApiUrl(value.data);
-                    resolve({
-                        [this.domainName]: domain
-                    });
-                }).catch((reason: any)=>{
-                    reject(reason);
+    query(): Parse.Query {
+        try {
+            return new this._parse.Query(this.domainName);
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    async update(objectId: string, model: DomainModel): Promise<Parse.Object> {
+        try {
+            const response = await axios.put(`${BFastConfig.getCloudDatabaseUrl()}/classes/${this.domainName}/${objectId}`,
+                model,
+                {
+                    headers: BFastConfig.getHeaders()
                 });
-            }else{
-                reject({code: -1, message: 'either id or link is required'});
-            }
-        });
+            return response.data;
+        } catch (e) {
+            throw e;
+        }
     }
 
-    navigate(link: string): Promise<any>{
-        return new Promise((resolve, reject)=>{
-            if(link){
-                axios.get(link, {
-                    headers: this.config.getHeaders()
-                }).then((values: any)=>{
-                    const domains = this.config.parseApiUrl(values.data);
-                    resolve({
-                        [this.domainName]: domains._embedded?domains._embedded[this.domainName]:domains,
-                        links: domains._links?domains._links:null,
-                        page: domains.page?domains.page:null
-                    });
-                }).catch((reason: any)=>{
-                    reject(reason);
-                })
-            }else{
-                reject({code: -1, message: 'Please provide a link of a resource'});
-            }
-        });
-    }
-
-    search(name: string, options: {[key: string]: any}): Promise<any>{
-        return new Promise((resolve, reject)=>{
-            if(name){
-                axios.get(this.config.getSearchApi(this.domainName, name), {
-                    headers: this.config.getHeaders(),
-                    params: options
-                }).then((values: any)=>{
-                    const domains = this.config.parseApiUrl(values.data);
-                    resolve({
-                        [this.domainName]: domains._embedded?domains._embedded:domains,
-                        links: domains._links?domains._links:null,
-                        page: domains.page?domains.page:null
-                    });
-                }).catch((reason: any)=>{
-                    reject(reason);
-                });
-            }else{
-                reject({code: -1, message: 'Please provide a name of a query'});
-            }
-        });
-    }
-
-    update(options: {link: string, id: string}): Promise<any>{
-        return new Promise((resolve, reject)=>{
-            if(options.link && this.model){
-               axios.patch(options.link, this.model, {
-                   headers: this.config.getHeaders()
-               }).then((value:any)=>{
-                   const domain = this.config.parseApiUrl(value.data);
-                   resolve({
-                       [this.domainName]: domain
-                   });
-               }).catch((reason: any)=>{
-                   reject(reason);
-               });
-            }else if(options.id && this.model){
-                axios.patch(`${this.config.getApiUrl(this.domainName)}/${options.id}`, this.model, {
-                    headers: this.config.getHeaders()
-                }).then((value:any)=>{
-                    const domain = this.config.parseApiUrl(value.data);
-                    resolve({
-                        [this.domainName]: domain
-                    });
-                }).catch((reason: any)=>{
-                    reject(reason);
-                });
-            }else{
-                reject({code: -1, message: 'either id or link is required, and set values which you want to update'});
-            }
-        });
-    }
-
-    delete(options: {link: string, id: string}): Promise<any>{
-        return new Promise((resolve, reject)=>{
-            if(options.link){
-               axios.delete(options.link, {
-                   headers: this.config.getHeaders()
-               }).then((_:any)=>{
-                   resolve({message: 'object deleted'});
-               }).catch((reason: any)=>{
-                   reject(reason);
-               });
-            }else if(options.id){
-                axios.delete(`${this.config.getApiUrl(this.domainName)}/${options.id}`, {
-                    headers: this.config.getHeaders()
-                }).then((_:any)=>{
-                    resolve({message: 'object deleted'});
-                }).catch((reason: any)=>{
-                    reject(reason);
-                });
-            }else{
-                reject({code: -1, message: 'either id or link is required'});
-            }
-        });
-    }
 }
 

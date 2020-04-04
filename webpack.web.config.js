@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
   target: "web",
-  entry: './src/index.ts',
+  entry: './src/bfast_js.ts',
   mode: 'development',
   module: {
     rules: [
@@ -19,7 +19,7 @@ module.exports = {
   output: {
     filename: 'bfast_js.js',
     path: path.resolve(__dirname, 'dist'),
-    library: 'BFast',
+    // library: 'BFast',
     libraryTarget: "umd"
   },
   devServer: {
