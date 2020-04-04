@@ -1,21 +1,37 @@
-import { Config } from "./configuration";
-import { DomainController } from "./controllers/domainController";
-import { FunctionController } from "./controllers/functionController";
+import {Config} from "./configuration";
+import {DomainController} from "./controllers/domainController";
+import {FunctionController} from "./controllers/functionController";
 
 /**
  * Created and maintained by Fahamu Tech Ltd Company
  * @maintained Joshua Mshana ( mama27j@gmail.com )
  */
 
-export var init = function(options: {serverUrl: string, apiKey: string}){
-    Config.serverUrl = options.serverUrl;
-    Config.apiKey = options.apiKey
+/**
+ *
+ * @param options
+ */
+export var init = function (options: {
+    cloudDatabaseUrl?: string,
+    cloudFunctionsUrl?: string,
+    applicationId: string,
+    projectId: string,
+    token?: string,
+}) {
+    Config.cloudDatabaseUrl = options.cloudDatabaseUrl;
+    Config.token = options.token;
+    Config.cloudFunctionsUrl = options.cloudFunctionsUrl;
+    Config.applicationId = options.applicationId;
+    Config.projectId = options.projectId;
 };
 
-export var domain = function(name: string){
+export var domain = function (name: string) {
     return new DomainController(name, new Config());
 };
 
-export var fun = function(functionName: string){
+export var collection = domain;
+export var table = domain;
+
+export var functions = function (functionName: string) {
     return new FunctionController(functionName, new Config());
 };

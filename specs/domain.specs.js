@@ -7,7 +7,7 @@ describe('Domain', function(){
    //  var main;
     // beforeEach(function(){
     //     BFast.init({
-    //         serverUrl: 'https://ssm.fahamutech.com:8001',
+    //         cloudDatabaseUrl: 'https://ssm.fahamutech.com:8001',
     //         apiKey: 'ut778567ghj'
     //     });
     // });
