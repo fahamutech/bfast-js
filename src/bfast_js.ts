@@ -33,9 +33,9 @@ export const BFast = {
         projectId: string,
         token?: string,
     }) {
-        BFastConfig.cloudDatabaseUrl = options.cloudDatabaseUrl;
-        BFastConfig.token = options.token;
-        BFastConfig.cloudFunctionsUrl = options.cloudFunctionsUrl;
+        BFastConfig.cloudDatabaseUrl = options.cloudDatabaseUrl ? options.cloudDatabaseUrl : '';
+        BFastConfig.token = options.token ? options.token : '';
+        BFastConfig.cloudFunctionsUrl = options.cloudFunctionsUrl ? options.cloudFunctionsUrl : '';
         BFastConfig.applicationId = options.applicationId;
         BFastConfig.projectId = options.projectId;
 
@@ -74,6 +74,7 @@ export const BFast = {
     },
 
     auth: function (user?: { username: string, password: string }): AuthAdapter {
+        // @ts-ignore
         return new _parse.User(user ? user : null);
     },
 
