@@ -1,5 +1,12 @@
 import {Query} from 'parse'
 
+// let _parse: any;
+// if (typeof window === 'undefined') {
+//     _parse = require('parse/node');
+// } else {
+//     _parse = require('parse');
+// }
+
 export class QueryController extends Query {
 
     private collectionName: string;
