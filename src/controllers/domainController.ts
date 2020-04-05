@@ -1,6 +1,7 @@
 import {DomainI, DomainModel} from "../core/domainInterface";
 import {BFastConfig} from "../conf";
 import {QueryController} from "./QueryController";
+import {Query} from 'parse';
 
 const axios = require('axios').default;
 
@@ -15,7 +16,7 @@ export class DomainController implements DomainI {
         this.cloudObj = new CloudObj;
     }
 
-    async save(model: DomainModel): Promise<any> {
+    async save(model: DomainModel): Promise<DomainModel> {
         if (model) {
             try {
                 const response = await this.cloudObj.save(model);
@@ -28,7 +29,7 @@ export class DomainController implements DomainI {
         }
     }
 
-    async getAll(): Promise<any> {
+    async getAll(): Promise<DomainModel[]> {
         try {
             const number = await this.query().count();
             const response = await this.query().limit(number).find();
@@ -39,7 +40,7 @@ export class DomainController implements DomainI {
     }
 
 
-    async get<T>(objectId: string): Promise<any> {
+    async get<T>(objectId: string): Promise<DomainModel> {
         try {
             const response = await this.query().get(objectId);
             return response.toJSON();
@@ -60,7 +61,7 @@ export class DomainController implements DomainI {
         }
     }
 
-    query(): Parse.Query {
+    query(): Query {
         try {
             return new QueryController(this.domainName);
             // this._parse.Query(this.domainName);

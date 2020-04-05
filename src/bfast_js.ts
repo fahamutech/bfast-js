@@ -2,11 +2,18 @@ import {BFastConfig} from "./conf";
 import {DomainController} from "./controllers/domainController";
 import {FunctionController} from "./controllers/functionController";
 import {StorageController} from "./controllers/StorageController";
-import * as _parse from 'parse';
 import {DomainI} from "./core/domainInterface";
 import {FunctionAdapter} from "./core/functionInterface";
 import {AuthAdapter} from "./core/authAdapter";
 import {StorageAdapter} from "./core/storageAdapter";
+import * as _parse from 'parse';
+
+// let _parse: any;
+// if (typeof window === 'undefined' && typeof process === 'object') {
+//     _parse = require('parse/node');
+// } else {
+//     _parse = require('parse');
+// }
 
 /**
  * Created and maintained by Fahamu Tech Ltd Company

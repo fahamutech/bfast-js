@@ -1,15 +1,17 @@
+import {Query} from 'parse';
+
 export interface DomainI {
     domainName: string;
 
-    save(model: DomainModel): Promise<Parse.Object>;
+    save(model: DomainModel): Promise<DomainModel>;
 
-    getAll(): Promise<Parse.Object[]>;
+    getAll(): Promise<DomainModel[]>;
 
-    get(objectId: string): Promise<Parse.Object>;
+    get(objectId: string): Promise<DomainModel>;
 
-    query(): Parse.Query;
+    query(): Query;
 
-    update(objectId: string, model: DomainModel): Promise<Parse.Object>;
+    update(objectId: string, model: DomainModel): Promise<DomainModel>;
 
     delete(objectId: string): Promise<any>;
 }
