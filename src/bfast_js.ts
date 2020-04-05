@@ -1,21 +1,21 @@
 import {BFastConfig} from "./conf";
 import {DomainController} from "./controllers/domainController";
 import {FunctionController} from "./controllers/functionController";
-import {AuthController} from "./controllers/AuthController";
 import {StorageController} from "./controllers/StorageController";
 import * as _parse from 'parse';
 
-export namespace BFast {
-    /**
-     * Created and maintained by Fahamu Tech Ltd Company
-     * @maintained Joshua Mshana ( mama27j@gmail.com )
-     */
+/**
+ * Created and maintained by Fahamu Tech Ltd Company
+ * @maintained Joshua Mshana ( mama27j@gmail.com )
+ */
+
+export const BFast = {
 
     /**
      *
      * @param options
      */
-    export const init = function (options: {
+    init: function (options: {
         cloudDatabaseUrl?: string,
         cloudFunctionsUrl?: string,
         applicationId: string,
@@ -31,38 +31,41 @@ export namespace BFast {
         _parse.initialize(BFastConfig.applicationId);
         // @ts-ignore
         _parse.serverURL = BFastConfig.getCloudDatabaseUrl();
-    };
+    },
 
     /**
      * it export api for domain
      * @param name {string} domain name
      */
-    export const domain = function (name: string) {
+    domain: function (name: string) {
         return new DomainController(name, _parse);
-    };
+    },
 
     /**
      * same as #domain
      */
-    export const collection = domain;
+    collection: function (collectionName: string) {
+        this.domain(collectionName);
+    },
     /**
      * same as #domain
      */
-    export const table = domain;
+    table: function (tableName: string) {
+        this.domain(tableName);
+    },
 
     /**
      * exec a cloud function
      * @param functionPath {string} function name
      */
-    export const functions = function (functionPath: string) {
+    functions: function (functionPath: string) {
         return new FunctionController(functionPath);
-    };
+    },
+    auth: function (user?: { username: string, password: string }) {
+        return new _parse.User(user ? user : null);
+    },
 
-    export const auth = function (user?: { username: string, password: string }) {
-        return new _parse.User(user?user:null);
-    };
-
-    export const storage = function (options: {
+    storage: function (options: {
         name: string,
         data: number[] | { base64: string } | { size: number; type: string; } | { uri: string },
         type?: string
@@ -70,4 +73,4 @@ export namespace BFast {
         return new StorageController(new _parse.File(options.name, options.data, options.type));
     }
 
-}
+};
