@@ -3,6 +3,10 @@ import {DomainController} from "./controllers/domainController";
 import {FunctionController} from "./controllers/functionController";
 import {StorageController} from "./controllers/StorageController";
 import * as _parse from 'parse';
+import {DomainI} from "./core/domainInterface";
+import {FunctionAdapter} from "./core/functionInterface";
+import {AuthAdapter} from "./core/authAdapter";
+import {StorageAdapter} from "./core/storageAdapter";
 
 /**
  * Created and maintained by Fahamu Tech Ltd Company
@@ -37,31 +41,32 @@ export const BFast = {
      * it export api for domain
      * @param name {string} domain name
      */
-    domain: function (name: string) {
+    domain: function (name: string): DomainI {
         return new DomainController(name, _parse);
     },
 
     /**
      * same as #domain
      */
-    collection: function (collectionName: string) {
-        this.domain(collectionName);
+    collection: function (collectionName: string): DomainI {
+        return this.domain(collectionName);
     },
     /**
      * same as #domain
      */
-    table: function (tableName: string) {
-        this.domain(tableName);
+    table: function (tableName: string): DomainI {
+        return this.domain(tableName);
     },
 
     /**
      * exec a cloud function
      * @param functionPath {string} function name
      */
-    functions: function (functionPath: string) {
+    functions: function (functionPath: string): FunctionAdapter {
         return new FunctionController(functionPath);
     },
-    auth: function (user?: { username: string, password: string }) {
+
+    auth: function (user?: { username: string, password: string }): AuthAdapter {
         return new _parse.User(user ? user : null);
     },
 
@@ -69,7 +74,7 @@ export const BFast = {
         name: string,
         data: number[] | { base64: string } | { size: number; type: string; } | { uri: string },
         type?: string
-    }) {
+    }): StorageAdapter {
         return new StorageController(new _parse.File(options.name, options.data, options.type));
     }
 

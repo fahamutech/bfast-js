@@ -1,9 +1,9 @@
-import {FunctionI} from "../core/functionInterface";
+import {FunctionAdapter} from "../core/functionInterface";
 import {BFastConfig} from "../conf";
 
 const axios = require('axios').default;
 
-export class FunctionController implements FunctionI {
+export class FunctionController implements FunctionAdapter {
 
     private readonly functionPath: string;
 
