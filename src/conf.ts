@@ -1,28 +1,41 @@
-export namespace BFastConfig {
-    export let cloudDatabaseUrl: string;
-    export let cloudFunctionsUrl: string;
-    export let applicationId: string;
-    export let projectId: string;
-    export let token: string;
+export class BFastConfig {
+    applicationId: any;
+    cloudFunctionsUrl: any;
+    projectId: any;
+    cloudDatabaseUrl: any;
+    token: any;
 
-    export const getHeaders = function (): { [key: string]: any } {
+    private constructor() {
+    }
+
+    private static instance: BFastConfig;
+
+    static getInstance(): BFastConfig {
+        if (!BFastConfig.instance) {
+            BFastConfig.instance = new BFastConfig();
+        }
+
+        return BFastConfig.instance;
+    }
+
+    getHeaders(): { [key: string]: any } {
         return {
             'Content-Type': 'application/json',
-            'X-Parse-Application-Id': applicationId
+            'X-Parse-Application-Id': this.applicationId
         }
     };
 
-    export const getCloudFunctionsUrl = function (path: string) {
-        if (cloudFunctionsUrl && cloudFunctionsUrl.startsWith('http')) {
-            return cloudFunctionsUrl;
+    getCloudFunctionsUrl(path: string) {
+        if (this.cloudFunctionsUrl && this.cloudFunctionsUrl.startsWith('http')) {
+            return this.cloudFunctionsUrl;
         }
-        return `https://${projectId}-faas.bfast.fahamutech.com${path}`
+        return `https://${this.projectId}-faas.bfast.fahamutech.com${path}`
     };
 
-    export const getCloudDatabaseUrl = function () {
-        if (cloudDatabaseUrl && cloudDatabaseUrl.startsWith('http')) {
-            return cloudDatabaseUrl;
+    getCloudDatabaseUrl() {
+        if (this.cloudDatabaseUrl && this.cloudDatabaseUrl.startsWith('http')) {
+            return this.cloudDatabaseUrl;
         }
-        return `https://${projectId}-daas.bfast.fahamutech.com`;
+        return `https://${this.projectId}-daas.bfast.fahamutech.com`;
     };
 }

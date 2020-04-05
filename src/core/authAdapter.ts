@@ -18,4 +18,10 @@
 //     setUsername(username: string, options?: Parse.SuccessFailureOptions): boolean;
 //
 //     signUp(attrs?: any, options?: Parse.SignUpOptions): Promise<any>;
+//
+//     currentAsync(): Promise<any>;
+//
+//     current(): any;
+//
+//     logOut(options: any): Promise<any>;
 // }

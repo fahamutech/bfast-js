@@ -1,7 +1,7 @@
 import {DomainI, DomainModel} from "../core/domainInterface";
 import {BFastConfig} from "../conf";
-import {QueryController} from "./QueryController";
 import {Query} from 'parse';
+import {QueryController} from "./QueryController";
 
 const axios = require('axios').default;
 
@@ -39,7 +39,6 @@ export class DomainController implements DomainI {
         }
     }
 
-
     async get<T>(objectId: string): Promise<DomainModel> {
         try {
             const response = await this.query().get(objectId);
@@ -51,10 +50,12 @@ export class DomainController implements DomainI {
 
     async delete(objectId: string): Promise<any> {
         try {
-            console.log(`${BFastConfig.getCloudDatabaseUrl()}/classes/${this.domainName}/${objectId}`);
-            const response = await axios.delete(`${BFastConfig.getCloudDatabaseUrl()}/classes/${this.domainName}/${objectId}`, {
-                headers: BFastConfig.getHeaders()
-            });
+            const response = await axios.delete(
+                `${BFastConfig.getInstance().getCloudDatabaseUrl()}/classes/${this.domainName}/${objectId}`,
+                {
+                    headers: BFastConfig.getInstance().getHeaders()
+                }
+            );
             return response.data;
         } catch (e) {
             throw e;
@@ -64,7 +65,6 @@ export class DomainController implements DomainI {
     query(): Query {
         try {
             return new QueryController(this.domainName);
-            // this._parse.Query(this.domainName);
         } catch (e) {
             throw e;
         }
@@ -72,11 +72,13 @@ export class DomainController implements DomainI {
 
     async update(objectId: string, model: DomainModel): Promise<Parse.Object> {
         try {
-            const response = await axios.put(`${BFastConfig.getCloudDatabaseUrl()}/classes/${this.domainName}/${objectId}`,
+            const response = await axios.put(
+                `${BFastConfig.getInstance().getCloudDatabaseUrl()}/classes/${this.domainName}/${objectId}`,
                 model,
                 {
-                    headers: BFastConfig.getHeaders()
-                });
+                    headers: BFastConfig.getInstance().getHeaders()
+                }
+            );
             return response.data;
         } catch (e) {
             throw e;
