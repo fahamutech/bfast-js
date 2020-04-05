@@ -14,8 +14,8 @@ export class FunctionController implements FunctionAdapter {
     post(body?: { [key: string]: any; }): Promise<any> {
         return new Promise((resolve, reject) => {
             if (this.functionPath && this.functionPath !== '') {
-                axios.post(BFastConfig.getCloudFunctionsUrl(this.functionPath), body ? body : {}, {
-                    headers: BFastConfig.getHeaders(),
+                axios.post(BFastConfig.getInstance().getCloudFunctionsUrl(this.functionPath), body ? body : {}, {
+                    headers: BFastConfig.getInstance().getHeaders(),
                 }).then((value: any) => {
                     resolve(value.data);
                 }).catch((reason: any) => {
@@ -29,8 +29,8 @@ export class FunctionController implements FunctionAdapter {
 
     async delete<T>(query?: { [p: string]: any }): Promise<T> {
         try {
-            const response = await axios.delete(BFastConfig.getCloudFunctionsUrl(this.functionPath), {
-                headers: BFastConfig.getHeaders(),
+            const response = await axios.delete(BFastConfig.getInstance().getCloudFunctionsUrl(this.functionPath), {
+                headers: BFastConfig.getInstance().getHeaders(),
                 params: query
             });
             return response.data;
@@ -41,8 +41,8 @@ export class FunctionController implements FunctionAdapter {
 
     async get<T>(query?: { [p: string]: any }): Promise<T> {
         try {
-            const response = await axios.get(BFastConfig.getCloudFunctionsUrl(this.functionPath), {
-                headers: BFastConfig.getHeaders(),
+            const response = await axios.get(BFastConfig.getInstance().getCloudFunctionsUrl(this.functionPath), {
+                headers: BFastConfig.getInstance().getHeaders(),
                 params: query
             });
             return response.data;
@@ -53,8 +53,8 @@ export class FunctionController implements FunctionAdapter {
 
     async put<T>(body?: { [p: string]: any }): Promise<T> {
         try {
-            const response = await axios.put(BFastConfig.getCloudFunctionsUrl(this.functionPath), body ? body : {}, {
-                headers: BFastConfig.getHeaders()
+            const response = await axios.put(BFastConfig.getInstance().getCloudFunctionsUrl(this.functionPath), body ? body : {}, {
+                headers: BFastConfig.getInstance().getHeaders()
             });
             return response.data;
         } catch (e) {
