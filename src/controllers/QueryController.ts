@@ -1,4 +1,5 @@
 import {Query} from 'parse'
+
 // let _parse: any;
 // if (typeof window === 'undefined') {
 //     _parse = require('parse/node');

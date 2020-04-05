@@ -4,9 +4,9 @@ import {FunctionController} from "./controllers/functionController";
 import {StorageController} from "./controllers/StorageController";
 import {DomainI} from "./core/domainInterface";
 import {FunctionAdapter} from "./core/functionInterface";
-import {AuthAdapter} from "./core/authAdapter";
 import {StorageAdapter} from "./core/storageAdapter";
 import * as _parse from 'parse';
+import {AuthController} from "./controllers/AuthController";
 
 // let _parse: any;
 // if (typeof window === 'undefined' && typeof process === 'object') {
@@ -73,9 +73,9 @@ export const BFast = {
         return new FunctionController(functionPath);
     },
 
-    auth: function (user?: { username: string, password: string }): AuthAdapter {
+    auth: function (user?: { username: string, password: string }): AuthController {
         // @ts-ignore
-        return new _parse.User(user ? user : null);
+        return new AuthController(user ? user : null);
     },
 
     storage: function (options: {
