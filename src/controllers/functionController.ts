@@ -1,7 +1,7 @@
 import {FunctionAdapter} from "../core/functionInterface";
 import {BFastConfig} from "../conf";
 
-const axios = require('axios').default;
+const axios = require('axios');
 
 export class FunctionController implements FunctionAdapter {
 

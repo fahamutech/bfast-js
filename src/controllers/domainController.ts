@@ -3,7 +3,7 @@ import {BFastConfig} from "../conf";
 import {Query} from 'parse';
 import {QueryController} from "./QueryController";
 
-const axios = require('axios').default;
+const axios = require('axios');
 
 export class DomainController implements DomainI {
 

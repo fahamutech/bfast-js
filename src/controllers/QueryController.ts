@@ -1,4 +1,3 @@
-import * as _parse from 'parse'
 import {Query} from 'parse'
 
 export class QueryController extends Query {
@@ -21,7 +20,6 @@ export class QueryController extends Query {
 
     async find(options?: Query.FindOptions): Promise<any[]> {
         try {
-            console.log(_parse);
             const response = await super.find(options);
             return JSON.parse(JSON.stringify(response));
         } catch (e) {

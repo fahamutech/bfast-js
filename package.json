@@ -1,23 +1,23 @@
 {
   "name": "bfastjs",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "javascript client sdk for bfast::cloud project",
   "main": "./dist/bfast_js.js",
   "types": "./dist/src/bfast_js.d.ts",
   "scripts": {
     "start": "webpack-dev-server --open",
     "test": "mocha ./specs",
-    "buildWeb": "npx webpack --config webpack.web.config.js",
+    "buildWeb": "npx webpack --config webpack.config.js",
     "build": "npm run buildWeb"
   },
   "author": "Fahamu Tech",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.19.2",
     "parse": "^2.12.0"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
-    "@types/node": "^13.11.0",
     "@types/parse": "^2.10.18",
     "mocha": "^7.1.1",
     "ts-loader": "^6.2.2",
