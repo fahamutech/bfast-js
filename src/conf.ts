@@ -26,6 +26,9 @@ export class BFastConfig {
     };
 
     getCloudFunctionsUrl(path: string) {
+        if (path.startsWith('http')) {
+            return path;
+        }
         if (this.cloudFunctionsUrl && this.cloudFunctionsUrl.startsWith('http')) {
             return this.cloudFunctionsUrl;
         }
