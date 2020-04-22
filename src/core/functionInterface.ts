@@ -6,5 +6,4 @@ export interface FunctionAdapter {
     delete<T>(query?: { [key: string]: any }): Promise<T>;
 
     put<T>(body?: { [key: string]: any }): Promise<T>;
-
 }

@@ -7,6 +7,8 @@ import {FunctionAdapter} from "./core/functionInterface";
 import {StorageAdapter} from "./core/storageAdapter";
 import * as _parse from 'parse';
 import {AuthController} from "./controllers/AuthController";
+import {SocketController} from "./controllers/SocketController";
+import {RealTimeAdapter} from "./core/RealTimeAdapter";
 
 /**
  * Created and maintained by Fahamu Tech Ltd Company
@@ -68,6 +70,13 @@ export const BFast = {
         request: function (path: string): FunctionAdapter {
             return new FunctionController(path);
         },
+        /**
+         * start a new socket
+         * @param eventName
+         */
+        event: function (eventName: string): RealTimeAdapter {
+            return new SocketController(eventName);
+        }
 
     },
 
