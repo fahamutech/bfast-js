@@ -6,10 +6,12 @@ import Socket = SocketIOClient.Socket;
 export class SocketController implements RealTimeAdapter {
     public readonly socket: Socket;
 
-    constructor(private readonly eventName: string) {
+    constructor(private readonly eventName: string, onConnect?: Function, onDisconnect?: Function) {
         this.socket = io(BFastConfig.getInstance().getCloudFunctionsUrl('/'), {
             autoConnect: true,
         });
+        if (onConnect) this.socket.on('connect', onConnect);
+        if (onDisconnect) this.socket.on('disconnect', onDisconnect);
     }
 
     emit(data: { auth: any; payload: any }): void {
@@ -21,15 +23,11 @@ export class SocketController implements RealTimeAdapter {
     }
 
     close(): void {
-        this.socket.disconnect();
+        if (this.socket.connected) this.socket.disconnect();
     }
 
-    // onConnect(handler: (data: any) => any): void {
-    //     this.socket.on('connect', handler);
-    // }
-
-    // onDisconnect(handler: (data: any) => any): void {
-    //     this.socket.on('disconnect', handler);
-    // }
+    open(): void {
+        if (this.socket.disconnected) this.socket.open();
+    }
 
 }

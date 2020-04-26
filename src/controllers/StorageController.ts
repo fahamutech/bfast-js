@@ -24,4 +24,40 @@ export class StorageController implements StorageAdapter {
         return this.file.url(options);
     }
 
+    addMetadata(key: string, value: any): void {
+        return this.file.addMetadata(key, value);
+    }
+
+    addTag(key: string, value: any): void {
+        return this.file.addTag(key, value);
+    }
+
+    cancel(): void {
+        this.file.cancel();
+    }
+
+    destroy(): Promise<StorageAdapter> {
+        return this.file.destroy();
+    }
+
+    equals(other: StorageController): boolean {
+        return this.file.equals(other);
+    }
+
+    metadata(): Record<string, any> {
+        return this.file.metadata();
+    }
+
+    setMetadata(metadata: Record<string, any>): void {
+        this.file.setMetadata(metadata);
+    }
+
+    setTags(tags: Record<string, any>): void {
+        this.file.setTags(tags);
+    }
+
+    tags(): Record<string, any> {
+        return this.file.tags();
+    }
+
 }
