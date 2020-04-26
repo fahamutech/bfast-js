@@ -14,5 +14,5 @@ export interface TransactionAdapter {
 
     deleteMany(domainName: string, payLoads: { objectId: string, data?: DeleteOperation }[]): TransactionAdapter;
 
-    commit(): Promise<any>;
+    commit(options?: { before: () => void, after: () => void }): Promise<any>;
 }

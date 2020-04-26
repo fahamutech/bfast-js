@@ -14,10 +14,13 @@ export class TransactionController implements TransactionAdapter {
         this.transactionRequests = [];
     }
 
-    async commit(): Promise<any> {
+    async commit(options?: { before: () => Promise<void>, after: () => Promise<void> }): Promise<any> {
         try {
             if (this.transactionRequests.length === 0) {
                 throw new Error('You can not commit an empty transaction');
+            }
+            if (options && options.before) {
+                await options.before();
             }
             const response = await axios.post(`${BFastConfig.getInstance().getCloudDatabaseUrl()}/batch`, {
                 requests: this.transactionRequests,
@@ -26,6 +29,9 @@ export class TransactionController implements TransactionAdapter {
                 headers: BFastConfig.getInstance().getHeaders()
             });
             this.transactionRequests.splice(0);
+            if (options && options.after) {
+                await options.after();
+            }
             return response.data;
         } catch (e) {
             throw e;
