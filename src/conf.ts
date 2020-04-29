@@ -4,6 +4,8 @@ export class BFastConfig {
     projectId: any;
     cloudDatabaseUrl: any;
     token: any;
+    appPassword: any;
+    cache = true;
 
     private constructor() {
     }

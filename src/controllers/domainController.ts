@@ -1,11 +1,10 @@
 import {DomainI, DomainModel} from "../core/domainInterface";
 import {BFastConfig} from "../conf";
-import {Query} from 'parse';
 import {QueryController} from "./QueryController";
 
 const axios = require('axios');
 
-export class DomainController implements DomainI {
+export class DomainController<T extends DomainModel> implements DomainI<T> {
 
     domainName: string;
     private readonly cloudObj: Parse.Object;
@@ -16,11 +15,11 @@ export class DomainController implements DomainI {
         this.cloudObj = new CloudObj;
     }
 
-    async save(model: DomainModel): Promise<DomainModel> {
+    async save<T>(model: T): Promise<T> {
         if (model) {
             try {
                 const response = await this.cloudObj.save(model);
-                return response.toJSON();
+                return JSON.parse(JSON.stringify(response));
             } catch (e) {
                 throw e;
             }
@@ -29,26 +28,29 @@ export class DomainController implements DomainI {
         }
     }
 
-    async getAll(): Promise<DomainModel[]> {
+    async getAll<T>(pagination?: { size: number, skip: number }): Promise<T[]> {
         try {
-            const number = await this.query().count();
-            const response = await this.query().limit(number).find();
+            const number = pagination ? pagination.size : await this.query().count();
+            const query = this.query();
+            query.skip(pagination ? pagination.skip : 0);
+            query.limit(number);
+            const response = await query.find();
             return JSON.parse(JSON.stringify(response));
         } catch (e) {
             throw e;
         }
     }
 
-    async get<T>(objectId: string): Promise<DomainModel> {
+    async get<T>(objectId: string): Promise<T> {
         try {
-            const response = await this.query().get(objectId);
-            return response.toJSON();
+            const response = await this.query<T>().get(objectId);
+            return JSON.parse(JSON.stringify(response));
         } catch (e) {
             throw e;
         }
     }
 
-    async delete(objectId: string): Promise<any> {
+    async delete<T>(objectId: string): Promise<T> {
         try {
             const response = await axios.delete(
                 `${BFastConfig.getInstance().getCloudDatabaseUrl()}/classes/${this.domainName}/${objectId}`,
@@ -62,15 +64,15 @@ export class DomainController implements DomainI {
         }
     }
 
-    query(): Query {
+    query<T>(): QueryController<T> {
         try {
-            return new QueryController(this.domainName);
+            return new QueryController<T>(this.domainName);
         } catch (e) {
             throw e;
         }
     }
 
-    async update(objectId: string, model: DomainModel): Promise<Parse.Object> {
+    async update<T>(objectId: string, model: T): Promise<T> {
         try {
             const response = await axios.put(
                 `${BFastConfig.getInstance().getCloudDatabaseUrl()}/classes/${this.domainName}/${objectId}`,

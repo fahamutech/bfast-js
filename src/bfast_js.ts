@@ -29,14 +29,18 @@ export const BFast = {
         applicationId: string,
         projectId: string,
         token?: string,
+        appPassword?: string,
+        enableCache?: boolean,
     }) {
         BFastConfig.getInstance().cloudDatabaseUrl = options.cloudDatabaseUrl ? options.cloudDatabaseUrl : '';
         BFastConfig.getInstance().token = options.token ? options.token : '';
         BFastConfig.getInstance().cloudFunctionsUrl = options.cloudFunctionsUrl ? options.cloudFunctionsUrl : '';
         BFastConfig.getInstance().applicationId = options.applicationId;
         BFastConfig.getInstance().projectId = options.projectId;
+        BFastConfig.getInstance().appPassword = options.appPassword;
+        BFastConfig.getInstance().cache = options.enableCache ? options.enableCache : true
 
-        _parse.initialize(BFastConfig.getInstance().applicationId);
+        _parse.initialize(BFastConfig.getInstance().applicationId, undefined, BFastConfig.getInstance().appPassword);
         // @ts-ignore
         _parse.serverURL = BFastConfig.getInstance().getCloudDatabaseUrl();
         _parse.CoreManager.set('REQUEST_BATCH_SIZE', 1000000);
@@ -47,21 +51,21 @@ export const BFast = {
          * it export api for domain
          * @param name {string} domain name
          */
-        domain(name: string): DomainI {
-            return new DomainController(name, _parse);
+        domain<T>(name: string): DomainI<T> {
+            return new DomainController<T>(name, _parse);
         },
 
         /**
          * same as #domain
          */
-        collection(collectionName: string): DomainI {
-            return this.domain(collectionName);
+        collection<T>(collectionName: string): DomainI<T> {
+            return this.domain<T>(collectionName);
         },
         /**
          * same as #domain
          */
-        table(tableName: string): DomainI {
-            return this.domain(tableName);
+        table<T>(tableName: string): DomainI<T> {
+            return this.domain<T>(tableName);
         },
 
         /**
@@ -90,6 +94,13 @@ export const BFast = {
         event(eventName: string, onConnect?: Function, onDisconnect?: Function): RealTimeAdapter {
             return new SocketController(eventName, onConnect, onDisconnect);
         }
+    },
+
+    /**
+     * access initialized parse JS Sdk direct
+     */
+    directAccess: {
+        parseSdk: _parse
     },
 
     auth: AuthController,

@@ -1,19 +1,19 @@
-import {Query} from 'parse';
+import {QueryController} from "../controllers/QueryController";
 
-export interface DomainI {
+export interface DomainI<T extends DomainModel> {
     domainName: string;
 
-    save(model: DomainModel): Promise<DomainModel>;
+    save<T>(model: T): Promise<T>;
 
-    getAll(): Promise<DomainModel[]>;
+    getAll<T>(pagination?:{size:number,skip:number}): Promise<T[]>;
 
-    get(objectId: string): Promise<DomainModel>;
+    get<T>(objectId: string): Promise<T>;
 
-    query(): Query;
+    query<T>(): QueryController<T>;
 
-    update(objectId: string, model: DomainModel): Promise<DomainModel>;
+    update<T>(objectId: string, model: T): Promise<T>;
 
-    delete(objectId: string): Promise<any>;
+    delete<T>(objectId: string): Promise<T>;
 }
 
 export interface DomainModel {

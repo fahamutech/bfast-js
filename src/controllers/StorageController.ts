@@ -12,7 +12,7 @@ export class StorageController implements StorageAdapter {
         return this.file.name()
     }
 
-    save(options?: Parse.SuccessFailureOptions): Promise<Parse.File> {
+    save(options?: ParseSaveFileOptions): Promise<Parse.File> {
         return this.file.save(options);
     }
 
@@ -60,4 +60,8 @@ export class StorageController implements StorageAdapter {
         return this.file.tags();
     }
 
+}
+
+interface ParseSaveFileOptions extends Parse.FullOptions {
+    progress: (progressValue: any, loaded: any, total: any, {type}: any) => any;
 }
