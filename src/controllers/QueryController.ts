@@ -46,7 +46,7 @@ export class QueryController<T extends DomainModel> extends Query {
 
     async count(options?: FindOptionsWithCacheOptions): Promise<number> {
         try {
-            const identifier = `count_${JSON.stringify(this.toJSON())}`;
+            const identifier = `count_${this.className}_${JSON.stringify(this.toJSON())}`;
             if (this.cacheAdapter.cacheEnabled(options)) {
                 const cacheResponse = await this.cacheAdapter.get<number>(identifier);
                 if (cacheResponse) {
@@ -226,7 +226,7 @@ export class QueryController<T extends DomainModel> extends Query {
 
     async distinct<T>(key: any, options?: FindOptionsWithCacheOptions): Promise<T> {
         try {
-            const identifier = `distinct_${JSON.stringify(this.toJSON())}`;
+            const identifier = `distinct_${this.className}_${JSON.stringify(this.toJSON())}`;
             if (this.cacheAdapter.cacheEnabled(options)) {
                 const cacheResponse = await this.cacheAdapter.get<T>(identifier);
                 if (cacheResponse) {
@@ -251,7 +251,7 @@ export class QueryController<T extends DomainModel> extends Query {
 
     async find<T>(options?: FindOptionsWithCacheOptions): Promise<T[]> {
         try {
-            const identifier = `find_${JSON.stringify(this.toJSON())}`;
+            const identifier = `find_${this.className}_${JSON.stringify(this.toJSON())}`;
             if (this.cacheAdapter.cacheEnabled(options)) {
                 const cacheResponse = await this.cacheAdapter.get<T[]>(identifier);
                 if (cacheResponse) {

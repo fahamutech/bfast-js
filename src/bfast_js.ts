@@ -4,7 +4,6 @@ import {FunctionController} from "./controllers/functionController";
 import {StorageController} from "./controllers/StorageController";
 import {DomainI} from "./core/DomainAdapter";
 import {FunctionAdapter} from "./core/FunctionsAdapter";
-import {StorageAdapter} from "./core/StorageAdapter";
 import * as _parse from 'parse';
 import {AuthController} from "./controllers/AuthController";
 import {SocketController} from "./controllers/SocketController";
@@ -12,6 +11,7 @@ import {TransactionAdapter} from "./core/TransactionAdapter";
 import {TransactionController} from "./controllers/TransactionController";
 import {RealTimeAdapter} from "./core/RealTimeAdapter";
 import {CacheController} from "./controllers/CacheController";
+import {CacheAdapter} from "./core/CacheAdapter";
 
 /**
  * Created and maintained by Fahamu Tech Ltd Company
@@ -61,7 +61,11 @@ export const BFast = {
          * @param name {string} domain name
          */
         domain<T>(name: string): DomainI<T> {
-            return new DomainController<T>(name, _parse, new CacheController(location.hostname));
+            const cacheName = BFastConfig.getInstance().cache?.cacheName;
+            return new DomainController<T>(
+                name,
+                _parse,
+                new CacheController(cacheName ? cacheName : 'bfastLocalDatabase'));
         },
 
         /**
@@ -109,7 +113,11 @@ export const BFast = {
      * access initialized parse JS Sdk direct
      */
     directAccess: {
-        parseSdk: _parse
+        parseSdk: _parse,
+        cache(cacheName?: string): CacheAdapter {
+            const cache = BFastConfig.getInstance().cache?.cacheName;
+            return new CacheController(cacheName ? cacheName : (cache ? cache : 'bfastLocalDatabase'));
+        }
     },
 
     auth: AuthController,
@@ -119,7 +127,7 @@ export const BFast = {
             fileName: string,
             data: number[] | { base64: string } | { size: number; type: string; } | { uri: string },
             fileType?: string
-        }): StorageAdapter {
+        }): StorageController {
             return new StorageController(new _parse.File(options.fileName, options.data, options.fileType));
         }
     }

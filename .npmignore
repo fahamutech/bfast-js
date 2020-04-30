@@ -1,10 +1,11 @@
 specs
 /specs
 tsconfig.json
-webpack.web.config.js
+webpack.config.js
 package-lock.json
 node_modules
 .idea
 .vscode
 *.tgz
 *.zip
+.github

@@ -69,9 +69,11 @@ export class CacheController implements CacheAdapter {
     }
 
     cacheEnabled(options?: CacheOptions): boolean {
-        if (options?.cacheEnable === true) {
-            return true;
-        } else return BFastConfig.getInstance().cache?.enable === true;
+        if (options) {
+            return options.cacheEnable;
+        } else {
+            return BFastConfig.getInstance().cache?.enable === true;
+        }
     }
 
 }
