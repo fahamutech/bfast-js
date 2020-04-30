@@ -33,8 +33,8 @@ export const BFast = {
         appPassword?: string,
         cache?: {
             enable: boolean,
-            cacheName: string,
-            cacheDtlName: string,
+            cacheStoreName: string,
+            cacheStoreTTLName: string,
         }
     }) {
         BFastConfig.getInstance().cloudDatabaseUrl = options.cloudDatabaseUrl ? options.cloudDatabaseUrl : '';
@@ -45,8 +45,8 @@ export const BFast = {
         BFastConfig.getInstance().appPassword = options.appPassword;
         BFastConfig.getInstance().cache = options.cache ? options.cache : {
             enable: true,
-            cacheName: 'bfast_cache',
-            cacheDtlName: 'bfast_cache_dtl',
+            cacheStoreName: 'bfast_cache',
+            cacheStoreTTLName: 'bfast_cache_dtl',
         }
 
         _parse.initialize(<string>BFastConfig.getInstance().applicationId, undefined, BFastConfig.getInstance().appPassword);
@@ -61,7 +61,7 @@ export const BFast = {
          * @param name {string} domain name
          */
         domain<T>(name: string): DomainI<T> {
-            const cacheName = BFastConfig.getInstance().cache?.cacheName;
+            const cacheName = BFastConfig.getInstance().cache?.cacheStoreName;
             return new DomainController<T>(
                 name,
                 _parse,
@@ -114,9 +114,12 @@ export const BFast = {
      */
     directAccess: {
         parseSdk: _parse,
-        cache(cacheName?: string): CacheAdapter {
-            const cache = BFastConfig.getInstance().cache?.cacheName;
-            return new CacheController(cacheName ? cacheName : (cache ? cache : 'bfastLocalDatabase'));
+        cache(options?: { cacheName: string, storeName: string }): CacheAdapter {
+            const cache = BFastConfig.getInstance().cache?.cacheStoreName;
+            return new CacheController(
+                options && options.cacheName ? options.cacheName : (cache ? cache : 'bfastLocalDatabase'),
+                options && options.storeName ? options.storeName : (cache ? cache : 'bfastLocalDatabase'),
+            );
         }
     },
 

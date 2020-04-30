@@ -3,26 +3,31 @@ import * as localForage from 'localforage'
 import {BFastConfig} from "../conf";
 
 export class CacheController implements CacheAdapter {
-    cacheStoreName: string;
-    private readonly _storage: LocalForage;
-    private readonly _ttlStorage: LocalForage;
+    cacheName: string;
 
-    constructor(cacheName: string) {
-        this.cacheStoreName = cacheName;
-        this._storage = localForage.createInstance({
-            storeName: BFastConfig.getInstance().cache?.cacheName,
-            name: this.cacheStoreName
+    constructor(cacheName: string,
+                private readonly  storeName?: string) {
+        this.cacheName = cacheName;
+    }
+
+    private _getStore(): LocalForage {
+        return localForage.createInstance({
+            storeName: this.storeName ? this.storeName : BFastConfig.getInstance().cache?.cacheStoreName,
+            name: this.cacheName
         });
-        this._ttlStorage = localForage.createInstance({
-            storeName: BFastConfig.getInstance().cache?.cacheDtlName,
-            name: this.cacheStoreName
+    }
+
+    private _getTTLStore(): LocalForage {
+        return localForage.createInstance({
+            storeName: BFastConfig.getInstance().cache?.cacheStoreTTLName,
+            name: this.cacheName
         });
     }
 
     async clearAll(): Promise<boolean> {
         try {
-            await this._storage.clear();
-            await this._ttlStorage.clear();
+            await this._getStore().clear();
+            await this._getTTLStore().clear();
             return true;
         } catch (e) {
             throw e;
@@ -32,7 +37,7 @@ export class CacheController implements CacheAdapter {
     async get<T>(identifier: string): Promise<T> {
         try {
             await this.remove(identifier);
-            return await this._storage.getItem<T>(identifier);
+            return await this._getStore().getItem<T>(identifier);
         } catch (e) {
             throw e;
         }
@@ -40,8 +45,8 @@ export class CacheController implements CacheAdapter {
 
     async set<T>(identifier: string, data: T, options?: { dtl: number }): Promise<T> {
         try {
-            const response = await this._storage.setItem<T>(identifier, data);
-            await this._ttlStorage.setItem(identifier, CacheController._getDayToLeave(options ? options.dtl : 7));
+            const response = await this._getStore().setItem<T>(identifier, data);
+            await this._getTTLStore().setItem(identifier, CacheController._getDayToLeave(options ? options.dtl : 7));
             return response;
         } catch (e) {
             throw e;
@@ -55,10 +60,10 @@ export class CacheController implements CacheAdapter {
 
     async remove(identifier: string): Promise<boolean> {
         try {
-            const dayToLeave = await this._ttlStorage.getItem<number>(identifier);
+            const dayToLeave = await this._getTTLStore().getItem<number>(identifier);
             if (dayToLeave && dayToLeave < new Date().getTime()) {
-                await this._ttlStorage.removeItem(identifier);
-                await this._storage.removeItem(identifier);
+                await this._getTTLStore().removeItem(identifier);
+                await this._getStore().removeItem(identifier);
                 return true;
             } else {
                 return false;

@@ -7,8 +7,8 @@ export class BFastConfig {
     appPassword: string | undefined;
     cache: {
         enable: boolean;
-        cacheName: string;
-        cacheDtlName: string;
+        cacheStoreName: string;
+        cacheStoreTTLName: string;
     } | undefined
 
     private constructor() {
