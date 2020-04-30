@@ -2,15 +2,16 @@ import {BFastConfig} from "./conf";
 import {DomainController} from "./controllers/domainController";
 import {FunctionController} from "./controllers/functionController";
 import {StorageController} from "./controllers/StorageController";
-import {DomainI} from "./core/domainInterface";
-import {FunctionAdapter} from "./core/functionInterface";
-import {StorageAdapter} from "./core/storageAdapter";
+import {DomainI} from "./core/DomainAdapter";
+import {FunctionAdapter} from "./core/FunctionsAdapter";
+import {StorageAdapter} from "./core/StorageAdapter";
 import * as _parse from 'parse';
 import {AuthController} from "./controllers/AuthController";
 import {SocketController} from "./controllers/SocketController";
 import {TransactionAdapter} from "./core/TransactionAdapter";
 import {TransactionController} from "./controllers/TransactionController";
 import {RealTimeAdapter} from "./core/RealTimeAdapter";
+import {CacheController} from "./controllers/CacheController";
 
 /**
  * Created and maintained by Fahamu Tech Ltd Company
@@ -29,14 +30,26 @@ export const BFast = {
         applicationId: string,
         projectId: string,
         token?: string,
+        appPassword?: string,
+        cache?: {
+            enable: boolean,
+            cacheName: string,
+            cacheDtlName: string,
+        }
     }) {
         BFastConfig.getInstance().cloudDatabaseUrl = options.cloudDatabaseUrl ? options.cloudDatabaseUrl : '';
         BFastConfig.getInstance().token = options.token ? options.token : '';
         BFastConfig.getInstance().cloudFunctionsUrl = options.cloudFunctionsUrl ? options.cloudFunctionsUrl : '';
         BFastConfig.getInstance().applicationId = options.applicationId;
         BFastConfig.getInstance().projectId = options.projectId;
+        BFastConfig.getInstance().appPassword = options.appPassword;
+        BFastConfig.getInstance().cache = options.cache ? options.cache : {
+            enable: true,
+            cacheName: 'bfast_cache',
+            cacheDtlName: 'bfast_cache_dtl',
+        }
 
-        _parse.initialize(BFastConfig.getInstance().applicationId);
+        _parse.initialize(<string>BFastConfig.getInstance().applicationId, undefined, BFastConfig.getInstance().appPassword);
         // @ts-ignore
         _parse.serverURL = BFastConfig.getInstance().getCloudDatabaseUrl();
         _parse.CoreManager.set('REQUEST_BATCH_SIZE', 1000000);
@@ -47,21 +60,21 @@ export const BFast = {
          * it export api for domain
          * @param name {string} domain name
          */
-        domain(name: string): DomainI {
-            return new DomainController(name, _parse);
+        domain<T>(name: string): DomainI<T> {
+            return new DomainController<T>(name, _parse, new CacheController(location.hostname));
         },
 
         /**
          * same as #domain
          */
-        collection(collectionName: string): DomainI {
-            return this.domain(collectionName);
+        collection<T>(collectionName: string): DomainI<T> {
+            return this.domain<T>(collectionName);
         },
         /**
          * same as #domain
          */
-        table(tableName: string): DomainI {
-            return this.domain(tableName);
+        table<T>(tableName: string): DomainI<T> {
+            return this.domain<T>(tableName);
         },
 
         /**
@@ -90,6 +103,13 @@ export const BFast = {
         event(eventName: string, onConnect?: Function, onDisconnect?: Function): RealTimeAdapter {
             return new SocketController(eventName, onConnect, onDisconnect);
         }
+    },
+
+    /**
+     * access initialized parse JS Sdk direct
+     */
+    directAccess: {
+        parseSdk: _parse
     },
 
     auth: AuthController,
