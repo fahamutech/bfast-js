@@ -1,9 +1,10 @@
 import {Query} from 'parse'
-import {DomainModel} from "../core/domainInterface";
+import {DomainModel} from "../core/DomainAdapter";
+import {AggregationOptions, CacheAdapter, FindOptionsWithCacheOptions} from "../core/CacheAdapter";
 
 export class QueryController<T extends DomainModel> extends Query {
 
-    constructor(collectionName: string) {
+    constructor(collectionName: string, private readonly cacheAdapter: CacheAdapter) {
         super(collectionName);
     }
 
@@ -43,8 +44,29 @@ export class QueryController<T extends DomainModel> extends Query {
         return super.containsAllStartingWith(key, values);
     }
 
-    count(options?: Parse.Query.CountOptions): Promise<number> {
-        return super.count(options);
+    async count(options?: FindOptionsWithCacheOptions): Promise<number> {
+        try {
+            const identifier = `count_${JSON.stringify(this.toJSON())}`;
+            if (this.cacheAdapter.cacheEnabled(options)) {
+                const cacheResponse = await this.cacheAdapter.get<number>(identifier);
+                if (cacheResponse) {
+                    super.count(options).then(value => {
+                        const data = JSON.parse(JSON.stringify(value));
+                        if (options && options.freshData) {
+                            options.freshData({identifier, data});
+                        }
+                        return this.cacheAdapter
+                            .set<number>(identifier, data);
+                    }).catch();
+                    return cacheResponse;
+                }
+            }
+            const response = JSON.parse(JSON.stringify(await super.count(options)));
+            this.cacheAdapter.set<number>(identifier, response).catch();
+            return response;
+        } catch (e) {
+            throw e;
+        }
     }
 
     descending<K extends any>(key: K[] | K): this {
@@ -79,8 +101,29 @@ export class QueryController<T extends DomainModel> extends Query {
         return super.fullText(key, value, options);
     }
 
-    get(objectId: string, options?: Parse.Query.GetOptions): Promise<any> {
-        return super.get(objectId, options);
+    async get(objectId: string, options?: FindOptionsWithCacheOptions): Promise<any> {
+        try {
+            const identifier = objectId;
+            if (this.cacheAdapter.cacheEnabled(options)) {
+                const cacheResponse = await this.cacheAdapter.get<T>(identifier);
+                if (cacheResponse) {
+                    super.get(objectId, options).then(value => {
+                        const data = JSON.parse(JSON.stringify(value));
+                        if (options && options.freshData) {
+                            options.freshData({identifier, data});
+                        }
+                        return this.cacheAdapter
+                            .set<T>(identifier, data);
+                    }).catch();
+                    return cacheResponse;
+                }
+            }
+            const response = JSON.parse(JSON.stringify(await super.get(objectId, options)));
+            this.cacheAdapter.set<T>(identifier, response).catch();
+            return response;
+        } catch (e) {
+            throw e;
+        }
     }
 
     greaterThan<K extends any>(key: K, value: T[K]): this {
@@ -181,32 +224,54 @@ export class QueryController<T extends DomainModel> extends Query {
         return super.greaterThanOrEqualTo(key, value);
     }
 
-    async distinct<T>(key: any): Promise<T> {
+    async distinct<T>(key: any, options?: FindOptionsWithCacheOptions): Promise<T> {
         try {
-            const response = super.distinct(key);
-            return JSON.parse(JSON.stringify(response));
+            const identifier = `distinct_${JSON.stringify(this.toJSON())}`;
+            if (this.cacheAdapter.cacheEnabled(options)) {
+                const cacheResponse = await this.cacheAdapter.get<T>(identifier);
+                if (cacheResponse) {
+                    super.distinct(key).then(value => {
+                        const data = JSON.parse(JSON.stringify(value));
+                        if (options && options.freshData) {
+                            options.freshData({identifier, data});
+                        }
+                        return this.cacheAdapter
+                            .set<T>(identifier, data);
+                    }).catch();
+                    return cacheResponse;
+                }
+            }
+            const response = JSON.parse(JSON.stringify(await super.distinct(key)));
+            this.cacheAdapter.set<T>(identifier, response).catch();
+            return response;
         } catch (e) {
             throw e;
         }
     }
 
-    async find<T>(options?: Query.FindOptions): Promise<T[]> {
+    async find<T>(options?: FindOptionsWithCacheOptions): Promise<T[]> {
         try {
-            const response = await super.find(options);
-            return JSON.parse(JSON.stringify(response));
+            const identifier = `find_${JSON.stringify(this.toJSON())}`;
+            if (this.cacheAdapter.cacheEnabled(options)) {
+                const cacheResponse = await this.cacheAdapter.get<T[]>(identifier);
+                if (cacheResponse) {
+                    super.find(options).then(value => {
+                        const data = JSON.parse(JSON.stringify(value));
+                        if (options && options.freshData) {
+                            options.freshData({identifier, data});
+                        }
+                        return this.cacheAdapter
+                            .set<T[]>(identifier, data);
+                    }).catch();
+                    return cacheResponse;
+                }
+            }
+            const response = JSON.parse(JSON.stringify(await super.find(options)));
+            this.cacheAdapter.set<T[]>(identifier, response).catch();
+            return response;
         } catch (e) {
             throw e;
         }
     }
 
-}
-
-export interface AggregationOptions extends Parse.Query.AggregationOptions {
-    group?: { objectId?: string; [key: string]: any };
-    match?: { [key: string]: any };
-    project?: { [key: string]: any };
-    limit?: number;
-    skip?: number;
-    // Sort documentation https://docs.mongodb.com/v3.2/reference/operator/aggregation/sort/#pipe._S_sort
-    sort?: { [key: string]: 1 | -1 };
 }

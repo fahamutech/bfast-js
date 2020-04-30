@@ -1,11 +1,15 @@
 export class BFastConfig {
-    applicationId: any;
-    cloudFunctionsUrl: any;
-    projectId: any;
-    cloudDatabaseUrl: any;
-    token: any;
-    appPassword: any;
-    cache = true;
+    applicationId: string | undefined;
+    cloudFunctionsUrl: string | undefined;
+    projectId: string | undefined;
+    cloudDatabaseUrl: string | undefined;
+    token: string | undefined;
+    appPassword: string | undefined;
+    cache: {
+        enable: boolean;
+        cacheName: string;
+        cacheDtlName: string;
+    } | undefined
 
     private constructor() {
     }

@@ -1,4 +1,4 @@
-import {FunctionAdapter} from "../core/functionInterface";
+import {FunctionAdapter} from "../core/FunctionsAdapter";
 import {BFastConfig} from "../conf";
 
 const axios = require('axios');

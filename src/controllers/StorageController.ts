@@ -1,4 +1,4 @@
-import {StorageAdapter} from "../core/storageAdapter";
+import {StorageAdapter} from "../core/StorageAdapter";
 
 export class StorageController implements StorageAdapter {
     constructor(private file: Parse.File) {
