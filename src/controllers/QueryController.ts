@@ -1,7 +1,7 @@
-import {DomainModel} from "../core/DomainAdapter";
-import {CacheAdapter} from "../core/CacheAdapter";
-import {FindOptionsWithCacheOptions, QueryAdapter} from "../core/QueryAdapter";
-import {FunctionAdapter} from "../core/FunctionsAdapter";
+import {DomainModel} from "../adapters/DomainAdapter";
+import {CacheAdapter} from "../adapters/CacheAdapter";
+import {FindOptionsWithCacheOptions, QueryAdapter} from "../adapters/QueryAdapter";
+import {FunctionAdapter} from "../adapters/FunctionsAdapter";
 
 export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
 
@@ -35,7 +35,7 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
     ascending<K>(key: K | K[]): QueryAdapter<T> {
         throw new Error("Method not implemented.");
     }
-    aggregate<V = any>(pipeline: import("../core/QueryAdapter").AggregationOptions | import("../core/QueryAdapter").AggregationOptions[]): Promise<V> {
+    aggregate<V = any>(pipeline: import("../adapters/QueryAdapter").AggregationOptions | import("../adapters/QueryAdapter").AggregationOptions[]): Promise<V> {
         throw new Error("Method not implemented.");
     }
     containedBy<K, V>(key: K, values: string[] | V[]): QueryAdapter<T> {

@@ -1,7 +1,8 @@
-import {DomainI, DomainModel} from "../core/DomainAdapter";
+import {DomainI, DomainModel} from "../adapters/DomainAdapter";
 import {QueryController} from "./QueryController";
-import {CacheAdapter, CacheOptions, FindOptionsWithCacheOptions} from "../core/CacheAdapter";
+import {CacheAdapter} from "../adapters/CacheAdapter";
 import {BFastConfig} from "../conf";
+import {CacheOptions, FindOptionsWithCacheOptions} from "../adapters/QueryAdapter";
 
 const axios = require('axios').default;
 
@@ -16,8 +17,7 @@ export class DomainController<T extends DomainModel> implements DomainI<T> {
         if (model) {
             try {
                 const response = await axios.post(
-                    `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.domainName}`,
-                    model, {
+                    `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.domainName}`, model, {
                         headers: BFastConfig.getInstance().getHeaders(this.appName)
                     });
                 return response.data;
@@ -67,8 +67,8 @@ export class DomainController<T extends DomainModel> implements DomainI<T> {
                 {
                     headers: BFastConfig.getInstance().getHeaders(this.appName)
                 }
-                new Parse()
-            );
+                // new Parse()
+                );
             return response.data;
         } catch (e) {
             throw e;

@@ -1,4 +1,4 @@
-import {TransactionAdapter} from "../core/TransactionAdapter";
+import {TransactionAdapter} from "../adapters/TransactionAdapter";
 import {TransactionModel} from "../model/TransactionModel";
 import {BFastConfig} from "../conf";
 import {DeleteOperation} from "../model/DeleteOperation";
@@ -10,7 +10,7 @@ export class TransactionController implements TransactionAdapter {
 
     private readonly transactionRequests: TransactionModel[];
 
-    constructor() {
+    constructor(private readonly isNormalBatch = false) {
         this.transactionRequests = [];
     }
 
@@ -24,7 +24,7 @@ export class TransactionController implements TransactionAdapter {
             }
             const response = await axios.post(`${BFastConfig.getInstance().databaseURL()}/batch`, {
                 requests: this.transactionRequests,
-                transaction: true,
+                transaction: !this.isNormalBatch,
             }, {
                 headers: BFastConfig.getInstance().getHeaders()
             });

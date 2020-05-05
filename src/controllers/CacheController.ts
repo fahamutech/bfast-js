@@ -1,4 +1,4 @@
-import {CacheAdapter, CacheOptions} from "../core/CacheAdapter";
+import {CacheAdapter, CacheOptions} from "../adapters/CacheAdapter";
 import * as localForage from 'localforage'
 import {BFastConfig} from "../conf";
 

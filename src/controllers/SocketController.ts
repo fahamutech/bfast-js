@@ -1,4 +1,4 @@
-import {RealTimeAdapter} from "../core/RealTimeAdapter";
+import {RealTimeAdapter} from "../adapters/RealTimeAdapter";
 import * as io from 'socket.io-client';
 import {BFastConfig} from "../conf";
 import Socket = SocketIOClient.Socket;
