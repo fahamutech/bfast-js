@@ -1,4 +1,4 @@
-import {BFastConfig} from "./conf";
+import {AppCredentials, BFastConfig} from "./conf";
 import {DomainController} from "./controllers/domainController";
 import {FunctionController} from "./controllers/functionController";
 import {StorageController} from "./controllers/StorageController";
@@ -23,70 +23,50 @@ export const BFast = {
     /**
      *
      * @param options
+     * @param appName {string} application name for multiple apps access
      */
-    init: function (options: {
-        cloudDatabaseUrl?: string,
-        cloudFunctionsUrl?: string,
-        applicationId: string,
-        projectId: string,
-        token?: string,
-        appPassword?: string,
-        cache?: {
-            enable: boolean,
-            cacheStoreName: string,
-            cacheStoreTTLName: string,
-        }
-    }) {
-        BFastConfig.getInstance().cloudDatabaseUrl = options.cloudDatabaseUrl ? options.cloudDatabaseUrl : '';
-        BFastConfig.getInstance().token = options.token ? options.token : '';
-        BFastConfig.getInstance().cloudFunctionsUrl = options.cloudFunctionsUrl ? options.cloudFunctionsUrl : '';
-        BFastConfig.getInstance().applicationId = options.applicationId;
-        BFastConfig.getInstance().projectId = options.projectId;
-        BFastConfig.getInstance().appPassword = options.appPassword;
-        BFastConfig.getInstance().cache = options.cache ? options.cache : {
-            enable: true,
-            cacheStoreName: 'bfast_cache',
-            cacheStoreTTLName: 'bfast_cache_dtl',
-        }
-
-        _parse.initialize(<string>BFastConfig.getInstance().applicationId, undefined, BFastConfig.getInstance().appPassword);
-        // @ts-ignore
-        _parse.serverURL = BFastConfig.getInstance().getCloudDatabaseUrl();
-        _parse.CoreManager.set('REQUEST_BATCH_SIZE', 1000000);
+    init(options: AppCredentials, appName: string = BFastConfig.DEFAULT_APP) {
+        options.cache
+        const appCredentials = BFastConfig.getInstance(options, appName).getAppCredential()
+        // _parse.initialize(<string>appCredentials.applicationId, undefined, appCredentials.appPassword);
+        // // @ts-ignore
+        // _parse.serverURL = appCredentials.databaseURL;
+        // _parse.CoreManager.set('REQUEST_BATCH_SIZE', 1000000);
     },
 
-    database: {
-        /**
-         * it export api for domain
-         * @param name {string} domain name
-         */
-        domain<T>(name: string): DomainI<T> {
-            const cacheName = BFastConfig.getInstance().cache?.cacheStoreName;
-            return new DomainController<T>(
-                name,
-                _parse,
-                new CacheController(cacheName ? cacheName : 'bfastLocalDatabase'));
-        },
+    database(appName: string = BFastConfig.DEFAULT_APP) {
+        return {
+            /**
+             * it export api for domain
+             * @param name {string} domain name
+             */
+            domain<T>(name: string): DomainI<T> {
+                const cacheName = BFastConfig.getInstance().getAppCredential(appName).cache?.cacheStoreName;
+                return new DomainController<T>(
+                    name,
+                    new CacheController(cacheName ? cacheName : 'bfastLocalDatabase'));
+            },
 
-        /**
-         * same as #domain
-         */
-        collection<T>(collectionName: string): DomainI<T> {
-            return this.domain<T>(collectionName);
-        },
-        /**
-         * same as #domain
-         */
-        table<T>(tableName: string): DomainI<T> {
-            return this.domain<T>(tableName);
-        },
+            /**
+             * same as #domain
+             */
+            collection<T>(collectionName: string): DomainI<T> {
+                return this.domain<T>(collectionName);
+            },
+            /**
+             * same as #domain
+             */
+            table<T>(tableName: string): DomainI<T> {
+                return this.domain<T>(tableName);
+            },
 
-        /**
-         * perform transaction to remote database
-         * @return {TransactionAdapter}
-         */
-        transaction(): TransactionAdapter {
-            return new TransactionController();
+            /**
+             * perform transaction to remote database
+             * @return {TransactionAdapter}
+             */
+            transaction(): TransactionAdapter {
+                return new TransactionController();
+            }
         }
     },
 

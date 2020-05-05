@@ -2,7 +2,6 @@ import {QueryController} from "../controllers/QueryController";
 import {CacheOptions} from "./CacheAdapter";
 
 export interface DomainI<T extends DomainModel> {
-    domainName: string;
 
     save<T>(model: T, options?: CacheOptions): Promise<T>;
 
@@ -18,5 +17,11 @@ export interface DomainI<T extends DomainModel> {
 }
 
 export interface DomainModel {
-    [name: string]: any
+    [name: string]: string | number | Pointer |
+}
+
+interface Pointer {
+    __type: string;
+    className: string;
+    objectId: string;
 }

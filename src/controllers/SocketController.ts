@@ -7,7 +7,7 @@ export class SocketController implements RealTimeAdapter {
     public readonly socket: Socket;
 
     constructor(private readonly eventName: string, onConnect?: Function, onDisconnect?: Function) {
-        this.socket = io(BFastConfig.getInstance().getCloudFunctionsUrl('/'), {
+        this.socket = io(BFastConfig.getInstance().functionsURL('/'), {
             autoConnect: false,
         });
         if (onConnect) this.socket.on('connect', onConnect);

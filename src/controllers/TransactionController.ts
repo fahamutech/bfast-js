@@ -22,7 +22,7 @@ export class TransactionController implements TransactionAdapter {
             if (options && options.before) {
                 await options.before();
             }
-            const response = await axios.post(`${BFastConfig.getInstance().getCloudDatabaseUrl()}/batch`, {
+            const response = await axios.post(`${BFastConfig.getInstance().databaseURL()}/batch`, {
                 requests: this.transactionRequests,
                 transaction: true,
             }, {
