@@ -10,7 +10,7 @@ export class DomainController<T extends DomainModel> implements DomainI<T> {
     constructor(private readonly domainName: string,
                 private readonly cacheAdapter: CacheAdapter,
                 private readonly restAdapter: RestAdapter,
-                private readonly appName = BFastConfig.DEFAULT_APP) {
+                private readonly appName: string ) {
     }
 
     async save<T>(model: T, options?: CacheOptions): Promise<T> {

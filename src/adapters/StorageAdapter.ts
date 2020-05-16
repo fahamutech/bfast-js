@@ -3,14 +3,6 @@ import {AuthOptions} from "./AuthAdapter";
 export interface StorageAdapter {
     getData(): string;
 
-    // url(options?: { forceSecure?: boolean }): string;
-
-    // metadata(): Record<string, any>;
-
-    // tags(): Record<string, any>;
-
-    // name(): string;
-
     /**
      * when done saving must return a url of a file
      * @param file
@@ -19,14 +11,6 @@ export interface StorageAdapter {
     save(file: { fileName: string, data: { base64: string }, fileType: string }, options?: FileOptions): Promise<{ url: string }>;
 
     // delete(filename: string): Promise<any>;
-
-    // setMetadata(metadata: Record<string, any>): void;
-    //
-    // addMetadata(key: string, value: any): void;
-    //
-    // setTags(tags: Record<string, any>): void;
-    //
-    // addTag(key: string, value: any): void;
 }
 
 export interface FileOptions extends AuthOptions {

@@ -42,10 +42,12 @@ export const BFast = {
              * @param name {string} domain name
              */
             domain<T>(name: string): DomainI<T> {
-                const cacheName = BFastConfig.getInstance().getAppCredential(appName).cache?.cacheStoreName;
                 return new DomainController<T>(
                     name,
-                    new CacheController(appName, cacheName ? cacheName : 'bfastLocalDatabase'),
+                    new CacheController(appName,
+                        BFastConfig.getInstance().getCacheDatabaseName('bfastLocalDatabase', appName),
+                        BFastConfig.getInstance().getCacheCollectionName('cache', appName)
+                    ),
                     new AxiosRestController(),
                     appName
                 );
@@ -95,23 +97,24 @@ export const BFast = {
         }
     },
 
-    directAccess(appName = BFastConfig.DEFAULT_APP) {
-        return {
-            cache(options?: { cacheName: string, storeName: string }): CacheAdapter {
-                const cache = BFastConfig.getInstance().getAppCredential(appName).cache?.cacheStoreName;
-                return new CacheController(
-                    appName,
-                    options && options.cacheName ? options.cacheName : (cache ? cache : 'bfastLocalDatabase'),
-                    options && options.storeName ? options.storeName : (cache ? cache : 'bfastLocalDatabase'),
-                );
-            }
-        }
+    cache(options?: { cacheName: string, storeName: string }, appName = BFastConfig.DEFAULT_APP): CacheAdapter {
+        return new CacheController(
+            appName,
+            options && options.cacheName ? BFastConfig.getInstance().getCacheCollectionName(options.cacheName, appName) :
+                BFastConfig.getInstance().getCacheDatabaseName('bfastLocalDatabase', appName),
+            options && options.storeName ? BFastConfig.getInstance().getCacheCollectionName(options.storeName, appName)
+                : BFastConfig.getInstance().getCacheCollectionName('cache', appName),
+        );
     },
 
     auth(appName = BFastConfig.DEFAULT_APP) {
         return new AuthController(
             new AxiosRestController(),
-            new CacheController(appName, 'bfastLocalDatabase', `auth_${appName}`),
+            new CacheController(
+                appName,
+                BFastConfig.getInstance().getCacheCollectionName('bfastLocalDatabase', appName),
+                BFastConfig.getInstance().getCacheCollectionName(`auth`, appName)
+            ),
             appName
         );
     },

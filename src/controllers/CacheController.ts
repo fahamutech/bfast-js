@@ -4,41 +4,49 @@ import {BFastConfig} from "../conf";
 import {CacheOptions} from "../adapters/QueryAdapter";
 
 export class CacheController implements CacheAdapter {
-    cacheName: string;
+    cacheDatabaseName: string;
 
     constructor(private readonly appName: string,
-                cacheName: string,
-                private readonly  storeName?: string) {
-        this.cacheName = cacheName;
+                cacheDatabaseName: string,
+                private readonly  cacheCollectionName: string) {
+        this.cacheDatabaseName = cacheDatabaseName;
     }
 
-    private _getStore(): LocalForage {
+    private _getCacheDatabase(): LocalForage {
+        let collectionNameFromCredential = BFastConfig.getInstance().getAppCredential(this.appName).cache?.cacheCollectionName;
+        if (collectionNameFromCredential) {
+            collectionNameFromCredential = BFastConfig.getInstance().getCacheCollectionName(collectionNameFromCredential, this.appName);
+        }
         return localForage.createInstance({
-            storeName: this.storeName ? this.storeName : BFastConfig.getInstance().getAppCredential(this.appName).cache?.cacheStoreName,
-            name: this.cacheName
+            storeName: collectionNameFromCredential ? collectionNameFromCredential : this.cacheCollectionName,
+            name: this.cacheDatabaseName
         });
     }
 
     private _getTTLStore(): LocalForage {
+        let ttlStoreFromCredential = BFastConfig.getInstance().getAppCredential(this.appName).cache?.cacheCollectionTTLName;
+        if (ttlStoreFromCredential){
+            BFastConfig.getInstance().getCacheCollectionName(ttlStoreFromCredential,this.appName);
+        }
         return localForage.createInstance({
-            storeName: BFastConfig.getInstance().getAppCredential(this.appName).cache?.cacheStoreTTLName,
-            name: this.cacheName
+            storeName: ttlStoreFromCredential ? ttlStoreFromCredential : 'cache_ttl_'+this.appName,
+            name: this.cacheDatabaseName
         });
     }
 
     async clearAll(): Promise<boolean> {
-        await this._getStore().clear();
+        await this._getCacheDatabase().clear();
         await this._getTTLStore().clear();
         return true;
     }
 
     async get<T>(identifier: string): Promise<T> {
         await this.remove(identifier);
-        return await this._getStore().getItem<T>(identifier);
+        return await this._getCacheDatabase().getItem<T>(identifier);
     }
 
     async set<T>(identifier: string, data: T, options?: { dtl: number }): Promise<T> {
-        const response = await this._getStore().setItem<T>(identifier, data);
+        const response = await this._getCacheDatabase().setItem<T>(identifier, data);
         await this._getTTLStore().setItem(identifier, CacheController._getDayToLeave(options ? options.dtl : 7));
         return response;
     }
@@ -52,7 +60,7 @@ export class CacheController implements CacheAdapter {
         const dayToLeave = await this._getTTLStore().getItem<number>(identifier);
         if (dayToLeave && dayToLeave < new Date().getTime()) {
             await this._getTTLStore().removeItem(identifier);
-            await this._getStore().removeItem(identifier);
+            await this._getCacheDatabase().removeItem(identifier);
             return true;
         } else {
             return false;

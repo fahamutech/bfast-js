@@ -1,7 +1,7 @@
 import {CacheOptions} from "./QueryAdapter";
 
 export interface CacheAdapter {
-    cacheName: string;
+    cacheDatabaseName: string;
 
     set<T>(identifier: string, data: T, options?: { dtl: number }): Promise<T>;
 

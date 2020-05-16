@@ -18,6 +18,9 @@ export class BFastConfig {
     }
 
     getAppCredential(appName = BFastConfig.DEFAULT_APP) {
+        if (!this.credentials[appName]) {
+            throw new Error(`This ${appName} is not initialized`);
+        }
         return this.credentials[appName];
     }
 
@@ -62,6 +65,22 @@ export class BFastConfig {
 
     };
 
+    getCacheDatabaseName(name: string, appName: string): string {
+        if (name) {
+            return `${name}_${appName}`;
+        } else {
+            return `bfastLocalDatabase_${appName}`;
+        }
+    }
+
+    getCacheCollectionName(name: string, appName: string): string {
+        if (name) {
+            return `${name}_${appName}`;
+        } else {
+            return `cache_${appName}`;
+        }
+    }
+
 }
 
 export interface AppCredentials {
@@ -69,13 +88,12 @@ export interface AppCredentials {
     functionsURL?: string;
     projectId: string;
     databaseURL?: string;
-    token?: string;
     appPassword?: string;
     cache?: CacheConfigOptions
 }
 
 export interface CacheConfigOptions {
     enable: boolean,
-    cacheStoreName: string,
-    cacheStoreTTLName: string,
+    cacheCollectionName: string,
+    cacheCollectionTTLName: string,
 }
