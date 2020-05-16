@@ -3,14 +3,15 @@ import {TransactionModel} from "../model/TransactionModel";
 import {BFastConfig} from "../conf";
 import {DeleteOperation} from "../model/DeleteOperation";
 import {UpdateOperation} from "../model/UpdateOperation";
-
-const axios = require('axios').default;
+import {RestAdapter} from "../adapters/RestAdapter";
 
 export class TransactionController implements TransactionAdapter {
 
     private readonly transactionRequests: TransactionModel[];
 
-    constructor(private readonly isNormalBatch = false) {
+    constructor(private readonly appName: string,
+                private readonly restApi: RestAdapter,
+                private readonly isNormalBatch = false) {
         this.transactionRequests = [];
     }
 
@@ -22,11 +23,11 @@ export class TransactionController implements TransactionAdapter {
             if (options && options.before) {
                 await options.before();
             }
-            const response = await axios.post(`${BFastConfig.getInstance().databaseURL()}/batch`, {
+            const response = await this.restApi.post(`${BFastConfig.getInstance().databaseURL(this.appName, '/batch')}`, {
                 requests: this.transactionRequests,
                 transaction: !this.isNormalBatch,
             }, {
-                headers: BFastConfig.getInstance().getHeaders()
+                headers: BFastConfig.getInstance().getHeaders(this.appName)
             });
             this.transactionRequests.splice(0);
             if (options && options.after) {

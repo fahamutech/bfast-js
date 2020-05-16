@@ -69,7 +69,7 @@ export const BFast = {
              * @return {TransactionAdapter}
              */
             transaction(isNormalBatch?: boolean): TransactionAdapter {
-                return new TransactionController(isNormalBatch);
+                return new TransactionController(appName, new AxiosRestController(), isNormalBatch);
             }
         }
     },
@@ -116,16 +116,8 @@ export const BFast = {
         );
     },
 
-    storage(appName = BFastConfig.DEFAULT_APP) {
-        return {
-            getInstance(options: {
-                fileName: string,
-                data: { base64: string },
-                fileType: string
-            }): StorageController {
-                return new StorageController(options, new AxiosRestController(), appName);
-            }
-        }
+    storage(appName = BFastConfig.DEFAULT_APP): StorageController {
+        return new StorageController(new AxiosRestController(), appName);
     }
 
 };

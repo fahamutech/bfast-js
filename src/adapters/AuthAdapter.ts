@@ -1,5 +1,4 @@
 import {UserModel} from "../model/UserModel";
-import {User} from "parse";
 
 export interface AuthAdapter {
 
@@ -23,7 +22,7 @@ export interface AuthAdapter {
 
     logOut(): Promise<boolean>;
 
-    requestPasswordReset<T extends User>(email: string, options?: AuthOptions): Promise<T>;
+    requestPasswordReset<T extends UserModel>(email: string, options?: AuthOptions): Promise<T>;
 }
 
 export interface AuthOptions {

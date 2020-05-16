@@ -13,11 +13,12 @@ export interface StorageAdapter {
 
     /**
      * when done saving must return a url of a file
+     * @param file
      * @param options
      */
-    save(options?: FileOptions): Promise<{ url: string, name: string }>;
+    save(file: { fileName: string, data: { base64: string }, fileType: string }, options?: FileOptions): Promise<{ url: string }>;
 
-    // destroy(): Promise<this>;
+    // delete(filename: string): Promise<any>;
 
     // setMetadata(metadata: Record<string, any>): void;
     //
