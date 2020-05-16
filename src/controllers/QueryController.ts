@@ -1,230 +1,223 @@
 import {DomainModel} from "../adapters/DomainAdapter";
 import {CacheAdapter} from "../adapters/CacheAdapter";
-import {FindOptionsWithCacheOptions, QueryAdapter} from "../adapters/QueryAdapter";
-import {FunctionAdapter} from "../adapters/FunctionsAdapter";
+import {AggregationOptions, CacheOptions, FindOptionsWithCacheOptions, QueryAdapter} from "../adapters/QueryAdapter";
+import {RestAdapter, RestResponse} from "../adapters/RestAdapter";
+import {BFastConfig} from "../conf";
+import {QueryModel} from "../model/QueryModel";
 
 export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
 
-    private readonly where = {};
-
     constructor(private readonly collectionName: string,
                 private readonly cacheAdapter: CacheAdapter,
-                private readonly restAdapter: FunctionAdapter,
+                private readonly restAdapter: RestAdapter,
                 private readonly appName: string) {
         this.collectionName = collectionName;
     }
 
-    and(...args: QueryAdapter<T>[]): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    fromJSON(json: any): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    nor(...args: QueryAdapter<T>[]): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    or(...var_args: QueryAdapter<T>[]): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    addAscending<K>(key: K | K[]): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    addDescending<K>(key: K | K[]): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    ascending<K>(key: K | K[]): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    aggregate<V = any>(pipeline: import("../adapters/QueryAdapter").AggregationOptions | import("../adapters/QueryAdapter").AggregationOptions[]): Promise<V> {
-        throw new Error("Method not implemented.");
-    }
-    containedBy<K, V>(key: K, values: string[] | V[]): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    containedIn<K, V>(key: K, values: string | V[]): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    contains<K>(key: K, substring: string): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    containsAll<K, V>(key: K, values: V[]): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    containsAllStartingWith<K, V>(key: K, values: V[]): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    descending<K>(key: K | K[]): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    doesNotExist<K>(key: K): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    endsWith<K>(key: K, suffix: string): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    equalTo<K, V>(key: K, value: V): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    exists<K>(key: K): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    fullText<K>(key: K, value: string, options?: FullTextOptions | undefined): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    greaterThan<K, V>(key: K, value: V): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    greaterThanOrEqualTo<K, V>(key: K, value: V): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    include<K>(key: K | K[]): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    includeAll(): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    lessThan<K, V>(key: K, value: V): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    lessThanOrEqualTo<K, V>(key: K, value: V): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    limit(n: number): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    matches<K>(key: K, regex: RegExp, modifiers?: string | undefined): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    notContainedIn<K, V>(key: K, values: V[]): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    notEqualTo<K, V>(key: K, value: V[]): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    select<K>(...keys: K[]): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    skip(n: number): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    sortByTextScore(): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    startsWith<K>(key: K, prefix: string): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-    withJSON(json: any): QueryAdapter<T> {
-        throw new Error("Method not implemented.");
-    }
-
-    toJSON(): any {
-        return this.where;
+    async aggregate<V = any>(pipeline: AggregationOptions | AggregationOptions[], options: CacheOptions): Promise<V> {
+        let pipelineToStrings = JSON.stringify(pipeline);
+        pipelineToStrings = pipelineToStrings.length > 7 ? pipelineToStrings.substring(0, 7) : pipelineToStrings;
+        const identifier = `aggregate_${this.collectionName}_${pipelineToStrings}`;
+        const aggregateReq = (): Promise<RestResponse> => {
+            return this.restAdapter.get(
+                `${BFastConfig.getInstance().databaseURL(this.appName)}/aggregate/${this.collectionName}`,
+                {
+                    headers: BFastConfig.getInstance().getMasterHeaders(this.appName),
+                    params: pipeline
+                }
+            );
+        }
+        if (this.cacheAdapter.cacheEnabled(options)) {
+            const cacheResponse = await this.cacheAdapter.get<V>(identifier);
+            if (cacheResponse) {
+                aggregateReq().then(value => {
+                    const data = value.data.results
+                    if (options && options.freshDataCallback) {
+                        options.freshDataCallback({identifier, data});
+                    }
+                    return this.cacheAdapter
+                        .set<T>(identifier, data);
+                }).catch();
+                return cacheResponse;
+            }
+        }
+        const response = await aggregateReq();
+        this.cacheAdapter.set<V>(identifier, response.data.results).catch();
+        return response.data.results;
     }
 
     async count(options?: FindOptionsWithCacheOptions): Promise<number> {
-        try {
-            const identifier = `count_${this.collectionName}_${JSON.stringify(this.toJSON())}`;
-            if (this.cacheAdapter.cacheEnabled(options)) {
-                const cacheResponse = await this.cacheAdapter.get<number>(identifier);
-                if (cacheResponse) {
-                    // super.count(options).then(value => {
-                    //     const data = JSON.parse(JSON.stringify(value));
-                    //     if (options && options.freshData) {
-                    //         options.freshData({identifier, data});
-                    //     }
-                    //     return this.cacheAdapter
-                    //         .set<number>(identifier, data);
-                    // }).catch();
-                    return cacheResponse;
+        const countReq = async (): Promise<RestResponse> => {
+            return this.restAdapter.get(
+                `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}`,
+                {
+                    headers: BFastConfig.getInstance().getHeaders(this.appName),
+                    params: {
+                        count: 1,
+                        limit: 0
+                    }
                 }
-            }
-            // const response = JSON.parse(JSON.stringify(await super.count(options)));
-            // this.cacheAdapter.set<number>(identifier, response).catch();
-            // return response;
-        } catch (e) {
-            throw e;
+            );
         }
+        const identifier = `count_${this.collectionName}_`;
+        if (this.cacheAdapter.cacheEnabled(options)) {
+            const cacheResponse = await this.cacheAdapter.get<number>(identifier);
+            if (cacheResponse) {
+                countReq()
+                    .then(value => {
+                        const data = value.data.count;
+                        if (options && options.freshDataCallback) {
+                            options.freshDataCallback({identifier, data});
+                        }
+                        return this.cacheAdapter.set<number>(identifier, data);
+                    })
+                    .catch();
+                return cacheResponse;
+            }
+        }
+        const response = await countReq();
+        this.cacheAdapter.set<number>(identifier, response.data.count).catch();
+        return response.data.count;
     }
 
     async get(objectId: string, options?: FindOptionsWithCacheOptions): Promise<any> {
         try {
             const identifier = objectId;
+            const getReq = async (): Promise<RestResponse> => {
+                return this.restAdapter.get(
+                    `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}/${identifier}`,
+                    {
+                        headers: BFastConfig.getInstance().getHeaders(this.appName),
+                    }
+                );
+            }
             if (this.cacheAdapter.cacheEnabled(options)) {
                 const cacheResponse = await this.cacheAdapter.get<T>(identifier);
                 if (cacheResponse) {
-                    // super.get(objectId, options).then(value => {
-                    //     const data = JSON.parse(JSON.stringify(value));
-                    //     if (options && options.freshData) {
-                    //         options.freshData({identifier, data});
-                    //     }
-                    //     return this.cacheAdapter
-                    //         .set<T>(identifier, data);
-                    // }).catch();
+                    getReq().then(value => {
+                        const data = value.data;
+                        if (options && options.freshDataCallback) {
+                            options.freshDataCallback({identifier, data});
+                        }
+                        return this.cacheAdapter.set<T>(identifier, data);
+                    }).catch();
                     return cacheResponse;
                 }
             }
-            // const response = JSON.parse(JSON.stringify(await super.get(objectId, options)));
-            // this.cacheAdapter.set<T>(identifier, response).catch();
-            // return response;
+            const response = await getReq();
+            this.cacheAdapter.set<T>(identifier, response.data).catch();
+            return response.data;
         } catch (e) {
             throw e;
         }
     }
 
-
-    async distinct<T>(key: any, options?: FindOptionsWithCacheOptions): Promise<T> {
-        try {
-            const identifier = `distinct_${this.collectionName}_${JSON.stringify(this.toJSON())}`;
-            if (this.cacheAdapter.cacheEnabled(options)) {
-                const cacheResponse = await this.cacheAdapter.get<T>(identifier);
-                if (cacheResponse) {
-                    // super.distinct(key).then(value => {
-                    //     const data = JSON.parse(JSON.stringify(value));
-                    //     if (options && options.freshData) {
-                    //         options.freshData({identifier, data});
-                    //     }
-                    //     return this.cacheAdapter
-                    //         .set<T>(identifier, data);
-                    // }).catch();
-                    // return cacheResponse;
+    async distinct<T>(key: any, queryModel: QueryModel<T>, options?: FindOptionsWithCacheOptions): Promise<T> {
+        const identifier = `distinct_${this.collectionName}_${JSON.stringify(queryModel.filter)}`;
+        const distinctReq = (): Promise<RestResponse> => {
+            return this.restAdapter.get(
+                `${BFastConfig.getInstance().databaseURL(this.appName)}/aggregate/${this.collectionName}`,
+                {
+                    headers: BFastConfig.getInstance().getMasterHeaders(this.appName),
+                    params: {
+                        limit: queryModel.size,
+                        skip: queryModel.skip,
+                        order: queryModel.orderBy?.join(','),
+                        keys: queryModel.keys ? queryModel.keys?.join(',') : null,
+                        where: queryModel.filter,
+                        distinct: key
+                    }
                 }
-            }
-            // const response = JSON.parse(JSON.stringify(await super.distinct(key)));
-            // this.cacheAdapter.set<T>(identifier, response).catch();
-            // return response;
-        } catch (e) {
-            throw e;
+            );
         }
+        if (this.cacheAdapter.cacheEnabled(options)) {
+            const cacheResponse = await this.cacheAdapter.get<T>(identifier);
+            if (cacheResponse) {
+                distinctReq().then(value => {
+                    const data = value.data.results
+                    if (options && options.freshDataCallback) {
+                        options.freshDataCallback({identifier, data});
+                    }
+                    return this.cacheAdapter
+                        .set<T>(identifier, data);
+                }).catch();
+                return cacheResponse;
+            }
+        }
+        const response = await distinctReq();
+        this.cacheAdapter.set<T>(identifier, response.data.results).catch();
+        return response.data.results;
     }
 
-    async find<T>(options?: FindOptionsWithCacheOptions): Promise<T[]> {
-        try {
-            const identifier = `find_${this.collectionName}_${JSON.stringify(this.toJSON())}`;
-            if (this.cacheAdapter.cacheEnabled(options)) {
-                const cacheResponse = await this.cacheAdapter.get<T[]>(identifier);
-                if (cacheResponse) {
-                    // super.find(options).then(value => {
-                    //     const data = JSON.parse(JSON.stringify(value));
-                    //     if (options && options.freshData) {
-                    //         options.freshData({identifier, data});
-                    //     }
-                    //     return this.cacheAdapter
-                    //         .set<T[]>(identifier, data);
-                    // }).catch();
-                    // return cacheResponse;
+    async find<T>(queryModel: QueryModel<T>, options?: FindOptionsWithCacheOptions): Promise<T[]> {
+        const identifier = `find_${this.collectionName}_${JSON.stringify(queryModel.filter)}`;
+        const findReq = (): Promise<RestResponse> => {
+            return this.restAdapter.get(
+                `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}`,
+                {
+                    headers: BFastConfig.getInstance().getHeaders(this.appName),
+                    params: {
+                        limit: queryModel.size,
+                        skip: queryModel.skip,
+                        order: queryModel.orderBy?.join(','),
+                        keys: queryModel.keys ? queryModel.keys?.join(',') : null,
+                        where: queryModel.filter
+                    }
                 }
-            }
-            // const response = JSON.parse(JSON.stringify(await super.find(options)));
-            // this.cacheAdapter.set<T[]>(identifier, response).catch();
-            // return response;
-        } catch (e) {
-            throw e;
+            );
         }
+        if (this.cacheAdapter.cacheEnabled(options)) {
+            const cacheResponse = await this.cacheAdapter.get<T[]>(identifier);
+            if (cacheResponse) {
+                findReq().then(value => {
+                    const data = value.data.results;
+                    if (options && options.freshDataCallback) {
+                        options.freshDataCallback({identifier, data});
+                    }
+                    return this.cacheAdapter.set<T[]>(identifier, data);
+                }).catch();
+                return cacheResponse;
+            }
+        }
+        const response = await findReq();
+        this.cacheAdapter.set<T[]>(identifier, response.data.results).catch();
+        return response.data.results;
     }
 
-    async first(options?: FindOptionsWithCacheOptions): Promise<any> {
-        // const response = await .first(options);
-        // return JSON.parse(JSON.stringify(response));
+    async first<T>(queryModel: QueryModel<T>, options?: FindOptionsWithCacheOptions): Promise<T> {
+        const identifier = `first_${this.collectionName}_${JSON.stringify(queryModel.filter)}`;
+        const firstReq = (): Promise<RestResponse> => {
+            return this.restAdapter.get(
+                `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}`,
+                {
+                    headers: BFastConfig.getInstance().getHeaders(this.appName),
+                    params: {
+                        limit: 1,
+                        skip: 0,
+                        order: queryModel.orderBy?.join(','),
+                        keys: queryModel.keys ? queryModel.keys?.join(',') : null,
+                        where: queryModel.filter,
+                    }
+                }
+            );
+        }
+        if (this.cacheAdapter.cacheEnabled(options)) {
+            const cacheResponse = await this.cacheAdapter.get<T>(identifier);
+            if (cacheResponse) {
+                firstReq().then(value => {
+                    const data = value.data.results;
+                    if (options && options.freshDataCallback) {
+                        options.freshDataCallback({identifier, data: data.length === 1 ? data[0] : null});
+                    }
+                    return this.cacheAdapter.set<T>(identifier, data.length === 1 ? data[0] : null);
+                }).catch();
+                return cacheResponse;
+            }
+        }
+        const response = await firstReq();
+        const data = response.data;
+        this.cacheAdapter.set<T>(identifier, data.length === 1 ? data[0] : null).catch();
+        return data.length === 1 ? data[0] : null;
     }
 
 }

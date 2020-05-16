@@ -1,11 +1,11 @@
 import {QueryController} from "../controllers/QueryController";
-import {CacheOptions} from "./CacheAdapter";
+import {CacheOptions} from "./QueryAdapter";
 
 export interface DomainI<T extends DomainModel> {
 
     save<T>(model: T, options?: CacheOptions): Promise<T>;
 
-    getAll<T>(pagination?:{size:number,skip:number}, options?: CacheOptions): Promise<T[]>;
+    getAll<T>(pagination?: { size: number, skip: number }, options?: CacheOptions): Promise<T[]>;
 
     get<T>(objectId: string, options?: CacheOptions): Promise<T>;
 
@@ -17,7 +17,7 @@ export interface DomainI<T extends DomainModel> {
 }
 
 export interface DomainModel {
-    [name: string]: string | number | Pointer |
+    [name: string]: any
 }
 
 interface Pointer {

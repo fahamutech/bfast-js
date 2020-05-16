@@ -3,27 +3,23 @@ import {QueryController} from "./QueryController";
 import {CacheAdapter} from "../adapters/CacheAdapter";
 import {BFastConfig} from "../conf";
 import {CacheOptions, FindOptionsWithCacheOptions} from "../adapters/QueryAdapter";
-
-const axios = require('axios').default;
+import {RestAdapter} from "../adapters/RestAdapter";
 
 export class DomainController<T extends DomainModel> implements DomainI<T> {
 
     constructor(private readonly domainName: string,
                 private readonly cacheAdapter: CacheAdapter,
+                private readonly restAdapter: RestAdapter,
                 private readonly appName = BFastConfig.DEFAULT_APP) {
     }
 
     async save<T>(model: T, options?: CacheOptions): Promise<T> {
         if (model) {
-            try {
-                const response = await axios.post(
-                    `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.domainName}`, model, {
-                        headers: BFastConfig.getInstance().getHeaders(this.appName)
-                    });
-                return response.data;
-            } catch (e) {
-                throw e;
-            }
+            const response = await this.restAdapter.post(
+                `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.domainName}`, model, {
+                    headers: BFastConfig.getInstance().getHeaders(this.appName)
+                });
+            return response.data;
         } else {
             return Promise.reject({code: -1, message: 'please provide data to save'});
         }
@@ -42,7 +38,7 @@ export class DomainController<T extends DomainModel> implements DomainI<T> {
     }
 
     async delete<T>(objectId: string, options?: CacheOptions): Promise<T> {
-        const response = await axios.delete(
+        const response = await this.restAdapter.delete(
             `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.domainName}/${objectId}`,
             {
                 headers: BFastConfig.getInstance().getHeaders(this.appName)
@@ -52,27 +48,18 @@ export class DomainController<T extends DomainModel> implements DomainI<T> {
     }
 
     query<T>(options?: CacheOptions): QueryController<T> {
-        try {
-            return new QueryController<T>(this.domainName, this.cacheAdapter, this.appName);
-        } catch (e) {
-            throw e;
-        }
+        return new QueryController<T>(this.domainName, this.cacheAdapter, this.restAdapter, this.appName);
     }
 
     async update<T>(objectId: string, model: T, options?: CacheOptions): Promise<T> {
-        try {
-            const response = await axios.put(
-                `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.domainName}/${objectId}`,
-                model,
-                {
-                    headers: BFastConfig.getInstance().getHeaders(this.appName)
-                }
-                // new Parse()
-                );
-            return response.data;
-        } catch (e) {
-            throw e;
-        }
+        const response = await this.restAdapter.put(
+            `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.domainName}/${objectId}`,
+            model,
+            {
+                headers: BFastConfig.getInstance().getHeaders(this.appName)
+            }
+        );
+        return response.data;
     }
 
 }

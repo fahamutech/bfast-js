@@ -4,7 +4,6 @@ import {FunctionController} from "./controllers/functionController";
 import {StorageController} from "./controllers/StorageController";
 import {DomainI} from "./adapters/DomainAdapter";
 import {FunctionAdapter} from "./adapters/FunctionsAdapter";
-import * as _parse from 'parse';
 import {AuthController} from "./controllers/AuthController";
 import {SocketController} from "./controllers/SocketController";
 import {TransactionAdapter} from "./adapters/TransactionAdapter";
@@ -12,6 +11,7 @@ import {TransactionController} from "./controllers/TransactionController";
 import {RealTimeAdapter} from "./adapters/RealTimeAdapter";
 import {CacheController} from "./controllers/CacheController";
 import {CacheAdapter} from "./adapters/CacheAdapter";
+import {AxiosRestController} from "./controllers/AxiosRestController";
 
 /**
  * Created and maintained by Fahamu Tech Ltd Company
@@ -28,7 +28,7 @@ export const BFast = {
      */
     init(options: AppCredentials, appName: string = BFastConfig.DEFAULT_APP): AppCredentials {
         options.cache
-        return BFastConfig.getInstance(options, appName).getAppCredential();
+        return BFastConfig.getInstance(options, appName).getAppCredential(appName);
     },
 
     /**
@@ -45,7 +45,10 @@ export const BFast = {
                 const cacheName = BFastConfig.getInstance().getAppCredential(appName).cache?.cacheStoreName;
                 return new DomainController<T>(
                     name,
-                    new CacheController(cacheName ? cacheName : 'bfastLocalDatabase'));
+                    new CacheController(appName, cacheName ? cacheName : 'bfastLocalDatabase'),
+                    new AxiosRestController(),
+                    appName
+                );
             },
 
             /**
@@ -71,48 +74,57 @@ export const BFast = {
         }
     },
 
-    functions: {
-        /**
-         * exec a cloud function
-         * @param path {string} function name
-         */
-        request(path: string): FunctionAdapter {
-            return new FunctionController(path);
-        },
-        /**
-         * start a new socket
-         * @param eventName
-         * @param onConnect {function} callback when connection established
-         * @param onDisconnect {function} callback when connection terminated
-         */
-        event(eventName: string, onConnect?: Function, onDisconnect?: Function): RealTimeAdapter {
-            return new SocketController(eventName, onConnect, onDisconnect);
+    functions(appName = BFastConfig.DEFAULT_APP) {
+        return {
+            /**
+             * exec a cloud function
+             * @param path {string} function name
+             */
+            request(path: string): FunctionAdapter {
+                return new FunctionController(path, new AxiosRestController(), appName);
+            },
+            /**
+             * start a new socket
+             * @param eventName
+             * @param onConnect {function} callback when connection established
+             * @param onDisconnect {function} callback when connection terminated
+             */
+            event(eventName: string, onConnect?: Function, onDisconnect?: Function): RealTimeAdapter {
+                return new SocketController(eventName, appName, onConnect, onDisconnect);
+            }
         }
     },
 
-    /**
-     * access initialized parse JS Sdk direct
-     */
-    directAccess: {
-        parseSdk: _parse,
-        cache(options?: { cacheName: string, storeName: string }): CacheAdapter {
-            const cache = BFastConfig.getInstance().cache?.cacheStoreName;
-            return new CacheController(
-                options && options.cacheName ? options.cacheName : (cache ? cache : 'bfastLocalDatabase'),
-                options && options.storeName ? options.storeName : (cache ? cache : 'bfastLocalDatabase'),
-            );
+    directAccess(appName = BFastConfig.DEFAULT_APP) {
+        return {
+            cache(options?: { cacheName: string, storeName: string }): CacheAdapter {
+                const cache = BFastConfig.getInstance().getAppCredential(appName).cache?.cacheStoreName;
+                return new CacheController(
+                    appName,
+                    options && options.cacheName ? options.cacheName : (cache ? cache : 'bfastLocalDatabase'),
+                    options && options.storeName ? options.storeName : (cache ? cache : 'bfastLocalDatabase'),
+                );
+            }
         }
     },
 
-    auth: AuthController,
+    auth(appName = BFastConfig.DEFAULT_APP) {
+        return new AuthController(
+            new AxiosRestController(),
+            new CacheController(appName, 'bfastLocalDatabase', `auth_${appName}`),
+            appName
+        );
+    },
 
-    storage: {
-        getInstance(options: {
-            fileName: string,
-            data: number[] | { base64: string } | { size: number; type: string; } | { uri: string },
-            fileType?: string
-        }): StorageController {
-            return new StorageController(new _parse.File(options.fileName, options.data, options.fileType));
+    storage(appName = BFastConfig.DEFAULT_APP) {
+        return {
+            getInstance(options: {
+                fileName: string,
+                data: { base64: string },
+                fileType: string
+            }): StorageController {
+                return new StorageController(options, new AxiosRestController(), appName);
+            }
         }
     }
 

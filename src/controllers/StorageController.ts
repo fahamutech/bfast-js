@@ -1,67 +1,53 @@
-import {StorageAdapter} from "../adapters/StorageAdapter";
+import {FileOptions, StorageAdapter} from "../adapters/StorageAdapter";
+import {BFastConfig} from "../conf";
+import {RestAdapter} from "../adapters/RestAdapter";
 
 export class StorageController implements StorageAdapter {
-    constructor(private file: Parse.File) {
+    constructor(private readonly file: {
+                    fileName: string;
+                    data: { base64: string };
+                    fileType: string
+                }, private readonly restApi: RestAdapter,
+                private readonly appName = BFastConfig.DEFAULT_APP) {
     }
 
-    getData(): Promise<string> {
-        return this.file.getData();
+    getData(): string {
+        return this.file.data?.base64;
     }
 
-    name(): string {
-        return this.file.name()
+    async save(options?: FileOptions): Promise<{ url: string, name: string }> {
+        const postHeader = {};
+        if (options && options.useMasterKey) {
+            Object.assign(postHeader, {
+                'X-Parse-Master-Key': BFastConfig.getInstance().getAppCredential(this.appName).appPassword,
+            });
+        }
+        if (options && options.sessionToken) {
+            Object.assign(postHeader, {
+                'X-Parse-Session-Token': options?.sessionToken
+            });
+        }
+        Object.assign(postHeader, {
+            'X-Parse-Application-Id': BFastConfig.getInstance().getAppCredential(this.appName).applicationId,
+            'Content-Type': this.file.fileType
+        });
+        const response = await this.restApi.post<{ url: string, name: string }>(
+            BFastConfig.getInstance().databaseURL(this.appName, '/files/' + this.file.fileName),
+            this.file.data.base64,
+            {
+                headers: postHeader
+            }
+        );
+        let url;
+        if (options && options.forceSecure) {
+            url = response.data.url.replace('http://', 'https://');
+        } else {
+            url = response.data.url;
+        }
+        return {
+            url: url,
+            name: response.data.name
+        };
     }
 
-    save(options?: ParseSaveFileOptions): Promise<Parse.File> {
-        return this.file.save(options);
-    }
-
-    toJSON(): { __type: string; name: string; url: string } {
-        return this.file.toJSON();
-    }
-
-    url(options?: { forceSecure: boolean }): string {
-        return this.file.url(options);
-    }
-
-    addMetadata(key: string, value: any): void {
-        return this.file.addMetadata(key, value);
-    }
-
-    addTag(key: string, value: any): void {
-        return this.file.addTag(key, value);
-    }
-
-    cancel(): void {
-        this.file.cancel();
-    }
-
-    destroy(): Promise<StorageAdapter> {
-        return this.file.destroy();
-    }
-
-    equals(other: StorageController): boolean {
-        return this.file.equals(other);
-    }
-
-    metadata(): Record<string, any> {
-        return this.file.metadata();
-    }
-
-    setMetadata(metadata: Record<string, any>): void {
-        this.file.setMetadata(metadata);
-    }
-
-    setTags(tags: Record<string, any>): void {
-        this.file.setTags(tags);
-    }
-
-    tags(): Record<string, any> {
-        return this.file.tags();
-    }
-
-}
-
-interface ParseSaveFileOptions extends Parse.FullOptions {
-    progress: (progressValue: any, loaded: any, total: any, {type}: any) => any;
 }

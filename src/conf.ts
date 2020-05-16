@@ -28,21 +28,38 @@ export class BFastConfig {
         }
     };
 
-    functionsURL(path: string, appName: string) {
+    getMasterHeaders(appName: string): { [key: string]: any } {
+        return {
+            'Content-Type': 'application/json',
+            'X-Parse-Application-Id': this.credentials[appName].applicationId,
+            'X-Parse-Master-Key': this.credentials[appName].appPassword,
+        }
+    };
+
+    functionsURL(path: string, appName: string): string {
         if (path.startsWith('http')) {
             return path;
         }
         if (this.credentials[appName].functionsURL && this.credentials[appName].functionsURL?.startsWith('http')) {
-            return this.credentials[appName].functionsURL;
+            return this.credentials[appName].functionsURL as string;
         }
         return `https://${this.credentials[appName].projectId}-faas.bfast.fahamutech.com${path}`
     };
 
-    databaseURL(appName: string) {
+    databaseURL(appName: string, suffix?: string): string {
         if (this.credentials[appName].databaseURL && this.credentials[appName].databaseURL?.startsWith('http')) {
-            return this.credentials[appName].databaseURL;
+            if (suffix) {
+                return this.credentials[appName].databaseURL + suffix;
+            } else {
+                return this.credentials[appName].databaseURL as string;
+            }
         }
-        return `https://${this.credentials[appName].projectId}-daas.bfast.fahamutech.com`;
+        if (suffix) {
+            return `https://${this.credentials[appName].projectId}-daas.bfast.fahamutech.com${suffix}`;
+        } else {
+            return `https://${this.credentials[appName].projectId}-daas.bfast.fahamutech.com`;
+        }
+
     };
 
 }
