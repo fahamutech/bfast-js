@@ -77,12 +77,12 @@ export class CacheController implements CacheAdapter {
         return date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
     }
 
-    async remove(identifier: string): Promise<boolean> {
+    async remove(identifier: string, force = false): Promise<boolean> {
         if (device.isNode) {
             return true;
         }
         const dayToLeave = await this._getTTLStore()?.getItem<number>(identifier);
-        if (dayToLeave && dayToLeave < new Date().getTime()) {
+        if (force || (dayToLeave && dayToLeave < new Date().getTime())) {
             await this._getTTLStore()?.removeItem(identifier);
             await this._getCacheDatabase()?.removeItem(identifier);
             return true;
