@@ -1,7 +1,9 @@
 specs
 /specs
 tsconfig.json
+tsconfig-node.json
 webpack.config.js
+webpack-node.config.js
 package-lock.json
 node_modules
 .idea
@@ -9,3 +11,6 @@ node_modules
 *.tgz
 *.zip
 .github
+node-config
+/dist/node
+/src

@@ -1,56 +1,73 @@
-import {CacheAdapter, CacheOptions} from "../core/CacheAdapter";
-import * as localForage from 'localforage'
+import {CacheAdapter} from "../adapters/CacheAdapter";
+import * as localForage from 'localforage';
 import {BFastConfig} from "../conf";
+import {CacheOptions} from "../adapters/QueryAdapter";
+// @ts-ignore
+import * as device from "browser-or-node";
 
 export class CacheController implements CacheAdapter {
-    cacheName: string;
+    cacheDatabaseName: string;
 
-    constructor(cacheName: string,
-                private readonly  storeName?: string) {
-        this.cacheName = cacheName;
+    constructor(private readonly appName: string,
+                cacheDatabaseName: string,
+                private readonly  cacheCollectionName: string) {
+        this.cacheDatabaseName = cacheDatabaseName;
     }
 
-    private _getStore(): LocalForage {
+    private _getCacheDatabase(): LocalForage | undefined {
+        if (device.isNode) {
+            return undefined;
+        }
+        let collectionNameFromCredential = BFastConfig.getInstance().getAppCredential(this.appName).cache?.cacheCollectionName;
+        if (collectionNameFromCredential) {
+            collectionNameFromCredential = BFastConfig.getInstance().getCacheCollectionName(collectionNameFromCredential, this.appName);
+        }
         return localForage.createInstance({
-            storeName: this.storeName ? this.storeName : BFastConfig.getInstance().cache?.cacheStoreName,
-            name: this.cacheName
+            storeName: collectionNameFromCredential ? collectionNameFromCredential : this.cacheCollectionName,
+            name: this.cacheDatabaseName
         });
     }
 
-    private _getTTLStore(): LocalForage {
+    private _getTTLStore(): LocalForage | undefined {
+        if (device.isNode) {
+            return undefined;
+        }
+        let ttlStoreFromCredential = BFastConfig.getInstance().getAppCredential(this.appName).cache?.cacheCollectionTTLName;
+        if (ttlStoreFromCredential) {
+            BFastConfig.getInstance().getCacheCollectionName(ttlStoreFromCredential, this.appName);
+        }
         return localForage.createInstance({
-            storeName: BFastConfig.getInstance().cache?.cacheStoreTTLName,
-            name: this.cacheName
+            storeName: ttlStoreFromCredential ? ttlStoreFromCredential : 'cache_ttl_' + this.appName,
+            name: this.cacheDatabaseName
         });
     }
 
     async clearAll(): Promise<boolean> {
-        try {
-            await this._getStore().clear();
-            await this._getTTLStore().clear();
+        if (device.isNode) {
             return true;
-        } catch (e) {
-            throw e;
         }
+        await this._getCacheDatabase()?.clear();
+        await this._getTTLStore()?.clear();
+        return true;
     }
 
-    async get<T>(identifier: string): Promise<T> {
-        try {
-            await this.remove(identifier);
-            return await this._getStore().getItem<T>(identifier);
-        } catch (e) {
-            throw e;
+    async get<T extends any>(identifier: string): Promise<T> {
+        if (device.isNode) {
+            // @ts-ignore
+            return null;
         }
+        await this.remove(identifier);
+        return await this._getCacheDatabase()?.getItem<T>(identifier) as any;
     }
 
     async set<T>(identifier: string, data: T, options?: { dtl: number }): Promise<T> {
-        try {
-            const response = await this._getStore().setItem<T>(identifier, data);
-            await this._getTTLStore().setItem(identifier, CacheController._getDayToLeave(options ? options.dtl : 7));
-            return response;
-        } catch (e) {
-            throw e;
+        if (device.isNode) {
+            // @ts-ignore
+            return null;
         }
+        const response = await this._getCacheDatabase()?.setItem<T>(identifier, data);
+        await this._getTTLStore()?.setItem(identifier, CacheController._getDayToLeave(options ? options.dtl : 7));
+        return response as any;
     }
 
     private static _getDayToLeave(days: number) {
@@ -59,25 +76,27 @@ export class CacheController implements CacheAdapter {
     }
 
     async remove(identifier: string): Promise<boolean> {
-        try {
-            const dayToLeave = await this._getTTLStore().getItem<number>(identifier);
-            if (dayToLeave && dayToLeave < new Date().getTime()) {
-                await this._getTTLStore().removeItem(identifier);
-                await this._getStore().removeItem(identifier);
-                return true;
-            } else {
-                return false;
-            }
-        } catch (e) {
-            throw e;
+        if (device.isNode) {
+            return true;
+        }
+        const dayToLeave = await this._getTTLStore()?.getItem<number>(identifier);
+        if (dayToLeave && dayToLeave < new Date().getTime()) {
+            await this._getTTLStore()?.removeItem(identifier);
+            await this._getCacheDatabase()?.removeItem(identifier);
+            return true;
+        } else {
+            return false;
         }
     }
 
     cacheEnabled(options?: CacheOptions): boolean {
-        if (options) {
+        if (device.isNode) {
+            return false;
+        }
+        if (options && options.cacheEnable !== undefined && options.cacheEnable !== null) {
             return options.cacheEnable;
         } else {
-            return BFastConfig.getInstance().cache?.enable === true;
+            return BFastConfig.getInstance().getAppCredential(this.appName).cache?.enable === true;
         }
     }
 

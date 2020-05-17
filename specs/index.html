@@ -5,7 +5,30 @@
     <title>Title</title>
 </head>
 <body>
-
+<div>
+    <h1>Upload File</h1>
+    <input type="file" onchange="handleFile(event)">
+</div>
 <script src="../dist/bfast_js.js"></script>
+<script>
+    function handleFile($event) {
+        const fileReader = new FileReader();
+        fileReader.onload = ev => {
+            window.BFast.init({
+                applicationId: 'fpay',
+                projectId: 'fahamupay'
+            });
+            const base64 = ev.target.result;
+            window.BFast.storage().save({
+                fileName: $event.target.files[0].name,
+                data: {
+                    base64: base64
+                },
+                fileType: $event.target.files[0].type
+            }).catch(console.log).then(console.log)
+        }
+        fileReader.readAsDataURL($event.target.files[0]);
+    }
+</script>
 </body>
 </html>

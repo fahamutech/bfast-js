@@ -6,3 +6,6 @@ dist
 .vscode
 /bfastjs-1.1.7.tgz
 *.tgz
+node-config/node_modules
+**/node_modules/**
+node-config/dist

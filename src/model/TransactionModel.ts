@@ -1,4 +1,4 @@
-import {DomainModel} from "../core/DomainAdapter";
+import {DomainModel} from "../adapters/DomainAdapter";
 
 export interface TransactionModel {
     method: 'POST' | 'PUT' | 'DELETE';

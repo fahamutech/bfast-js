@@ -1,277 +1,223 @@
-import {Query} from 'parse'
-import {DomainModel} from "../core/DomainAdapter";
-import {AggregationOptions, CacheAdapter, FindOptionsWithCacheOptions} from "../core/CacheAdapter";
+import {DomainModel} from "../adapters/DomainAdapter";
+import {CacheAdapter} from "../adapters/CacheAdapter";
+import {AggregationOptions, CacheOptions, FindOptionsWithCacheOptions, QueryAdapter} from "../adapters/QueryAdapter";
+import {RestAdapter, RestResponse} from "../adapters/RestAdapter";
+import {BFastConfig} from "../conf";
+import {QueryModel} from "../model/QueryModel";
 
-export class QueryController<T extends DomainModel> extends Query {
+export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
 
-    constructor(collectionName: string, private readonly cacheAdapter: CacheAdapter) {
-        super(collectionName);
+    constructor(private readonly collectionName: string,
+                private readonly cacheAdapter: CacheAdapter,
+                private readonly restAdapter: RestAdapter,
+                private readonly appName: string) {
+        this.collectionName = collectionName;
     }
 
-    addAscending<K extends any>(key: K[] | K): this {
-        return super.addAscending(key);
-    }
-
-    addDescending<K extends any>(key: K[] | K): this {
-        return super.addDescending(key);
-    }
-
-    ascending<K extends any>(key: K[] | K): this {
-        return super.ascending(key);
-    }
-
-    aggregate<V = any>(pipeline: AggregationOptions | AggregationOptions[]): Promise<V> {
-        return super.aggregate(pipeline);
-    }
-
-    containedBy<K extends any>(key: K, values: Array<T[K]>): this {
-        return super.containedBy(key, values);
-    }
-
-    containedIn<K extends any>(key: K, values: Array<T[K]>): this {
-        return super.containedIn(key, values);
-    }
-
-    contains<K extends any>(key: K, substring: string): this {
-        return super.contains(key, substring);
-    }
-
-    containsAll<K extends any>(key: K, values: any[]): this {
-        return super.containsAll(key, values);
-    }
-
-    containsAllStartingWith<K extends any>(key: K, values: any[]): this {
-        return super.containsAllStartingWith(key, values);
+    async aggregate<V = any>(pipeline: AggregationOptions | AggregationOptions[], options: CacheOptions): Promise<V> {
+        let pipelineToStrings = JSON.stringify(pipeline);
+        pipelineToStrings = pipelineToStrings.length > 7 ? pipelineToStrings.substring(0, 7) : pipelineToStrings;
+        const identifier = `aggregate_${this.collectionName}_${pipelineToStrings ? pipelineToStrings : ''}`;
+        const aggregateReq = (): Promise<RestResponse> => {
+            return this.restAdapter.get(
+                `${BFastConfig.getInstance().databaseURL(this.appName)}/aggregate/${this.collectionName}`,
+                {
+                    headers: BFastConfig.getInstance().getMasterHeaders(this.appName),
+                    params: pipeline
+                }
+            );
+        }
+        if (this.cacheAdapter.cacheEnabled(options)) {
+            const cacheResponse = await this.cacheAdapter.get<V>(identifier);
+            if (cacheResponse) {
+                aggregateReq().then(value => {
+                    const data = value.data.results
+                    if (options && options.freshDataCallback) {
+                        options.freshDataCallback({identifier, data});
+                    }
+                    return this.cacheAdapter
+                        .set<T>(identifier, data);
+                }).catch();
+                return cacheResponse;
+            }
+        }
+        const response = await aggregateReq();
+        this.cacheAdapter.set<V>(identifier, response.data.results).catch();
+        return response.data.results;
     }
 
     async count(options?: FindOptionsWithCacheOptions): Promise<number> {
-        try {
-            const identifier = `count_${this.className}_${JSON.stringify(this.toJSON())}`;
-            if (this.cacheAdapter.cacheEnabled(options)) {
-                const cacheResponse = await this.cacheAdapter.get<number>(identifier);
-                if (cacheResponse) {
-                    super.count(options).then(value => {
-                        const data = JSON.parse(JSON.stringify(value));
-                        if (options && options.freshData) {
-                            options.freshData({identifier, data});
-                        }
-                        return this.cacheAdapter
-                            .set<number>(identifier, data);
-                    }).catch();
-                    return cacheResponse;
+        const countReq = async (): Promise<RestResponse> => {
+            return this.restAdapter.get(
+                `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}`,
+                {
+                    headers: BFastConfig.getInstance().getHeaders(this.appName),
+                    params: {
+                        count: 1,
+                        limit: 0
+                    }
                 }
-            }
-            const response = JSON.parse(JSON.stringify(await super.count(options)));
-            this.cacheAdapter.set<number>(identifier, response).catch();
-            return response;
-        } catch (e) {
-            throw e;
+            );
         }
-    }
-
-    descending<K extends any>(key: K[] | K): this {
-        return super.descending(key);
-    }
-
-    doesNotExist<K extends any>(key: K): this {
-        return super.doesNotExist(key);
-    }
-
-    hint(value: string | object): this {
-        return super.hint(value);
-    }
-
-    explain(explain: boolean): this {
-        return super.explain(explain);
-    }
-
-    endsWith<K extends any>(key: K, suffix: string): this {
-        return super.endsWith(key, suffix);
-    }
-
-    exists<K extends any>(key: K): this {
-        return super.exists(key);
-    }
-
-    cancel(): this {
-        return super.cancel();
-    }
-
-    fullText<K extends any>(key: K, value: string, options?: Parse.Query.FullTextOptions): this {
-        return super.fullText(key, value, options);
+        const identifier = `count_${this.collectionName}_`;
+        if (this.cacheAdapter.cacheEnabled(options)) {
+            const cacheResponse = await this.cacheAdapter.get<number>(identifier);
+            if (cacheResponse) {
+                countReq()
+                    .then(value => {
+                        const data = value.data.count;
+                        if (options && options.freshDataCallback) {
+                            options.freshDataCallback({identifier, data});
+                        }
+                        return this.cacheAdapter.set<number>(identifier, data);
+                    })
+                    .catch();
+                return cacheResponse;
+            }
+        }
+        const response = await countReq();
+        this.cacheAdapter.set<number>(identifier, response.data.count).catch();
+        return response.data.count;
     }
 
     async get(objectId: string, options?: FindOptionsWithCacheOptions): Promise<any> {
         try {
-            const identifier = objectId;
+            const identifier = this.collectionName + '_' + objectId;
+            const getReq = async (): Promise<RestResponse> => {
+                return this.restAdapter.get(
+                    `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}/${identifier}`,
+                    {
+                        headers: BFastConfig.getInstance().getHeaders(this.appName),
+                    }
+                );
+            }
             if (this.cacheAdapter.cacheEnabled(options)) {
                 const cacheResponse = await this.cacheAdapter.get<T>(identifier);
                 if (cacheResponse) {
-                    super.get(objectId, options).then(value => {
-                        const data = JSON.parse(JSON.stringify(value));
-                        if (options && options.freshData) {
-                            options.freshData({identifier, data});
+                    getReq().then(value => {
+                        const data = value.data;
+                        if (options && options.freshDataCallback) {
+                            options.freshDataCallback({identifier, data});
                         }
-                        return this.cacheAdapter
-                            .set<T>(identifier, data);
+                        return this.cacheAdapter.set<T>(identifier, data);
                     }).catch();
                     return cacheResponse;
                 }
             }
-            const response = JSON.parse(JSON.stringify(await super.get(objectId, options)));
-            this.cacheAdapter.set<T>(identifier, response).catch();
-            return response;
+            const response = await getReq();
+            this.cacheAdapter.set<T>(identifier, response.data).catch();
+            return response.data;
         } catch (e) {
             throw e;
         }
     }
 
-    greaterThan<K extends any>(key: K, value: T[K]): this {
-        return super.greaterThan(key, value);
-    }
-
-    include<K extends any>(key: K[] | K): this {
-        return super.include(key);
-    }
-
-    lessThan<K extends any>(key: K, value: T[K]): this {
-        return super.lessThan(key, value);
-    }
-
-    lessThanOrEqualTo<K extends any>(key: K, value: T[K]): this {
-        return super.lessThanOrEqualTo(key, value);
-    }
-
-    limit(n: number): QueryController<T> {
-        // @ts-ignore
-        return super.limit(n);
-    }
-
-    matches<K extends any>(key: K, regex: RegExp, modifiers?: string): this {
-        return super.matches(key, regex, modifiers);
-    }
-
-    notContainedIn<K extends any>(key: K, values: Array<T[K]>): this {
-        return super.notContainedIn(key, values);
-    }
-
-    notEqualTo<K extends any>(key: K, value: T[K]): this {
-        return super.notEqualTo(key, value);
-    }
-
-    polygonContains<K extends any>(key: K, point: Parse.GeoPoint): this {
-        return super.polygonContains(key, point);
-    }
-
-    select<K extends any>(...keys: any[]): this {
-        return super.select(...keys);
-    }
-
-    skip(n: number): QueryController<T> {
-        // @ts-ignore
-        return super.skip(n);
-    }
-
-    sortByTextScore(): this {
-        return super.sortByTextScore();
-    }
-
-    startsWith<K extends any>(key: K, prefix: string): this {
-        return super.startsWith(key, prefix);
-    }
-
-    subscribe(): Promise<Parse.LiveQuerySubscription> {
-        return super.subscribe();
-    }
-
-    toJSON(): any {
-        return super.toJSON();
-    }
-
-    withJSON(json: any): this {
-        return super.withJSON(json);
-    }
-
-    withinGeoBox<K extends any>(key: K, southwest: Parse.GeoPoint, northeast: Parse.GeoPoint): this {
-        return super.withinGeoBox(key, southwest, northeast);
-    }
-
-    withinKilometers<K extends any>(key: K, point: Parse.GeoPoint, maxDistance: number): this {
-        return super.withinKilometers(key, point, maxDistance);
-    }
-
-    withinMiles<K extends any>(key: K, point: Parse.GeoPoint, maxDistance: number): this {
-        return super.withinMiles(key, point, maxDistance);
-    }
-
-    withinPolygon<K extends any>(key: K, points: number[][]): this {
-        return super.withinPolygon(key, points);
-    }
-
-    withinRadians<K extends any>(key: K, point: Parse.GeoPoint, maxDistance: number): this {
-        return super.withinRadians(key, point, maxDistance);
-    }
-
-    equalTo<K extends any>(key: K, value: any): this {
-        return super.equalTo(key, value);
-    }
-
-    near<K extends any>(key: K, point: Parse.GeoPoint): this {
-        return super.near(key, point);
-    }
-
-    greaterThanOrEqualTo<K extends any>(key: K, value: T[K]): this {
-        return super.greaterThanOrEqualTo(key, value);
-    }
-
-    async distinct<T>(key: any, options?: FindOptionsWithCacheOptions): Promise<T> {
-        try {
-            const identifier = `distinct_${this.className}_${JSON.stringify(this.toJSON())}`;
-            if (this.cacheAdapter.cacheEnabled(options)) {
-                const cacheResponse = await this.cacheAdapter.get<T>(identifier);
-                if (cacheResponse) {
-                    super.distinct(key).then(value => {
-                        const data = JSON.parse(JSON.stringify(value));
-                        if (options && options.freshData) {
-                            options.freshData({identifier, data});
-                        }
-                        return this.cacheAdapter
-                            .set<T>(identifier, data);
-                    }).catch();
-                    return cacheResponse;
+    async distinct<T>(key: any, queryModel: QueryModel<T>, options?: FindOptionsWithCacheOptions): Promise<T> {
+        const identifier = `distinct_${this.collectionName}_${JSON.stringify(queryModel && queryModel.filter ? queryModel.filter : {})}`;
+        const distinctReq = (): Promise<RestResponse> => {
+            return this.restAdapter.get(
+                `${BFastConfig.getInstance().databaseURL(this.appName)}/aggregate/${this.collectionName}`,
+                {
+                    headers: BFastConfig.getInstance().getMasterHeaders(this.appName),
+                    params: {
+                        limit: (queryModel && queryModel.size) ? queryModel.size : 100,
+                        skip: (queryModel && queryModel.skip) ? queryModel.skip : 0,
+                        order: (queryModel && queryModel.orderBy) ? queryModel.orderBy?.join(',') : '-createdAt',
+                        keys: (queryModel && queryModel.keys) ? queryModel.keys?.join(',') : null,
+                        where: (queryModel && queryModel.filter) ? queryModel.filter : {},
+                        distinct: key
+                    }
                 }
-            }
-            const response = JSON.parse(JSON.stringify(await super.distinct(key)));
-            this.cacheAdapter.set<T>(identifier, response).catch();
-            return response;
-        } catch (e) {
-            throw e;
+            );
         }
+        if (this.cacheAdapter.cacheEnabled(options)) {
+            const cacheResponse = await this.cacheAdapter.get<T>(identifier);
+            if (cacheResponse) {
+                distinctReq().then(value => {
+                    const data = value.data.results
+                    if (options && options.freshDataCallback) {
+                        options.freshDataCallback({identifier, data});
+                    }
+                    return this.cacheAdapter
+                        .set<T>(identifier, data);
+                }).catch();
+                return cacheResponse;
+            }
+        }
+        const response = await distinctReq();
+        this.cacheAdapter.set<T>(identifier, response.data.results).catch();
+        return response.data.results;
     }
 
-    async find<T>(options?: FindOptionsWithCacheOptions): Promise<T[]> {
-        try {
-            const identifier = `find_${this.className}_${JSON.stringify(this.toJSON())}`;
-            if (this.cacheAdapter.cacheEnabled(options)) {
-                const cacheResponse = await this.cacheAdapter.get<T[]>(identifier);
-                if (cacheResponse) {
-                    super.find(options).then(value => {
-                        const data = JSON.parse(JSON.stringify(value));
-                        if (options && options.freshData) {
-                            options.freshData({identifier, data});
-                        }
-                        return this.cacheAdapter
-                            .set<T[]>(identifier, data);
-                    }).catch();
-                    return cacheResponse;
+    async find<T>(queryModel: QueryModel<T>, options?: FindOptionsWithCacheOptions): Promise<T[]> {
+        const identifier = `find_${this.collectionName}_${JSON.stringify(queryModel  && queryModel.filter ? queryModel.filter : {})}`;
+        const findReq = (): Promise<RestResponse> => {
+            return this.restAdapter.get(
+                `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}`,
+                {
+                    headers: BFastConfig.getInstance().getHeaders(this.appName),
+                    params: {
+                        limit: (queryModel && queryModel.size) ? queryModel.size : 100,
+                        skip: (queryModel && queryModel.skip) ? queryModel.skip : 0,
+                        order: (queryModel && queryModel.orderBy) ? queryModel.orderBy?.join(',') : '-createdAt',
+                        keys: (queryModel && queryModel.keys) ? queryModel.keys?.join(',') : null,
+                        where: (queryModel && queryModel.filter) ? queryModel.filter : {}
+                    }
                 }
-            }
-            const response = JSON.parse(JSON.stringify(await super.find(options)));
-            this.cacheAdapter.set<T[]>(identifier, response).catch();
-            return response;
-        } catch (e) {
-            throw e;
+            );
         }
+        if (this.cacheAdapter.cacheEnabled(options)) {
+            const cacheResponse = await this.cacheAdapter.get<T[]>(identifier);
+            if (cacheResponse) {
+                findReq().then(value => {
+                    const data = value.data.results;
+                    if (options && options.freshDataCallback) {
+                        options.freshDataCallback({identifier, data});
+                    }
+                    return this.cacheAdapter.set<T[]>(identifier, data);
+                }).catch();
+                return cacheResponse;
+            }
+        }
+        const response = await findReq();
+        this.cacheAdapter.set<T[]>(identifier, response.data.results).catch();
+        return response.data.results;
+    }
+
+    async first<T>(queryModel: QueryModel<T>, options?: FindOptionsWithCacheOptions): Promise<T> {
+        const identifier = `first_${this.collectionName}_${JSON.stringify(queryModel  && queryModel.filter ? queryModel.filter : {})}`;
+        const firstReq = (): Promise<RestResponse> => {
+            return this.restAdapter.get(
+                `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}`,
+                {
+                    headers: BFastConfig.getInstance().getHeaders(this.appName),
+                    params: {
+                        limit: 1,
+                        skip: 0,
+                        order: (queryModel && queryModel.orderBy) ? queryModel.orderBy?.join(',') : '-createdAt',
+                        keys: (queryModel && queryModel.keys) ? queryModel.keys?.join(',') : null,
+                        where: (queryModel && queryModel.filter) ? queryModel.filter : {}
+                    }
+                }
+            );
+        }
+        if (this.cacheAdapter.cacheEnabled(options)) {
+            const cacheResponse = await this.cacheAdapter.get<T>(identifier);
+            if (cacheResponse) {
+                firstReq().then(value => {
+                    const data = value.data.results;
+                    if (options && options.freshDataCallback) {
+                        options.freshDataCallback({identifier, data: data.length === 1 ? data[0] : null});
+                    }
+                    return this.cacheAdapter.set<T>(identifier, data.length === 1 ? data[0] : null);
+                }).catch();
+                return cacheResponse;
+            }
+        }
+        const response = await firstReq();
+        const data = response.data.results;
+        this.cacheAdapter.set<T>(identifier, data.length === 1 ? data[0] : null).catch();
+        return data.length === 1 ? data[0] : null;
     }
 
 }
