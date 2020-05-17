@@ -123,7 +123,9 @@ export class AuthController implements AuthAdapter {
         });
         delete userData.password;
         Object.assign(userData, response.data);
-        await this.cacheAdapter.set<T>('_current_user_', userData);
+        await this.cacheAdapter.set<T>('_current_user_', userData, {
+            dtl: 30
+        });
         return userData;
     }
 
@@ -131,13 +133,17 @@ export class AuthController implements AuthAdapter {
         const user = await this.currentUser();
         if (user && user.sessionToken) {
             const postHeaders = this._geHeadersWithToken(user, options);
-            const response = await this.restApi.put<UserModel>(BFastConfig.getInstance().databaseURL(this.appName, '/users/' + user.objectId), userModel, {
-                headers: postHeaders
-            });
+            const response = await this.restApi.put<UserModel>(
+                BFastConfig.getInstance().databaseURL(this.appName, '/users/' + user.objectId),
+                userModel, {
+                    headers: postHeaders
+                });
             delete userModel.password;
             Object.assign(user, response.data);
             Object.assign(user, userModel);
-            await this.cacheAdapter.set<T>('_current_user_', user as T);
+            await this.cacheAdapter.set<T>('_current_user_', user as T, {
+                dtl: 30
+            });
             return user;
         } else {
             throw new Error('Not current user in your device');
@@ -158,5 +164,12 @@ export class AuthController implements AuthAdapter {
             'X-Parse-Application-Id': BFastConfig.getInstance().getAppCredential(this.appName).applicationId
         });
         return postHeader;
+    }
+
+    async setCurrentUser<T extends UserModel>(user: T): Promise<T | null> {
+        await this.cacheAdapter.set<T>('_current_user_', user, {
+            dtl: 30
+        });
+        return user;
     }
 }

@@ -13,6 +13,7 @@ export interface AuthAdapter {
     getSessionToken(): Promise<string>;
 
     currentUser<T extends UserModel>(): Promise<T | null>;
+    setCurrentUser<T extends UserModel>(user: T): Promise<T | null>;
 
     signUp<T extends UserModel>(username: string, password: string, attrs: UserModel, options?: AuthOptions): Promise<T>;
 
