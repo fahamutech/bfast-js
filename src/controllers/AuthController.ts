@@ -123,7 +123,8 @@ export class AuthController implements AuthAdapter {
         });
         delete userData.password;
         Object.assign(userData, response.data);
-        return await this.cacheAdapter.set<T>('_current_user_', userData);
+        await this.cacheAdapter.set<T>('_current_user_', userData);
+        return userData;
     }
 
     async updateUser<T extends UserModel>(userModel: UserModel, options?: AuthOptions): Promise<any> {
@@ -136,7 +137,8 @@ export class AuthController implements AuthAdapter {
             delete userModel.password;
             Object.assign(user, response.data);
             Object.assign(user, userModel);
-            return await this.cacheAdapter.set<T>('_current_user_', user as T);
+            await this.cacheAdapter.set<T>('_current_user_', user as T);
+            return user;
         } else {
             throw new Error('Not current user in your device');
         }
