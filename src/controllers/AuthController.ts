@@ -82,7 +82,7 @@ export class AuthController implements AuthAdapter {
         await this.cacheAdapter.set('_current_user_', null);
         if (user && user.sessionToken) {
             const postHeader = this._geHeadersWithToken(user, options);
-            this.restApi.post(BFastConfig.getInstance().databaseURL(this.appName, '/logout'), {}, {
+            this.restApi.post(BFastConfig.getInstance().databaseURL(this.appName, '/logOut'), {}, {
                 headers: postHeader
             }).catch(console.warn);
         }
@@ -144,7 +144,7 @@ export class AuthController implements AuthAdapter {
         }
     }
 
-    private _geHeadersWithToken(user: UserModel, options?: AuthOptions) {
+    private _geHeadersWithToken(user: UserModel, options?: AuthOptions): object {
         const postHeader = {};
         if (options && options.useMasterKey) {
             Object.assign(postHeader, {
@@ -157,5 +157,6 @@ export class AuthController implements AuthAdapter {
         Object.assign(postHeader, {
             'X-Parse-Application-Id': BFastConfig.getInstance().getAppCredential(this.appName).applicationId
         });
+        return postHeader;
     }
 }
