@@ -1,16 +1,18 @@
 {
   "name": "bfastjs",
-  "version": "3.0.0-beta1",
+  "version": "3.0.0-beta2",
   "description": "javascript client sdk for bfast::cloud project",
-  "main": "./dist/web/bfast_js.js",
+  "main": "dist/bfast_js.js",
   "maintainers": [
     "Fahamu Tech"
   ],
-  "types": "./dist/web/src/bfast_js.d.ts",
+  "types": "dist/src/bfast_js.d.ts",
   "scripts": {
     "test": "mocha ./specs",
     "build:web": "npx webpack --config webpack.config.js",
-    "build:node": "cd node-config && webpack --config webpack-node.config.js"
+    "publish:web": "npm run build:web && npm publish",
+    "build:node": "cd node-config && webpack --config webpack-node.config.js",
+    "publish:node": "npm run build:node && cd node-config && npm publish"
   },
   "author": "Fahamu Tech",
   "license": "ISC",

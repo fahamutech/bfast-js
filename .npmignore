@@ -12,4 +12,5 @@ node_modules
 *.zip
 .github
 node-config
-dist/node
+/dist/node
+/src
