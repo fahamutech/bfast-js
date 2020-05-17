@@ -9,7 +9,7 @@ export interface CacheAdapter {
 
     clearAll(): Promise<boolean>;
 
-    remove(identifier: string): Promise<boolean>;
+    remove(identifier: string, force?: boolean): Promise<boolean>;
 
     cacheEnabled(options?: RequestOptions): boolean;
 }
