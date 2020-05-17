@@ -2,8 +2,6 @@ import {UserModel} from "../model/UserModel";
 
 export interface AuthAdapter {
 
-    logIn(options?: AuthOptions): Promise<UserModel>;
-
     authenticated(): Promise<boolean>;
 
     getEmail(): Promise<string>;

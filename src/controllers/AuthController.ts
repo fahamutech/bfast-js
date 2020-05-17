@@ -65,7 +65,6 @@ export class AuthController implements AuthAdapter {
         }
     }
 
-    // @ts-ignore
     async logIn<T extends UserModel>(username: string, password: string, options?: AuthOptions): Promise<T> {
         const getHeader = {};
         if (options && options.useMasterKey) {
@@ -83,9 +82,10 @@ export class AuthController implements AuthAdapter {
             },
             headers: getHeader
         });
-        return await this.cacheAdapter.set<T>('_current_user_', response.data, {
+        await this.cacheAdapter.set<T>('_current_user_', response.data, {
             dtl: 30
         });
+        return response.data;
     }
 
     async logOut(): Promise<boolean> {
@@ -93,7 +93,7 @@ export class AuthController implements AuthAdapter {
         return true;
     }
 
-    async requestPasswordReset<T extends UserModel>(email: string,options?: AuthOptions): Promise<T> {
+    async requestPasswordReset<T extends UserModel>(email: string, options?: AuthOptions): Promise<T> {
         const user = await this.currentUser<T>();
         if (user && user.sessionToken) {
             const postHeader = {};
