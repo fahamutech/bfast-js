@@ -1,7 +1,7 @@
 import {CacheAdapter} from "../adapters/CacheAdapter";
 import * as localForage from 'localforage';
 import {BFastConfig} from "../conf";
-import {CacheOptions} from "../adapters/QueryAdapter";
+import {RequestOptions} from "../adapters/QueryAdapter";
 // @ts-ignore
 import * as device from "browser-or-node";
 
@@ -89,7 +89,7 @@ export class CacheController implements CacheAdapter {
         }
     }
 
-    cacheEnabled(options?: CacheOptions): boolean {
+    cacheEnabled(options?: RequestOptions): boolean {
         if (device.isNode) {
             return false;
         }

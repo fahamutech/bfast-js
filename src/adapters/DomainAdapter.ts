@@ -1,19 +1,19 @@
 import {QueryController} from "../controllers/QueryController";
-import {CacheOptions} from "./QueryAdapter";
+import {RequestOptions} from "./QueryAdapter";
 
 export interface DomainI<T extends DomainModel> {
 
-    save<T>(model: T, options?: CacheOptions): Promise<T>;
+    save<T>(model: T, options?: RequestOptions): Promise<T>;
 
-    getAll<T>(pagination?: { size: number, skip: number }, options?: CacheOptions): Promise<T[]>;
+    getAll<T>(pagination?: { size: number, skip: number }, options?: RequestOptions): Promise<T[]>;
 
-    get<T>(objectId: string, options?: CacheOptions): Promise<T>;
+    get<T>(objectId: string, options?: RequestOptions): Promise<T>;
 
-    query<T>(options?: CacheOptions): QueryController<T>;
+    query<T>(options?: RequestOptions): QueryController<T>;
 
-    update<T>(objectId: string, model: T, options?: CacheOptions): Promise<T>;
+    update<T>(objectId: string, model: T, options?: RequestOptions): Promise<T>;
 
-    delete<T>(objectId: string, options?: CacheOptions): Promise<T>;
+    delete<T>(objectId: string, options?: RequestOptions): Promise<T>;
 }
 
 export interface DomainModel {

@@ -1,4 +1,4 @@
-import {CacheOptions} from "./QueryAdapter";
+import {RequestOptions} from "./QueryAdapter";
 
 export interface CacheAdapter {
     cacheDatabaseName: string;
@@ -11,5 +11,5 @@ export interface CacheAdapter {
 
     remove(identifier: string): Promise<boolean>;
 
-    cacheEnabled(options?: CacheOptions): boolean;
+    cacheEnabled(options?: RequestOptions): boolean;
 }

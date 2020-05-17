@@ -1,17 +1,22 @@
 import {QueryModel} from "../model/QueryModel";
 
 export interface QueryAdapter<T> {
-    aggregate<V = any>(pipeline: AggregationOptions | AggregationOptions[], options: CacheOptions): Promise<V>;
+    aggregate<V = any>(pipeline: AggregationOptions | AggregationOptions[], options: RequestOptions): Promise<V>;
 
-    count(options?: FindOptionsWithCacheOptions): Promise<number>;
+    count(options?: RequestOptions): Promise<number>;
 
-    distinct<K>(key: K, queryModel: QueryModel<T>, options?: FindOptionsWithCacheOptions): Promise<T>;
+    distinct<K>(key: K, queryModel: QueryModel<T>, options?: RequestOptions): Promise<T>;
 
-    find(queryModel: QueryModel<T>, options?: FindOptionsWithCacheOptions): Promise<T[]>;
+    find(queryModel: QueryModel<T>, options?: RequestOptions): Promise<T[]>;
 
-    first(queryModel: QueryModel<T>, options?: FindOptionsWithCacheOptions): Promise<T | undefined>;
+    first(queryModel: QueryModel<T>, options?: RequestOptions): Promise<T | undefined>;
 
-    get(objectId: string, options?: FindOptionsWithCacheOptions): Promise<T>;
+    get(objectId: string, options?: RequestOptions): Promise<T>;
+}
+
+
+export interface RequestOptions extends CacheOptions{
+    useMasterKey?: boolean
 }
 
 export interface AggregationOptions {
@@ -24,10 +29,7 @@ export interface AggregationOptions {
     sort?: { [key: string]: 1 | -1 };
 }
 
-export interface FindOptionsWithCacheOptions extends CacheOptions {
-}
-
-export interface CacheOptions {
+interface CacheOptions {
     /**
      * enable cache in method level, override global option
      */
