@@ -1,20 +1,22 @@
 {
   "name": "bfastjs",
-  "version": "3.0.0-beta0",
+  "version": "3.0.0-beta1",
   "description": "javascript client sdk for bfast::cloud project",
-  "main": "./dist/bfast_js.js",
-  "types": "./dist/src/bfast_js.d.ts",
+  "main": "./dist/web/bfast_js.js",
+  "maintainers": [
+    "Fahamu Tech"
+  ],
+  "types": "./dist/web/src/bfast_js.d.ts",
   "scripts": {
-    "start": "webpack-dev-server --open",
     "test": "mocha ./specs",
-    "buildWeb": "npx webpack --config webpack.config.js",
-    "build": "npm run buildWeb",
-    "prepublishOnly": "npm run buildWeb"
+    "build:web": "npx webpack --config webpack.config.js",
+    "build:node": "cd node-config && webpack --config webpack-node.config.js"
   },
   "author": "Fahamu Tech",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.19.2",
+    "browser-or-node": "^1.2.1",
     "localforage": "^1.7.3",
     "socket.io-client": "^2.3.0"
   },

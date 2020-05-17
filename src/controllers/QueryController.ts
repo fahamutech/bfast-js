@@ -17,7 +17,7 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
     async aggregate<V = any>(pipeline: AggregationOptions | AggregationOptions[], options: CacheOptions): Promise<V> {
         let pipelineToStrings = JSON.stringify(pipeline);
         pipelineToStrings = pipelineToStrings.length > 7 ? pipelineToStrings.substring(0, 7) : pipelineToStrings;
-        const identifier = `aggregate_${this.collectionName}_${pipelineToStrings}`;
+        const identifier = `aggregate_${this.collectionName}_${pipelineToStrings ? pipelineToStrings : ''}`;
         const aggregateReq = (): Promise<RestResponse> => {
             return this.restAdapter.get(
                 `${BFastConfig.getInstance().databaseURL(this.appName)}/aggregate/${this.collectionName}`,
@@ -113,7 +113,7 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
     }
 
     async distinct<T>(key: any, queryModel: QueryModel<T>, options?: FindOptionsWithCacheOptions): Promise<T> {
-        const identifier = `distinct_${this.collectionName}_${JSON.stringify(queryModel ? queryModel.filter : {})}`;
+        const identifier = `distinct_${this.collectionName}_${JSON.stringify(queryModel && queryModel.filter ? queryModel.filter : {})}`;
         const distinctReq = (): Promise<RestResponse> => {
             return this.restAdapter.get(
                 `${BFastConfig.getInstance().databaseURL(this.appName)}/aggregate/${this.collectionName}`,
@@ -150,7 +150,7 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
     }
 
     async find<T>(queryModel: QueryModel<T>, options?: FindOptionsWithCacheOptions): Promise<T[]> {
-        const identifier = `find_${this.collectionName}_${JSON.stringify(queryModel ? queryModel.filter : {})}`;
+        const identifier = `find_${this.collectionName}_${JSON.stringify(queryModel  && queryModel.filter ? queryModel.filter : {})}`;
         const findReq = (): Promise<RestResponse> => {
             return this.restAdapter.get(
                 `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}`,
@@ -185,7 +185,7 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
     }
 
     async first<T>(queryModel: QueryModel<T>, options?: FindOptionsWithCacheOptions): Promise<T> {
-        const identifier = `first_${this.collectionName}_${JSON.stringify(queryModel ? queryModel.filter : {})}`;
+        const identifier = `first_${this.collectionName}_${JSON.stringify(queryModel  && queryModel.filter ? queryModel.filter : {})}`;
         const firstReq = (): Promise<RestResponse> => {
             return this.restAdapter.get(
                 `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}`,

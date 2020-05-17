@@ -1,8 +1,8 @@
 const path = require('path');
 
 const clientConfig = {
-    target: "web",
-    entry: './src/bfast_js.ts',
+    target: "node",
+    entry: '../src/bfast_js.ts',
     mode: 'production',
     module: {
         rules: [
@@ -11,11 +11,11 @@ const clientConfig = {
                 use: [
                     {
                         loader: 'ts-loader',
-                        options: {configFile: "tsconfig.json"}
+                        options: {configFile: "tsconfig-node.json"}
                     }
                 ],
                 exclude: /node_modules/,
-            },
+            }
         ]
     },
     resolve: {
@@ -24,7 +24,8 @@ const clientConfig = {
     output: {
         filename: 'bfast_js.js',
         path: path.resolve(__dirname, './dist'),
-        libraryTarget: "umd"
-    }
+        libraryTarget: "commonjs"
+    },
 };
+
 module.exports = [clientConfig];

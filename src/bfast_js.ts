@@ -12,6 +12,9 @@ import {RealTimeAdapter} from "./adapters/RealTimeAdapter";
 import {CacheController} from "./controllers/CacheController";
 import {CacheAdapter} from "./adapters/CacheAdapter";
 import {AxiosRestController} from "./controllers/AxiosRestController";
+// @ts-ignore
+import * as device from "browser-or-node";
+
 
 /**
  * Created and maintained by Fahamu Tech Ltd Company
@@ -27,7 +30,9 @@ export const BFast = {
      * @return AppCredentials of current init project
      */
     init(options: AppCredentials, appName: string = BFastConfig.DEFAULT_APP): AppCredentials {
-        options.cache
+        options.cache = {
+            enable: true
+        }
         return BFastConfig.getInstance(options, appName).getAppCredential(appName);
     },
 
@@ -93,7 +98,30 @@ export const BFast = {
              */
             event(eventName: string, onConnect?: Function, onDisconnect?: Function): RealTimeAdapter {
                 return new SocketController(eventName, appName, onConnect, onDisconnect);
-            }
+            },
+            onHttpRequest(path: string,
+                          handler: ((request: any, response: any, next?: any) => any)[]
+                              | ((request: any, response: any, next?: any) => any)) {
+                if (device.isNode) {
+                    return {
+                        path: path,
+                        onRequest: handler
+                    };
+                } else {
+                    throw 'Works In NodeJs Environment Only'
+                }
+            },
+            onEvent(eventName: string,
+                    handler: (data: { auth: any, payload: any, socket: any }) => any) {
+                if (device.isNode) {
+                    return {
+                        name: eventName,
+                        onEvent: handler
+                    };
+                } else {
+                    throw 'Works In NodeJs Environment Only'
+                }
+            },
         }
     },
 

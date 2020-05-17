@@ -94,6 +94,6 @@ export interface AppCredentials {
 
 export interface CacheConfigOptions {
     enable: boolean,
-    cacheCollectionName: string,
-    cacheCollectionTTLName: string,
+    cacheCollectionName?: string,
+    cacheCollectionTTLName?: string,
 }

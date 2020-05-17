@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "dist/",
+    "outDir": "node-config/dist/",
     "noImplicitAny": true,
     "module": "commonjs",
     "target": "es2015",
