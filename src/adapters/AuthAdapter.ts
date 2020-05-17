@@ -2,7 +2,7 @@ import {UserModel} from "../model/UserModel";
 
 export interface AuthAdapter {
 
-    authenticated(): Promise<boolean>;
+    authenticated<T extends UserModel>(): Promise<T>;
 
     getEmail(): Promise<string>;
 

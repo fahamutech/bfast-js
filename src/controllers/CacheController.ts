@@ -22,9 +22,11 @@ export class CacheController implements CacheAdapter {
         if (collectionNameFromCredential) {
             collectionNameFromCredential = BFastConfig.getInstance().getCacheCollectionName(collectionNameFromCredential, this.appName);
         }
+        const collectionName = collectionNameFromCredential ? collectionNameFromCredential : this.cacheCollectionName;
+        // collectionName = collectionName + '_' + BFastConfig.getInstance().getAppCredential(this.appName).projectId;
         return localForage.createInstance({
-            storeName: collectionNameFromCredential ? collectionNameFromCredential : this.cacheCollectionName,
-            name: this.cacheDatabaseName
+            storeName: collectionName,
+            name: this.cacheDatabaseName + '_' + BFastConfig.getInstance().getAppCredential(this.appName).projectId
         });
     }
 
@@ -38,7 +40,7 @@ export class CacheController implements CacheAdapter {
         }
         return localForage.createInstance({
             storeName: ttlStoreFromCredential ? ttlStoreFromCredential : 'cache_ttl_' + this.appName,
-            name: this.cacheDatabaseName
+            name: this.cacheDatabaseName + '_' + BFastConfig.getInstance().getAppCredential(this.appName).projectId
         });
     }
 

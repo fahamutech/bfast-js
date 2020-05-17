@@ -10,16 +10,16 @@ export class AuthController implements AuthAdapter {
                 private readonly appName: string) {
     }
 
-    async authenticated(options?: AuthOptions): Promise<boolean> {
+    async authenticated<T extends UserModel>(options?: AuthOptions): Promise<T> {
         const user = await this.currentUser();
         if (user && user.sessionToken) {
             const getHeaders = this._geHeadersWithToken(user, options);
-            const response = await this.restApi.get<UserModel>(BFastConfig.getInstance().databaseURL(this.appName, '/users/me'), {
+            const response = await this.restApi.get<T>(BFastConfig.getInstance().databaseURL(this.appName, '/users/me'), {
                 headers: getHeaders
             });
-            return !!response.data;
+            return response.data;
         } else {
-            return false;
+            return null as any;
         }
     }
 
