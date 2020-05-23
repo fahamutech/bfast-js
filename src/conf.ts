@@ -1,9 +1,25 @@
 export class BFastConfig {
     static DEFAULT_APP = 'DEFAULT';
-    static DEFAULT_DOMAINS_CACHE_DB_NAME = '__domain';
-    static DEFAULT_AUTH_CACHE_DB_NAME = '__auth';
-    static DEFAULT_CACHE_DB_NAME = '__';
-    static DEFAULT_CACHE_TTL_COLLECTION_NAME = '__cache_ttl';
+    private _DEFAULT_DOMAINS_CACHE_DB_NAME = '__domain';
+    get DEFAULT_DOMAINS_CACHE_DB_NAME() {
+        return this._DEFAULT_DOMAINS_CACHE_DB_NAME;
+    }
+
+    private _DEFAULT_AUTH_CACHE_DB_NAME = '__auth';
+    get DEFAULT_AUTH_CACHE_DB_NAME() {
+        return this._DEFAULT_AUTH_CACHE_DB_NAME;
+    }
+
+    private _DEFAULT_CACHE_DB_NAME = '__';
+    get DEFAULT_CACHE_DB_NAME() {
+        return this._DEFAULT_CACHE_DB_NAME;
+    }
+
+    private _DEFAULT_CACHE_TTL_COLLECTION_NAME = '__cache_ttl';
+    get DEFAULT_CACHE_TTL_COLLECTION_NAME() {
+        return this._DEFAULT_CACHE_TTL_COLLECTION_NAME;
+    }
+
     private credentials: { [key: string]: AppCredentials } = {};
 
     private constructor() {

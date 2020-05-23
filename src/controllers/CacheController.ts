@@ -27,7 +27,7 @@ export class CacheController implements CacheAdapter {
             return undefined;
         }
         return localForage.createInstance({
-            storeName: BFastConfig.DEFAULT_CACHE_TTL_COLLECTION_NAME,
+            storeName: BFastConfig.getInstance().DEFAULT_CACHE_TTL_COLLECTION_NAME,
             name: this.database
         });
     }

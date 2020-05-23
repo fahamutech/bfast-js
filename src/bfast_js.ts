@@ -57,7 +57,7 @@ export const BFast = {
                     name,
                     new CacheController(
                         appName,
-                        BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.DEFAULT_DOMAINS_CACHE_DB_NAME, appName),
+                        BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_CACHE_TTL_COLLECTION_NAME, appName),
                         BFastConfig.getInstance().getCacheCollectionName(name, appName),
                     ),
                     new AxiosRestController(),
@@ -189,7 +189,7 @@ export const BFast = {
         return new CacheController(
             appName,
             (options && options.database) ? BFastConfig.getInstance().getCacheDatabaseName(options.database, appName) :
-                BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.DEFAULT_CACHE_DB_NAME, appName),
+                BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_CACHE_DB_NAME, appName),
             options && options.collection ? BFastConfig.getInstance().getCacheCollectionName(options.collection, appName)
                 : BFastConfig.getInstance().getCacheCollectionName('cache', appName),
         );
@@ -200,7 +200,7 @@ export const BFast = {
             new AxiosRestController(),
             new CacheController(
                 appName,
-                BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.DEFAULT_AUTH_CACHE_DB_NAME, appName),
+                BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME, appName),
                 BFastConfig.getInstance().getCacheCollectionName(`cache`, appName)
             ),
             appName
