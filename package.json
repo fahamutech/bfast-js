@@ -1,6 +1,6 @@
 {
   "name": "bfastjs",
-  "version": "3.0.0-beta11",
+  "version": "3.0.0-beta13",
   "description": "javascript client sdk for bfast::cloud project",
   "main": "dist/bfast_js.js",
   "maintainers": [
@@ -23,6 +23,7 @@
     "socket.io-client": "^2.3.0"
   },
   "devDependencies": {
+    "@types/socket.io-client": "^1.4.33",
     "mocha": "^7.1.2",
     "ts-loader": "^7.0.4",
     "typescript": "^3.9.2",

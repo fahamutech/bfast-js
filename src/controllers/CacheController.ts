@@ -6,27 +6,19 @@ import {RequestOptions} from "../adapters/QueryAdapter";
 import * as device from "browser-or-node";
 
 export class CacheController implements CacheAdapter {
-    cacheDatabaseName: string;
 
     constructor(private readonly appName: string,
-                cacheDatabaseName: string,
-                private readonly  cacheCollectionName: string) {
-        this.cacheDatabaseName = cacheDatabaseName;
+                private readonly database: string,
+                private readonly  collection: string) {
     }
 
     private _getCacheDatabase(): LocalForage | undefined {
         if (device.isNode) {
             return undefined;
         }
-        let collectionNameFromCredential = BFastConfig.getInstance().getAppCredential(this.appName).cache?.cacheCollectionName;
-        if (collectionNameFromCredential) {
-            collectionNameFromCredential = BFastConfig.getInstance().getCacheCollectionName(collectionNameFromCredential, this.appName);
-        }
-        const collectionName = collectionNameFromCredential ? collectionNameFromCredential : this.cacheCollectionName;
-        // collectionName = collectionName + '_' + BFastConfig.getInstance().getAppCredential(this.appName).projectId;
         return localForage.createInstance({
-            storeName: collectionName,
-            name: this.cacheDatabaseName + '_' + BFastConfig.getInstance().getAppCredential(this.appName).projectId
+            storeName: this.collection,
+            name: this.database
         });
     }
 
@@ -34,13 +26,9 @@ export class CacheController implements CacheAdapter {
         if (device.isNode) {
             return undefined;
         }
-        let ttlStoreFromCredential = BFastConfig.getInstance().getAppCredential(this.appName).cache?.cacheCollectionTTLName;
-        if (ttlStoreFromCredential) {
-            BFastConfig.getInstance().getCacheCollectionName(ttlStoreFromCredential, this.appName);
-        }
         return localForage.createInstance({
-            storeName: ttlStoreFromCredential ? ttlStoreFromCredential : 'cache_ttl_' + this.appName,
-            name: this.cacheDatabaseName + '_' + BFastConfig.getInstance().getAppCredential(this.appName).projectId
+            storeName: BFastConfig.DEFAULT_CACHE_TTL_COLLECTION_NAME,
+            name: this.database
         });
     }
 

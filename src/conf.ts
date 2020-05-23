@@ -1,5 +1,9 @@
 export class BFastConfig {
     static DEFAULT_APP = 'DEFAULT';
+    static DEFAULT_DOMAINS_CACHE_DB_NAME = '__domain';
+    static DEFAULT_AUTH_CACHE_DB_NAME = '__auth';
+    static DEFAULT_CACHE_DB_NAME = '__';
+    static DEFAULT_CACHE_TTL_COLLECTION_NAME = '__cache_ttl';
     private credentials: { [key: string]: AppCredentials } = {};
 
     private constructor() {
@@ -19,7 +23,7 @@ export class BFastConfig {
 
     getAppCredential(appName = BFastConfig.DEFAULT_APP) {
         if (!this.credentials[appName]) {
-            throw new Error(`This ${appName} is not initialized`);
+            throw new Error(`The app -> ${appName} is not initialized`);
         }
         return this.credentials[appName];
     }
@@ -58,26 +62,26 @@ export class BFastConfig {
             }
         }
         if (suffix) {
-            return `https://${this.credentials[appName].projectId}-daas.bfast.fahamutech.com${suffix}`;
+            return `https://${this.getAppCredential(appName).projectId}-daas.bfast.fahamutech.com${suffix}`;
         } else {
-            return `https://${this.credentials[appName].projectId}-daas.bfast.fahamutech.com`;
+            return `https://${this.getAppCredential(appName).projectId}-daas.bfast.fahamutech.com`;
         }
 
     };
 
     getCacheDatabaseName(name: string, appName: string): string {
-        if (name) {
-            return `${name}_${appName}`;
+        if (name && name !== '') {
+            return `bfast/${this.getAppCredential(appName).projectId}/${appName}/${name}`;
         } else {
-            return `bfastLocalDatabase_${appName}`;
+            return `bfast/${this.getAppCredential(appName).projectId}/${appName}`;
         }
     }
 
     getCacheCollectionName(name: string, appName: string): string {
-        if (name) {
-            return `${name}_${appName}`;
+        if (name && name !== '') {
+            return `${name}/${appName}`;
         } else {
-            return `cache_${appName}`;
+            return `cache/${appName}`;
         }
     }
 
@@ -94,6 +98,6 @@ export interface AppCredentials {
 
 export interface CacheConfigOptions {
     enable: boolean,
-    cacheCollectionName?: string,
-    cacheCollectionTTLName?: string,
+    collection?: string,
+    ttlCollection?: string,
 }
