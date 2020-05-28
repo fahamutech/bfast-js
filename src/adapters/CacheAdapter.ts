@@ -5,6 +5,8 @@ export interface CacheAdapter {
 
     get<T>(identifier: string): Promise<T>;
 
+    keys(): Promise<string[] | undefined>;
+
     clearAll(): Promise<boolean>;
 
     remove(identifier: string, force?: boolean): Promise<boolean>;
