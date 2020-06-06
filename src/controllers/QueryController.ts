@@ -177,13 +177,15 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
         if (this.cacheAdapter.cacheEnabled(options)) {
             const cacheResponse = await this.cacheAdapter.get<T[]>(identifier);
             if (cacheResponse) {
-                findReq().then(value => {
-                    const data = value.data.results;
-                    if (options && options.freshDataCallback) {
-                        options.freshDataCallback({identifier, data});
-                    }
-                    return this.cacheAdapter.set<T[]>(identifier, data);
-                }).catch();
+                findReq()
+                    .then(value => {
+                        const data = value.data.results;
+                        if (options && options.freshDataCallback) {
+                            options.freshDataCallback({identifier, data});
+                        }
+                        return this.cacheAdapter.set<T[]>(identifier, data);
+                    })
+                    .catch();
                 return cacheResponse;
             }
         }

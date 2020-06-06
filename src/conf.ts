@@ -10,7 +10,7 @@ export class BFastConfig {
         return this._DEFAULT_AUTH_CACHE_DB_NAME;
     }
 
-    private _DEFAULT_CACHE_DB_NAME = '__';
+    private _DEFAULT_CACHE_DB_NAME = '__cache';
     get DEFAULT_CACHE_DB_NAME() {
         return this._DEFAULT_CACHE_DB_NAME;
     }

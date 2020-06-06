@@ -33,7 +33,7 @@ export class DomainController<T extends DomainModel> implements DomainI<T> {
 
     async getAll<T>(pagination?: { size: number, skip: number }, options?: RequestOptions): Promise<T[]> {
         try {
-            const number = pagination ? pagination.size : await this.query().count();
+            const number = pagination ? pagination.size : await this.query().count(options);
             const query = this.query();
             return await query.find({
                 skip: pagination ? pagination.skip : 0,
@@ -46,7 +46,7 @@ export class DomainController<T extends DomainModel> implements DomainI<T> {
 
     async get<T>(objectId: string, options?: RequestOptions): Promise<T> {
         try {
-            return await this.query<T>().get(objectId);
+            return await this.query<T>().get(objectId,options);
         } catch (e) {
             throw {message: DomainController._getErrorMessage(e)};
         }

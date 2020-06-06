@@ -42,6 +42,7 @@ export const BFast = {
     getConfig(): BFastConfig {
         return BFastConfig.getInstance();
     },
+
     /**
      *
      * @param appName other app/project name from DEFAULT to work with
@@ -50,15 +51,15 @@ export const BFast = {
         return {
             /**
              * a domain/table/collection to deal with
-             * @param name {string} domain name
+             * @param domainName {string} domain name
              */
-            domain<T>(name: string): DomainI<T> {
+            domain<T>(domainName: string): DomainI<T> {
                 return new DomainController<T>(
-                    name,
+                    domainName,
                     new CacheController(
                         appName,
-                        BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_CACHE_TTL_COLLECTION_NAME, appName),
-                        BFastConfig.getInstance().getCacheCollectionName(name, appName),
+                        BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_CACHE_DB_NAME, appName),
+                        BFastConfig.getInstance().getCacheCollectionName(domainName, appName),
                     ),
                     new AxiosRestController(),
                     appName
@@ -188,9 +189,11 @@ export const BFast = {
     cache(options?: { database: string, collection: string }, appName = BFastConfig.DEFAULT_APP): CacheAdapter {
         return new CacheController(
             appName,
-            (options && options.database) ? BFastConfig.getInstance().getCacheDatabaseName(options.database, appName) :
-                BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_CACHE_DB_NAME, appName),
-            options && options.collection ? BFastConfig.getInstance().getCacheCollectionName(options.collection, appName)
+            (options && options.database)
+                ? BFastConfig.getInstance().getCacheDatabaseName(options.database, appName)
+                : BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_CACHE_DB_NAME, appName),
+            (options && options.collection)
+                ? BFastConfig.getInstance().getCacheCollectionName(options.collection, appName)
                 : BFastConfig.getInstance().getCacheCollectionName('cache', appName),
         );
     },
