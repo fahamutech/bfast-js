@@ -1,5 +1,6 @@
 import {DeleteOperation} from "../model/DeleteOperation";
 import {UpdateOperation} from "../model/UpdateOperation";
+import {TransactionModel} from "../model/TransactionModel";
 
 export interface TransactionAdapter {
     create(domainName: string, data: Object): TransactionAdapter;
@@ -14,5 +15,9 @@ export interface TransactionAdapter {
 
     deleteMany(domainName: string, payLoads: { objectId: string, data?: DeleteOperation }[]): TransactionAdapter;
 
-    commit(options?: { before: () => Promise<void>, after?: () => Promise<void>, useMasterKey?: boolean }): Promise<any>;
+    commit(options?: {
+        before: (transactionRequests: TransactionModel[]) => Promise<TransactionModel[]>,
+        after?: () => Promise<void>,
+        useMasterKey?: boolean
+    }): Promise<any>;
 }
