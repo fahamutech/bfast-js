@@ -24,6 +24,9 @@ const clientConfig = {
     output: {
         filename: 'bfast_js.js',
         path: path.resolve(__dirname, './dist'),
+        library: '',
+        libraryExport: '',
+        globalObject: 'this',
         libraryTarget: "umd"
     }
 };

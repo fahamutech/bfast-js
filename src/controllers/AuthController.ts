@@ -10,27 +10,16 @@ export class AuthController implements AuthAdapter {
                 private readonly appName: string) {
     }
 
-    async authenticated(options?: AuthOptions): Promise<boolean> {
+    async authenticated<T extends UserModel>(options?: AuthOptions): Promise<T> {
         const user = await this.currentUser();
         if (user && user.sessionToken) {
-            const getHeaders = {};
-            if (options && options.useMasterKey) {
-                Object.assign(getHeaders, {
-                    'X-Parse-Master-Key': BFastConfig.getInstance().getAppCredential(this.appName).appPassword,
-                });
-            }
-            Object.assign(getHeaders, {
-                'X-Parse-Session-Token': user.sessionToken
-            });
-            Object.assign(getHeaders, {
-                'X-Parse-Application-Id': BFastConfig.getInstance().getAppCredential(this.appName).applicationId
-            });
-            const response = await this.restApi.get<UserModel>(BFastConfig.getInstance().databaseURL(this.appName, '/users/me'), {
+            const getHeaders = this._geHeadersWithToken(user, options);
+            const response = await this.restApi.get<T>(BFastConfig.getInstance().databaseURL(this.appName, '/users/me'), {
                 headers: getHeaders
             });
-            return !!response.data;
+            return response.data;
         } else {
-            return false;
+            return null as any;
         }
     }
 
@@ -65,7 +54,6 @@ export class AuthController implements AuthAdapter {
         }
     }
 
-    // @ts-ignore
     async logIn<T extends UserModel>(username: string, password: string, options?: AuthOptions): Promise<T> {
         const getHeader = {};
         if (options && options.useMasterKey) {
@@ -83,31 +71,28 @@ export class AuthController implements AuthAdapter {
             },
             headers: getHeader
         });
-        return await this.cacheAdapter.set<T>('_current_user_', response.data, {
+        await this.cacheAdapter.set<T>('_current_user_', response.data, {
             dtl: 30
         });
+        return response.data;
     }
 
-    async logOut(): Promise<boolean> {
+    async logOut(options?: AuthOptions): Promise<boolean> {
+        const user = await this.currentUser();
         await this.cacheAdapter.set('_current_user_', null);
+        if (user && user.sessionToken) {
+            const postHeader = this._geHeadersWithToken(user, options);
+            this.restApi.post(BFastConfig.getInstance().databaseURL(this.appName, '/logOut'), {}, {
+                headers: postHeader
+            }).catch(console.warn);
+        }
         return true;
     }
 
-    async requestPasswordReset<T extends UserModel>(email: string,options?: AuthOptions): Promise<T> {
+    async requestPasswordReset<T extends UserModel>(email: string, options?: AuthOptions): Promise<T> {
         const user = await this.currentUser<T>();
         if (user && user.sessionToken) {
-            const postHeader = {};
-            if (options && options.useMasterKey) {
-                Object.assign(postHeader, {
-                    'X-Parse-Master-Key': BFastConfig.getInstance().getAppCredential(this.appName).appPassword,
-                });
-            }
-            Object.assign(postHeader, {
-                'X-Parse-Session-Token': user.sessionToken
-            });
-            Object.assign(postHeader, {
-                'X-Parse-Application-Id': BFastConfig.getInstance().getAppCredential(this.appName).applicationId
-            });
+            const postHeader = this._geHeadersWithToken(user, options);
             const response = await this.restApi.post(BFastConfig.getInstance().databaseURL(this.appName, '/requestPasswordReset'), {
                 email: user.email ? user.email : email
             }, {
@@ -138,33 +123,53 @@ export class AuthController implements AuthAdapter {
         });
         delete userData.password;
         Object.assign(userData, response.data);
-        return await this.cacheAdapter.set<T>('_current_user_', userData);
+        await this.cacheAdapter.set<T>('_current_user_', userData, {
+            dtl: 30
+        });
+        return userData;
     }
 
     async updateUser<T extends UserModel>(userModel: UserModel, options?: AuthOptions): Promise<any> {
         const user = await this.currentUser();
         if (user && user.sessionToken) {
-            const postHeaders = {};
-            if (options && options.useMasterKey) {
-                Object.assign(postHeaders, {
-                    'X-Parse-Master-Key': BFastConfig.getInstance().getAppCredential(this.appName).appPassword,
+            const postHeaders = this._geHeadersWithToken(user, options);
+            const response = await this.restApi.put<UserModel>(
+                BFastConfig.getInstance().databaseURL(this.appName, '/users/' + user.objectId),
+                userModel, {
+                    headers: postHeaders
                 });
-            }
-            Object.assign(postHeaders, {
-                'X-Parse-Session-Token': user.sessionToken
-            });
-            Object.assign(postHeaders, {
-                'X-Parse-Application-Id': BFastConfig.getInstance().getAppCredential(this.appName).applicationId
-            });
-            const response = await this.restApi.put<UserModel>(BFastConfig.getInstance().databaseURL(this.appName, '/users/' + user.objectId), userModel, {
-                headers: postHeaders
-            });
             delete userModel.password;
             Object.assign(user, response.data);
             Object.assign(user, userModel);
-            return await this.cacheAdapter.set<T>('_current_user_', user as T);
+            await this.cacheAdapter.set<T>('_current_user_', user as T, {
+                dtl: 30
+            });
+            return user;
         } else {
             throw new Error('Not current user in your device');
         }
+    }
+
+    private _geHeadersWithToken(user: UserModel, options?: AuthOptions): object {
+        const postHeader = {};
+        if (options && options.useMasterKey) {
+            Object.assign(postHeader, {
+                'X-Parse-Master-Key': BFastConfig.getInstance().getAppCredential(this.appName).appPassword,
+            });
+        }
+        Object.assign(postHeader, {
+            'X-Parse-Session-Token': user.sessionToken
+        });
+        Object.assign(postHeader, {
+            'X-Parse-Application-Id': BFastConfig.getInstance().getAppCredential(this.appName).applicationId
+        });
+        return postHeader;
+    }
+
+    async setCurrentUser<T extends UserModel>(user: T): Promise<T | null> {
+        await this.cacheAdapter.set<T>('_current_user_', user, {
+            dtl: 30
+        });
+        return user;
     }
 }

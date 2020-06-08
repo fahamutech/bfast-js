@@ -31,9 +31,16 @@ export const BFast = {
      */
     init(options: AppCredentials, appName: string = BFastConfig.DEFAULT_APP): AppCredentials {
         options.cache = {
-            enable: true
+            enable: false,
         }
         return BFastConfig.getInstance(options, appName).getAppCredential(appName);
+    },
+
+    /**
+     * return a config object
+     */
+    getConfig(): BFastConfig {
+        return BFastConfig.getInstance();
     },
 
     /**
@@ -43,15 +50,16 @@ export const BFast = {
     database(appName: string = BFastConfig.DEFAULT_APP) {
         return {
             /**
-             * it export api for domain
-             * @param name {string} domain name
+             * a domain/table/collection to deal with
+             * @param domainName {string} domain name
              */
-            domain<T>(name: string): DomainI<T> {
+            domain<T>(domainName: string): DomainI<T> {
                 return new DomainController<T>(
-                    name,
-                    new CacheController(appName,
-                        BFastConfig.getInstance().getCacheDatabaseName('bfastLocalDatabase', appName),
-                        BFastConfig.getInstance().getCacheCollectionName('cache', appName)
+                    domainName,
+                    new CacheController(
+                        appName,
+                        BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_CACHE_DB_NAME, appName),
+                        BFastConfig.getInstance().getCacheCollectionName(domainName, appName),
                     ),
                     new AxiosRestController(),
                     appName
@@ -104,6 +112,59 @@ export const BFast = {
                               | ((request: any, response: any, next?: any) => any)) {
                 if (device.isNode) {
                     return {
+                        method: null,
+                        path: path,
+                        onRequest: handler
+                    };
+                } else {
+                    throw 'Works In NodeJs Environment Only'
+                }
+            },
+            onPostHttpRequest(path: string,
+                              handler: ((request: any, response: any, next?: any) => any)[]
+                                  | ((request: any, response: any, next?: any) => any)) {
+                if (device.isNode) {
+                    return {
+                        method: 'POST',
+                        path: path,
+                        onRequest: handler
+                    };
+                } else {
+                    throw 'Works In NodeJs Environment Only'
+                }
+            },
+            onPutHttpRequest(path: string,
+                             handler: ((request: any, response: any, next?: any) => any)[]
+                                 | ((request: any, response: any, next?: any) => any)) {
+                if (device.isNode) {
+                    return {
+                        method: 'PUT',
+                        path: path,
+                        onRequest: handler
+                    };
+                } else {
+                    throw 'Works In NodeJs Environment Only'
+                }
+            },
+            onDeleteHttpRequest(path: string,
+                                handler: ((request: any, response: any, next?: any) => any)[]
+                                    | ((request: any, response: any, next?: any) => any)) {
+                if (device.isNode) {
+                    return {
+                        method: 'DELETE',
+                        path: path,
+                        onRequest: handler
+                    };
+                } else {
+                    throw 'Works In NodeJs Environment Only'
+                }
+            },
+            onGetHttpRequest(path: string,
+                             handler: ((request: any, response: any, next?: any) => any)[]
+                                 | ((request: any, response: any, next?: any) => any)) {
+                if (device.isNode) {
+                    return {
+                        method: 'GET',
                         path: path,
                         onRequest: handler
                     };
@@ -125,12 +186,14 @@ export const BFast = {
         }
     },
 
-    cache(options?: { cacheName: string, storeName: string }, appName = BFastConfig.DEFAULT_APP): CacheAdapter {
+    cache(options?: { database: string, collection: string }, appName = BFastConfig.DEFAULT_APP): CacheAdapter {
         return new CacheController(
             appName,
-            options && options.cacheName ? BFastConfig.getInstance().getCacheCollectionName(options.cacheName, appName) :
-                BFastConfig.getInstance().getCacheDatabaseName('bfastLocalDatabase', appName),
-            options && options.storeName ? BFastConfig.getInstance().getCacheCollectionName(options.storeName, appName)
+            (options && options.database)
+                ? BFastConfig.getInstance().getCacheDatabaseName(options.database, appName)
+                : BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_CACHE_DB_NAME, appName),
+            (options && options.collection)
+                ? BFastConfig.getInstance().getCacheCollectionName(options.collection, appName)
                 : BFastConfig.getInstance().getCacheCollectionName('cache', appName),
         );
     },
@@ -140,8 +203,8 @@ export const BFast = {
             new AxiosRestController(),
             new CacheController(
                 appName,
-                BFastConfig.getInstance().getCacheCollectionName('bfastLocalDatabase', appName),
-                BFastConfig.getInstance().getCacheCollectionName(`auth`, appName)
+                BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME, appName),
+                BFastConfig.getInstance().getCacheCollectionName(`cache`, appName)
             ),
             appName
         );

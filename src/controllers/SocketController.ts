@@ -1,10 +1,10 @@
 import {RealTimeAdapter} from "../adapters/RealTimeAdapter";
-// @ts-ignore
-import io from 'socket.io-client';
+import * as io from 'socket.io-client';
 import {BFastConfig} from "../conf";
+import Socket = SocketIOClient.Socket;
 
 export class SocketController implements RealTimeAdapter {
-    public readonly socket: any;
+    public readonly socket: Socket;
 
     constructor(private readonly eventName: string, appName = BFastConfig.DEFAULT_APP, onConnect?: Function, onDisconnect?: Function) {
         this.socket = io(BFastConfig.getInstance().functionsURL('/', appName), {

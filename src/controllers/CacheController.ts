@@ -1,30 +1,24 @@
 import {CacheAdapter} from "../adapters/CacheAdapter";
 import * as localForage from 'localforage';
 import {BFastConfig} from "../conf";
-import {CacheOptions} from "../adapters/QueryAdapter";
+import {RequestOptions} from "../adapters/QueryAdapter";
 // @ts-ignore
 import * as device from "browser-or-node";
 
 export class CacheController implements CacheAdapter {
-    cacheDatabaseName: string;
 
     constructor(private readonly appName: string,
-                cacheDatabaseName: string,
-                private readonly  cacheCollectionName: string) {
-        this.cacheDatabaseName = cacheDatabaseName;
+                private readonly database: string,
+                private readonly  collection: string) {
     }
 
     private _getCacheDatabase(): LocalForage | undefined {
         if (device.isNode) {
             return undefined;
         }
-        let collectionNameFromCredential = BFastConfig.getInstance().getAppCredential(this.appName).cache?.cacheCollectionName;
-        if (collectionNameFromCredential) {
-            collectionNameFromCredential = BFastConfig.getInstance().getCacheCollectionName(collectionNameFromCredential, this.appName);
-        }
         return localForage.createInstance({
-            storeName: collectionNameFromCredential ? collectionNameFromCredential : this.cacheCollectionName,
-            name: this.cacheDatabaseName
+            storeName: this.collection,
+            name: this.database
         });
     }
 
@@ -32,14 +26,17 @@ export class CacheController implements CacheAdapter {
         if (device.isNode) {
             return undefined;
         }
-        let ttlStoreFromCredential = BFastConfig.getInstance().getAppCredential(this.appName).cache?.cacheCollectionTTLName;
-        if (ttlStoreFromCredential) {
-            BFastConfig.getInstance().getCacheCollectionName(ttlStoreFromCredential, this.appName);
-        }
         return localForage.createInstance({
-            storeName: ttlStoreFromCredential ? ttlStoreFromCredential : 'cache_ttl_' + this.appName,
-            name: this.cacheDatabaseName
+            storeName: BFastConfig.getInstance().DEFAULT_CACHE_TTL_COLLECTION_NAME,
+            name: this.database
         });
+    }
+
+    async keys(): Promise<string[] | undefined>{
+        if (device.isNode){
+            return [];
+        }
+        return this._getCacheDatabase()?.keys();
     }
 
     async clearAll(): Promise<boolean> {
@@ -75,12 +72,12 @@ export class CacheController implements CacheAdapter {
         return date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
     }
 
-    async remove(identifier: string): Promise<boolean> {
+    async remove(identifier: string, force = false): Promise<boolean> {
         if (device.isNode) {
             return true;
         }
         const dayToLeave = await this._getTTLStore()?.getItem<number>(identifier);
-        if (dayToLeave && dayToLeave < new Date().getTime()) {
+        if (force || (dayToLeave && dayToLeave < new Date().getTime())) {
             await this._getTTLStore()?.removeItem(identifier);
             await this._getCacheDatabase()?.removeItem(identifier);
             return true;
@@ -89,7 +86,7 @@ export class CacheController implements CacheAdapter {
         }
     }
 
-    cacheEnabled(options?: CacheOptions): boolean {
+    cacheEnabled(options?: RequestOptions): boolean {
         if (device.isNode) {
             return false;
         }

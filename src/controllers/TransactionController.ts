@@ -7,7 +7,7 @@ import {RestAdapter} from "../adapters/RestAdapter";
 
 export class TransactionController implements TransactionAdapter {
 
-    private readonly transactionRequests: TransactionModel[];
+    private transactionRequests: TransactionModel[];
 
     constructor(private readonly appName: string,
                 private readonly restApi: RestAdapter,
@@ -15,28 +15,33 @@ export class TransactionController implements TransactionAdapter {
         this.transactionRequests = [];
     }
 
-    async commit(options?: { before: () => Promise<void>, after: () => Promise<void> }): Promise<any> {
-        try {
-            if (this.transactionRequests.length === 0) {
-                throw new Error('You can not commit an empty transaction');
-            }
-            if (options && options.before) {
-                await options.before();
-            }
-            const response = await this.restApi.post(`${BFastConfig.getInstance().databaseURL(this.appName, '/batch')}`, {
-                requests: this.transactionRequests,
-                transaction: !this.isNormalBatch,
-            }, {
-                headers: BFastConfig.getInstance().getHeaders(this.appName)
-            });
-            this.transactionRequests.splice(0);
-            if (options && options.after) {
-                await options.after();
-            }
-            return response.data;
-        } catch (e) {
-            throw e;
+    async commit(options?: {
+        before: (transactionRequests: TransactionModel[]) => Promise<TransactionModel[]>,
+        after?: () => Promise<void>,
+        useMasterKey?: boolean
+    }): Promise<any> {
+        if (this.transactionRequests.length === 0) {
+            throw new Error('You can not commit an empty transaction');
         }
+        if (options && options.before) {
+           const result =  await options.before(this.transactionRequests);
+           if (result && Array.isArray(result) && result.length>0 && result[0].body && result[0].path && result[0].method) {
+               this.transactionRequests = result;
+           }
+        }
+        const response = await this.restApi.post(`${BFastConfig.getInstance().databaseURL(this.appName, '/batch')}`, {
+            requests: this.transactionRequests,
+            transaction: !this.isNormalBatch,
+        }, {
+            headers: (options && options.useMasterKey === true)
+                ? BFastConfig.getInstance().getMasterHeaders(this.appName)
+                : BFastConfig.getInstance().getHeaders(this.appName),
+        });
+        this.transactionRequests.splice(0);
+        if (options && options.after) {
+            await options.after();
+        }
+        return response.data;
     }
 
     create(domainName: string, data: Object): TransactionAdapter {

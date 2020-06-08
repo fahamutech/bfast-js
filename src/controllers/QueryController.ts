@@ -1,6 +1,6 @@
 import {DomainModel} from "../adapters/DomainAdapter";
 import {CacheAdapter} from "../adapters/CacheAdapter";
-import {AggregationOptions, CacheOptions, FindOptionsWithCacheOptions, QueryAdapter} from "../adapters/QueryAdapter";
+import {AggregationOptions, QueryAdapter, RequestOptions} from "../adapters/QueryAdapter";
 import {RestAdapter, RestResponse} from "../adapters/RestAdapter";
 import {BFastConfig} from "../conf";
 import {QueryModel} from "../model/QueryModel";
@@ -14,7 +14,7 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
         this.collectionName = collectionName;
     }
 
-    async aggregate<V = any>(pipeline: AggregationOptions | AggregationOptions[], options: CacheOptions): Promise<V> {
+    async aggregate<V = any>(pipeline: AggregationOptions | AggregationOptions[], options: RequestOptions): Promise<V> {
         let pipelineToStrings = JSON.stringify(pipeline);
         pipelineToStrings = pipelineToStrings.length > 7 ? pipelineToStrings.substring(0, 7) : pipelineToStrings;
         const identifier = `aggregate_${this.collectionName}_${pipelineToStrings ? pipelineToStrings : ''}`;
@@ -22,7 +22,9 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
             return this.restAdapter.get(
                 `${BFastConfig.getInstance().databaseURL(this.appName)}/aggregate/${this.collectionName}`,
                 {
-                    headers: BFastConfig.getInstance().getMasterHeaders(this.appName),
+                    headers: (options && options.useMasterKey === true)
+                        ? BFastConfig.getInstance().getMasterHeaders(this.appName)
+                        : BFastConfig.getInstance().getHeaders(this.appName),
                     params: pipeline
                 }
             );
@@ -46,12 +48,14 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
         return response.data.results;
     }
 
-    async count(options?: FindOptionsWithCacheOptions): Promise<number> {
+    async count(options?: RequestOptions): Promise<number> {
         const countReq = async (): Promise<RestResponse> => {
             return this.restAdapter.get(
                 `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}`,
                 {
-                    headers: BFastConfig.getInstance().getHeaders(this.appName),
+                    headers: (options && options.useMasterKey === true)
+                        ? BFastConfig.getInstance().getMasterHeaders(this.appName)
+                        : BFastConfig.getInstance().getHeaders(this.appName),
                     params: {
                         count: 1,
                         limit: 0
@@ -80,14 +84,16 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
         return response.data.count;
     }
 
-    async get(objectId: string, options?: FindOptionsWithCacheOptions): Promise<any> {
+    async get(objectId: string, options?: RequestOptions): Promise<any> {
         try {
             const identifier = this.collectionName + '_' + objectId;
             const getReq = async (): Promise<RestResponse> => {
                 return this.restAdapter.get(
                     `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}/${identifier}`,
                     {
-                        headers: BFastConfig.getInstance().getHeaders(this.appName),
+                        headers: (options && options.useMasterKey === true)
+                            ? BFastConfig.getInstance().getMasterHeaders(this.appName)
+                            : BFastConfig.getInstance().getHeaders(this.appName),
                     }
                 );
             }
@@ -112,7 +118,7 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
         }
     }
 
-    async distinct<T>(key: any, queryModel: QueryModel<T>, options?: FindOptionsWithCacheOptions): Promise<T> {
+    async distinct<T>(key: any, queryModel: QueryModel<T>, options?: RequestOptions): Promise<T> {
         const identifier = `distinct_${this.collectionName}_${JSON.stringify(queryModel && queryModel.filter ? queryModel.filter : {})}`;
         const distinctReq = (): Promise<RestResponse> => {
             return this.restAdapter.get(
@@ -149,13 +155,15 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
         return response.data.results;
     }
 
-    async find<T>(queryModel: QueryModel<T>, options?: FindOptionsWithCacheOptions): Promise<T[]> {
-        const identifier = `find_${this.collectionName}_${JSON.stringify(queryModel  && queryModel.filter ? queryModel.filter : {})}`;
+    async find<T>(queryModel: QueryModel<T>, options?: RequestOptions): Promise<T[]> {
+        const identifier = `find_${this.collectionName}_${JSON.stringify(queryModel && queryModel.filter ? queryModel.filter : {})}`;
         const findReq = (): Promise<RestResponse> => {
             return this.restAdapter.get(
                 `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}`,
                 {
-                    headers: BFastConfig.getInstance().getHeaders(this.appName),
+                    headers: (options && options.useMasterKey === true)
+                        ? BFastConfig.getInstance().getMasterHeaders(this.appName)
+                        : BFastConfig.getInstance().getHeaders(this.appName),
                     params: {
                         limit: (queryModel && queryModel.size) ? queryModel.size : 100,
                         skip: (queryModel && queryModel.skip) ? queryModel.skip : 0,
@@ -169,13 +177,15 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
         if (this.cacheAdapter.cacheEnabled(options)) {
             const cacheResponse = await this.cacheAdapter.get<T[]>(identifier);
             if (cacheResponse) {
-                findReq().then(value => {
-                    const data = value.data.results;
-                    if (options && options.freshDataCallback) {
-                        options.freshDataCallback({identifier, data});
-                    }
-                    return this.cacheAdapter.set<T[]>(identifier, data);
-                }).catch();
+                findReq()
+                    .then(value => {
+                        const data = value.data.results;
+                        if (options && options.freshDataCallback) {
+                            options.freshDataCallback({identifier, data});
+                        }
+                        return this.cacheAdapter.set<T[]>(identifier, data);
+                    })
+                    .catch();
                 return cacheResponse;
             }
         }
@@ -184,13 +194,15 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
         return response.data.results;
     }
 
-    async first<T>(queryModel: QueryModel<T>, options?: FindOptionsWithCacheOptions): Promise<T> {
-        const identifier = `first_${this.collectionName}_${JSON.stringify(queryModel  && queryModel.filter ? queryModel.filter : {})}`;
+    async first<T>(queryModel: QueryModel<T>, options?: RequestOptions): Promise<T> {
+        const identifier = `first_${this.collectionName}_${JSON.stringify(queryModel && queryModel.filter ? queryModel.filter : {})}`;
         const firstReq = (): Promise<RestResponse> => {
             return this.restAdapter.get(
                 `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}`,
                 {
-                    headers: BFastConfig.getInstance().getHeaders(this.appName),
+                    headers: (options && options.useMasterKey === true)
+                        ? BFastConfig.getInstance().getMasterHeaders(this.appName)
+                        : BFastConfig.getInstance().getHeaders(this.appName),
                     params: {
                         limit: 1,
                         skip: 0,
