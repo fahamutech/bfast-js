@@ -4,6 +4,7 @@ import {AggregationOptions, QueryAdapter, RequestOptions} from "../adapters/Quer
 import {RestAdapter, RestResponse} from "../adapters/RestAdapter";
 import {BFastConfig} from "../conf";
 import {QueryModel} from "../model/QueryModel";
+import {FilterModel} from "../model/FilterModel";
 
 export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
 
@@ -48,7 +49,7 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
         return response.data.results;
     }
 
-    async count(options?: RequestOptions): Promise<number> {
+    async count(filter?: FilterModel<T>, options?: RequestOptions): Promise<number> {
         const countReq = async (): Promise<RestResponse> => {
             return this.restAdapter.get(
                 `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}`,
@@ -58,12 +59,13 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
                         : BFastConfig.getInstance().getHeaders(this.appName),
                     params: {
                         count: 1,
-                        limit: 0
+                        limit: 0,
+                        where: filter ? filter : {}
                     }
                 }
             );
         }
-        const identifier = `count_${this.collectionName}_`;
+        const identifier = `count_${this.collectionName}_${filter?filter:{}}`;
         if (this.cacheAdapter.cacheEnabled(options)) {
             const cacheResponse = await this.cacheAdapter.get<number>(identifier);
             if (cacheResponse) {

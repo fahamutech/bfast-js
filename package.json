@@ -1,6 +1,6 @@
 {
   "name": "bfastjs",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "javascript client sdk for bfast::cloud project",
   "main": "dist/bfast_js.js",
   "maintainers": [
