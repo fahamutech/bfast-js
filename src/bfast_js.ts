@@ -1,6 +1,6 @@
 import {AppCredentials, BFastConfig} from "./conf";
-import {DomainController} from "./controllers/domainController";
-import {FunctionController} from "./controllers/functionController";
+import {DomainController} from "./controllers/DomainController";
+import {FunctionController} from "./controllers/FunctionController";
 import {StorageController} from "./controllers/StorageController";
 import {DomainI} from "./adapters/DomainAdapter";
 import {FunctionAdapter} from "./adapters/FunctionsAdapter";

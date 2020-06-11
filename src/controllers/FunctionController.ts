@@ -2,16 +2,14 @@ import {FunctionAdapter} from "../adapters/FunctionsAdapter";
 import {BFastConfig} from "../conf";
 import {RestAdapter, RestRequestConfig} from "../adapters/RestAdapter";
 
-
 export class FunctionController implements FunctionAdapter {
-
 
     constructor(private readonly functionPath: string,
                 private readonly restApi: RestAdapter,
                 private readonly appName = BFastConfig.DEFAULT_APP) {
     }
 
-    async post(body?: { [key: string]: any; }, config?: RestRequestConfig): Promise<any> {
+    async post<T>(body?: { [key: string]: any; }, config?: RestRequestConfig): Promise<T> {
         if (this.functionPath && this.functionPath !== '') {
             const postConfig: RestRequestConfig = {};
             if (config && config.headers) {
