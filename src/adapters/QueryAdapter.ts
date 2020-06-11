@@ -1,9 +1,10 @@
 import {QueryModel} from "../model/QueryModel";
+import {FilterModel} from "../model/FilterModel";
 
 export interface QueryAdapter<T> {
     aggregate<V = any>(pipeline: AggregationOptions | AggregationOptions[], options: RequestOptions): Promise<V>;
 
-    count(options?: RequestOptions): Promise<number>;
+    count(filter?: FilterModel<T>, options?: RequestOptions): Promise<number>;
 
     distinct<K>(key: K, queryModel: QueryModel<T>, options?: RequestOptions): Promise<T>;
 

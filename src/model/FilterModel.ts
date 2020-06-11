@@ -8,6 +8,7 @@ type BasicFilterModel<T> = {
         $caseSensitive?: boolean;
         $diacraticSensitive?: boolean;
     };
+    [key: string]: any
     // $where?: string | Function;
     // $comment?: string;
 }

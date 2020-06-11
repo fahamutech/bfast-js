@@ -33,7 +33,7 @@ export class DomainController<T extends DomainModel> implements DomainI<T> {
 
     async getAll<T>(pagination?: { size: number, skip: number }, options?: RequestOptions): Promise<T[]> {
         try {
-            const number = pagination ? pagination.size : await this.query().count(options);
+            const number = pagination ? pagination.size : await this.query().count({}, options);
             const query = this.query();
             return await query.find({
                 skip: pagination ? pagination.skip : 0,
