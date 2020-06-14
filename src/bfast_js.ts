@@ -14,6 +14,9 @@ import {CacheAdapter} from "./adapters/CacheAdapter";
 import {AxiosRestController} from "./controllers/AxiosRestController";
 // @ts-ignore
 import * as device from "browser-or-node";
+import {HttpRequestModel} from "./model/HttpRequestModel";
+import {HttpResponseModel} from "./model/HttpResponseModel";
+import {HttpNextModel} from "./model/HttpNextModel";
 
 
 /**
@@ -89,103 +92,19 @@ export const BFast = {
         }
     },
 
+    /**
+     *
+     * @param appName other app/project name to work with
+     */
     functions(appName = BFastConfig.DEFAULT_APP) {
-        return {
-            /**
-             * exec a cloud function
-             * @param path {string} function name
-             */
-            request(path: string): FunctionAdapter {
-                return new FunctionController(path, new AxiosRestController(), appName);
-            },
-            /**
-             * start a new socket
-             * @param eventName
-             * @param onConnect {function} callback when connection established
-             * @param onDisconnect {function} callback when connection terminated
-             */
-            event(eventName: string, onConnect?: Function, onDisconnect?: Function): RealTimeAdapter {
-                return new SocketController(eventName, appName, onConnect, onDisconnect);
-            },
-            onHttpRequest(path: string,
-                          handler: ((request: any, response: any, next?: any) => any)[]
-                              | ((request: any, response: any, next?: any) => any)) {
-                if (device.isNode) {
-                    return {
-                        method: null,
-                        path: path,
-                        onRequest: handler
-                    };
-                } else {
-                    throw 'Works In NodeJs Environment Only'
-                }
-            },
-            onPostHttpRequest(path: string,
-                              handler: ((request: any, response: any, next?: any) => any)[]
-                                  | ((request: any, response: any, next?: any) => any)) {
-                if (device.isNode) {
-                    return {
-                        method: 'POST',
-                        path: path,
-                        onRequest: handler
-                    };
-                } else {
-                    throw 'Works In NodeJs Environment Only'
-                }
-            },
-            onPutHttpRequest(path: string,
-                             handler: ((request: any, response: any, next?: any) => any)[]
-                                 | ((request: any, response: any, next?: any) => any)) {
-                if (device.isNode) {
-                    return {
-                        method: 'PUT',
-                        path: path,
-                        onRequest: handler
-                    };
-                } else {
-                    throw 'Works In NodeJs Environment Only'
-                }
-            },
-            onDeleteHttpRequest(path: string,
-                                handler: ((request: any, response: any, next?: any) => any)[]
-                                    | ((request: any, response: any, next?: any) => any)) {
-                if (device.isNode) {
-                    return {
-                        method: 'DELETE',
-                        path: path,
-                        onRequest: handler
-                    };
-                } else {
-                    throw 'Works In NodeJs Environment Only'
-                }
-            },
-            onGetHttpRequest(path: string,
-                             handler: ((request: any, response: any, next?: any) => any)[]
-                                 | ((request: any, response: any, next?: any) => any)) {
-                if (device.isNode) {
-                    return {
-                        method: 'GET',
-                        path: path,
-                        onRequest: handler
-                    };
-                } else {
-                    throw 'Works In NodeJs Environment Only'
-                }
-            },
-            onEvent(eventName: string,
-                    handler: (data: { auth: any, payload: any, socket: any }) => any) {
-                if (device.isNode) {
-                    return {
-                        name: eventName,
-                        onEvent: handler
-                    };
-                } else {
-                    throw 'Works In NodeJs Environment Only'
-                }
-            },
-        }
+        return getFunctionsMap(appName, device.isNode);
     },
 
+    /**
+     * get cache instance to work with when work in a browser
+     * @param options
+     * @param appName other app/project name to work with
+     */
     cache(options?: { database: string, collection: string }, appName = BFastConfig.DEFAULT_APP): CacheAdapter {
         return new CacheController(
             appName,
@@ -198,6 +117,10 @@ export const BFast = {
         );
     },
 
+    /**
+     * get auth instance to work with authentication and authorization
+     * @param appName other app/project name to work with
+     */
     auth(appName = BFastConfig.DEFAULT_APP) {
         return new AuthController(
             new AxiosRestController(),
@@ -210,8 +133,103 @@ export const BFast = {
         );
     },
 
+    /**
+     * utils and enums
+     */
+    utils: {
+        USER_DOMAIN_NAME: '_User'
+    },
+
+    /**
+     * access to storage instance from your bfast::database project
+     * @param appName
+     */
     storage(appName = BFastConfig.DEFAULT_APP): StorageController {
         return new StorageController(new AxiosRestController(), appName);
     }
 
 };
+
+const getFunctionsMap = function (appName: string, isNode: boolean) {
+    if (isNode) {
+        return {
+            /**
+             * exec http client request
+             * @param path {string} function name
+             */
+            request(path: string): FunctionAdapter {
+                return new FunctionController(path, new AxiosRestController(), appName);
+            },
+            onHttpRequest(path: string,
+                          handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
+                              | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
+                return {
+                    method: null,
+                    path: path,
+                    onRequest: handler
+                };
+            },
+            onPostHttpRequest(path: string,
+                              handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
+                                  | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
+                return {
+                    method: 'POST',
+                    path: path,
+                    onRequest: handler
+                };
+            },
+            onPutHttpRequest(path: string,
+                             handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
+                                 | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
+                return {
+                    method: 'PUT',
+                    path: path,
+                    onRequest: handler
+                };
+            },
+            onDeleteHttpRequest(path: string,
+                                handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
+                                    | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
+                return {
+                    method: 'DELETE',
+                    path: path,
+                    onRequest: handler
+                };
+            },
+            onGetHttpRequest(path: string,
+                             handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
+                                 | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
+                return {
+                    method: 'GET',
+                    path: path,
+                    onRequest: handler
+                };
+            },
+            onEvent(eventName: string, handler: (data: { auth: any, payload: any, socket: any }) => any) {
+                return {
+                    name: eventName,
+                    onEvent: handler
+                };
+            },
+        }
+    } else {
+        return {
+            /**
+             * exec a http client request
+             * @param path {string} function name
+             */
+            request(path: string): FunctionAdapter {
+                return new FunctionController(path, new AxiosRestController(), appName);
+            },
+            /**
+             * listen for a realtime event from a bfast::functions
+             * @param eventName
+             * @param onConnect {function} callback when connection established
+             * @param onDisconnect {function} callback when connection terminated
+             */
+            event(eventName: string, onConnect?: Function, onDisconnect?: Function): RealTimeAdapter {
+                return new SocketController(eventName, appName, onConnect, onDisconnect);
+            }
+        }
+    }
+}

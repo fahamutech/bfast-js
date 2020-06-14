@@ -51,7 +51,6 @@ export class StorageController implements StorageAdapter {
         if (_source.type) {
             dataToSave.type = _source.type;
         }
-        console.log(dataToSave);
         const response = await this.restApi.post<{ url: string, name: string }>(
             BFastConfig.getInstance().databaseURL(this.appName, '/storage'), dataToSave,
             {
@@ -84,10 +83,8 @@ export class StorageController implements StorageAdapter {
 
         if (commaIndex !== -1) {
             const matches = dataUriRegexp.exec(base64.slice(0, commaIndex + 1));
-            // console.log(matches);
             // if data URI with type and charset, there will be 4 matches.
             _data = base64.slice(commaIndex + 1);
-            console.log(_data.substring(0, 50));
             _source = {
                 format: 'base64',
                 base64: _data,
@@ -95,7 +92,6 @@ export class StorageController implements StorageAdapter {
             };
         } else {
             _data = base64;
-            console.log(_data.substring(0, 50));
             _source = {
                 format: 'base64',
                 base64: _data,
