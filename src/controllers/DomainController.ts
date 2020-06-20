@@ -46,7 +46,7 @@ export class DomainController<T extends DomainModel> implements DomainI<T> {
 
     async get<T>(objectId: string, options?: RequestOptions): Promise<T> {
         try {
-            return await this.query<T>().get(objectId,options);
+            return await this.query<T>().get(objectId, options);
         } catch (e) {
             throw {message: DomainController._getErrorMessage(e)};
         }

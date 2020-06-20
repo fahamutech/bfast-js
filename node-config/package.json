@@ -1,6 +1,6 @@
 {
   "name": "bfastnode",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "nodejs client sdk for bfast::cloud project",
   "main": "dist/bfast_node.js",
   "maintainers": [
