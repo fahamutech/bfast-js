@@ -75,6 +75,7 @@ export const BFast = {
             collection<T>(collectionName: string): DomainI<T> {
                 return this.domain<T>(collectionName);
             },
+
             /**
              * same as #domain
              */

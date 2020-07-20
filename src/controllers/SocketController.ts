@@ -9,6 +9,8 @@ export class SocketController implements RealTimeAdapter {
     constructor(private readonly eventName: string, appName = BFastConfig.DEFAULT_APP, onConnect?: Function, onDisconnect?: Function) {
         this.socket = io(BFastConfig.getInstance().functionsURL('/', appName), {
             autoConnect: false,
+           // secure: true,
+            transports: ['websocket']
         });
         if (onConnect) this.socket.on('connect', onConnect);
         if (onDisconnect) this.socket.on('disconnect', onDisconnect);
