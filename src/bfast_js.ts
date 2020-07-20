@@ -14,6 +14,9 @@ import {CacheAdapter} from "./adapters/CacheAdapter";
 import {AxiosRestController} from "./controllers/AxiosRestController";
 // @ts-ignore
 import * as device from "browser-or-node";
+import {HttpRequestModel} from "./model/HttpRequestModel";
+import {HttpResponseModel} from "./model/HttpResponseModel";
+import {HttpNextModel} from "./model/HttpNextModel";
 
 
 /**
@@ -72,6 +75,7 @@ export const BFast = {
             collection<T>(collectionName: string): DomainI<T> {
                 return this.domain<T>(collectionName);
             },
+
             /**
              * same as #domain
              */
@@ -89,17 +93,21 @@ export const BFast = {
         }
     },
 
+    /**
+     *
+     * @param appName other app/project name to work with
+     */
     functions(appName = BFastConfig.DEFAULT_APP) {
         return {
             /**
-             * exec a cloud function
+             * exec a http client request
              * @param path {string} function name
              */
             request(path: string): FunctionAdapter {
                 return new FunctionController(path, new AxiosRestController(), appName);
             },
             /**
-             * start a new socket
+             * listen for a realtime event from a bfast::functions
              * @param eventName
              * @param onConnect {function} callback when connection established
              * @param onDisconnect {function} callback when connection terminated
@@ -108,8 +116,8 @@ export const BFast = {
                 return new SocketController(eventName, appName, onConnect, onDisconnect);
             },
             onHttpRequest(path: string,
-                          handler: ((request: any, response: any, next?: any) => any)[]
-                              | ((request: any, response: any, next?: any) => any)) {
+                          handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
+                              | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
                 if (device.isNode) {
                     return {
                         method: null,
@@ -121,8 +129,8 @@ export const BFast = {
                 }
             },
             onPostHttpRequest(path: string,
-                              handler: ((request: any, response: any, next?: any) => any)[]
-                                  | ((request: any, response: any, next?: any) => any)) {
+                              handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
+                                  | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
                 if (device.isNode) {
                     return {
                         method: 'POST',
@@ -134,8 +142,8 @@ export const BFast = {
                 }
             },
             onPutHttpRequest(path: string,
-                             handler: ((request: any, response: any, next?: any) => any)[]
-                                 | ((request: any, response: any, next?: any) => any)) {
+                             handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
+                                 | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
                 if (device.isNode) {
                     return {
                         method: 'PUT',
@@ -147,8 +155,8 @@ export const BFast = {
                 }
             },
             onDeleteHttpRequest(path: string,
-                                handler: ((request: any, response: any, next?: any) => any)[]
-                                    | ((request: any, response: any, next?: any) => any)) {
+                                handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
+                                    | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
                 if (device.isNode) {
                     return {
                         method: 'DELETE',
@@ -160,8 +168,8 @@ export const BFast = {
                 }
             },
             onGetHttpRequest(path: string,
-                             handler: ((request: any, response: any, next?: any) => any)[]
-                                 | ((request: any, response: any, next?: any) => any)) {
+                             handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
+                                 | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
                 if (device.isNode) {
                     return {
                         method: 'GET',
@@ -172,8 +180,7 @@ export const BFast = {
                     throw 'Works In NodeJs Environment Only'
                 }
             },
-            onEvent(eventName: string,
-                    handler: (data: { auth: any, payload: any, socket: any }) => any) {
+            onEvent(eventName: string, handler: (data: { auth: any, payload: any, socket: any }) => any) {
                 if (device.isNode) {
                     return {
                         name: eventName,
@@ -183,9 +190,14 @@ export const BFast = {
                     throw 'Works In NodeJs Environment Only'
                 }
             },
-        }
+        };
     },
 
+    /**
+     * get cache instance to work with when work in a browser
+     * @param options
+     * @param appName other app/project name to work with
+     */
     cache(options?: { database: string, collection: string }, appName = BFastConfig.DEFAULT_APP): CacheAdapter {
         return new CacheController(
             appName,
@@ -198,6 +210,10 @@ export const BFast = {
         );
     },
 
+    /**
+     * get auth instance to work with authentication and authorization
+     * @param appName other app/project name to work with
+     */
     auth(appName = BFastConfig.DEFAULT_APP) {
         return new AuthController(
             new AxiosRestController(),
@@ -210,6 +226,17 @@ export const BFast = {
         );
     },
 
+    /**
+     * utils and enums
+     */
+    utils: {
+        USER_DOMAIN_NAME: '_User'
+    },
+
+    /**
+     * access to storage instance from your bfast::database project
+     * @param appName
+     */
     storage(appName = BFastConfig.DEFAULT_APP): StorageController {
         return new StorageController(new AxiosRestController(), appName);
     }

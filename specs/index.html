@@ -15,8 +15,8 @@
         const fileReader = new FileReader();
         fileReader.onload = ev => {
             window.BFast.init({
-                applicationId: 'fpay',
-                projectId: 'fahamupay'
+                applicationId: 'smartstock_lb',
+                projectId: 'smartstock'
             });
             const base64 = ev.target.result;
             window.BFast.storage().save({

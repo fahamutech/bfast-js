@@ -20,14 +20,16 @@ export class TransactionController implements TransactionAdapter {
         after?: () => Promise<void>,
         useMasterKey?: boolean
     }): Promise<any> {
-        if (this.transactionRequests.length === 0) {
-            throw new Error('You can not commit an empty transaction');
-        }
+        // if (this.transactionRequests.length === 0) {
+        //     throw new Error('You can not commit an empty transaction');
+        // }
         if (options && options.before) {
-           const result =  await options.before(this.transactionRequests);
-           if (result && Array.isArray(result) && result.length>0 && result[0].body && result[0].path && result[0].method) {
-               this.transactionRequests = result;
-           }
+            const result = await options.before(this.transactionRequests);
+            if (result && Array.isArray(result) && result.length > 0 && result[0].body && result[0].path && result[0].method) {
+                this.transactionRequests = result;
+            } else if (result && Array.isArray(result) && result.length === 0) {
+                this.transactionRequests = result;
+            }
         }
         const response = await this.restApi.post(`${BFastConfig.getInstance().databaseURL(this.appName, '/batch')}`, {
             requests: this.transactionRequests,

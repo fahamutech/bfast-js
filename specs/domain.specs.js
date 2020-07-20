@@ -13,17 +13,17 @@ describe('Domain', function(){
     // });
 
     describe('get data(s)', function(){
-        it('should get getAll data of a specific doamain', function(){
+        it('should get getAll data of a specific doamain', function(done){
             // BFast.domain('invoices').getAll().then(values=>{
             //     console.log(values);
             //     done();
-            //     assert(1,1);
+            //     assert(true);
             // }).catch(reason=>{
             //     console.log(reason);
             //     done(reason);
             //     assert(1,1);
             //  });
-            assert(1,1);
+            // assert(true);
         })
     })
 });

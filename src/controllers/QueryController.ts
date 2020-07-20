@@ -91,7 +91,7 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
             const identifier = this.collectionName + '_' + objectId;
             const getReq = async (): Promise<RestResponse> => {
                 return this.restAdapter.get(
-                    `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}/${identifier}`,
+                    `${BFastConfig.getInstance().databaseURL(this.appName)}/classes/${this.collectionName}/${objectId}`,
                     {
                         headers: (options && options.useMasterKey === true)
                             ? BFastConfig.getInstance().getMasterHeaders(this.appName)

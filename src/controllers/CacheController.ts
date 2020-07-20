@@ -32,8 +32,8 @@ export class CacheController implements CacheAdapter {
         });
     }
 
-    async keys(): Promise<string[] | undefined>{
-        if (device.isNode){
+    async keys(): Promise<string[] | undefined> {
+        if (device.isNode) {
             return [];
         }
         return this._getCacheDatabase()?.keys();

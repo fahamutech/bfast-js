@@ -31,7 +31,7 @@ type FilterSelector<T> = {
      * including documents where the field value is null.
      */
     $exists?: boolean;
-    // Evaluation
+    // Evaluation;
     // $expr?: any;
     // $jsonSchema?: any;
     // $mod?: T extends number ? [number, number] : never;
