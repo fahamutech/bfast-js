@@ -17,6 +17,7 @@ import * as device from "browser-or-node";
 import {HttpRequestModel} from "./model/HttpRequestModel";
 import {HttpResponseModel} from "./model/HttpResponseModel";
 import {HttpNextModel} from "./model/HttpNextModel";
+import Socket = SocketIOClient.Socket;
 
 
 /**
@@ -180,11 +181,21 @@ export const BFast = {
                     throw 'Works In NodeJs Environment Only'
                 }
             },
-            onEvent(eventName: string, handler: (data: { auth: any, payload: any, socket: any }) => any) {
+            onEvent(eventName: string, handler: (data: { auth: any, payload: any, socket: Socket }) => any) {
                 if (device.isNode) {
                     return {
                         name: eventName,
                         onEvent: handler
+                    };
+                } else {
+                    throw 'Works In NodeJs Environment Only'
+                }
+            },
+            onGuard(handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
+                | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
+                if (device.isNode) {
+                    return {
+                        onGuard: handler
                     };
                 } else {
                     throw 'Works In NodeJs Environment Only'
