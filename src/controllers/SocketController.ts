@@ -18,12 +18,31 @@ export class SocketController implements RealTimeAdapter {
         this.open();
     }
 
-    emit(data: { auth: any; payload: any }): void {
-        this.socket.emit(this.eventName, data);
+    /**
+     *
+     * @param request {
+     *     auth: any, // your auth data
+     *     body: any // your data must be passed in this field
+     * }
+     */
+    emit(request: { auth?: any; body: any }): void {
+        if (typeof request === 'object' && request.body !== undefined) {
+            this.socket.emit(this.eventName, request);
+        } else {
+            throw "Please provide a request object with at least a body property `{ body: any }`";
+        }
     }
 
-    listener(handler: (event: { auth: any; payload: any }) => any): void {
-        this.socket.on(this.eventName, handler);
+    /**
+     * add listener on this socket
+     * @param handler {Function} example `listener((response)=>console.log(response.body))`
+     */
+    listener(handler: (response: { body: any }) => any): void {
+        if (typeof handler === 'function') {
+            this.socket.on(this.eventName, handler);
+        } else {
+            throw "Function required";
+        }
     }
 
     close(): void {

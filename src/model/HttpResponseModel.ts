@@ -17,6 +17,11 @@ export interface CookieOptions {
     sameSite?: boolean | 'lax' | 'strict' | 'none';
 }
 
+export interface EventResponseModel {
+    socket: SocketIOClient.Socket,
+    emit: (data: any) => void;
+}
+
 // interface Send<R = any, T = HttpResponseModel> extends SendBase {
 // }
 

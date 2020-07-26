@@ -64,7 +64,7 @@ export class BFastConfig {
             return path;
         }
         if (this.credentials[appName].functionsURL && this.credentials[appName].functionsURL?.startsWith('http')) {
-            return this.credentials[appName].functionsURL as string;
+            return `${this.credentials[appName].functionsURL}${path}` as string;
         }
         return `https://${this.credentials[appName].projectId}-faas.bfast.fahamutech.com${path}`
     };

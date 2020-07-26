@@ -1,8 +1,8 @@
 export interface RealTimeAdapter {
 
-    emit(data: { auth: any, payload: any }): void;
+    emit(request: { auth: any, body: any }): void;
 
-    listener(handler: (event: { auth: any; payload: any }) => any): void;
+    listener(handler: (response: { body: any }) => any): void;
 
     close(): void;
 

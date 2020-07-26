@@ -13,7 +13,7 @@ import {AxiosRestController} from "./controllers/AxiosRestController";
 // @ts-ignore
 import * as device from "browser-or-node";
 import {HttpRequestModel} from "./model/HttpRequestModel";
-import {HttpResponseModel} from "./model/HttpResponseModel";
+import {EventResponseModel, HttpResponseModel} from "./model/HttpResponseModel";
 import {HttpNextModel} from "./model/HttpNextModel";
 import Socket = SocketIOClient.Socket;
 
@@ -179,10 +179,10 @@ export const BFast = {
                     throw 'Works In NodeJs Environment Only'
                 }
             },
-            onEvent(eventName: string, handler: (data: { auth: any, payload: any, socket: Socket }) => any) {
+            onEvent(path: string, handler: (request: { auth?: any, body?: any}, response: EventResponseModel) => any) {
                 if (device.isNode) {
                     return {
-                        name: eventName,
+                        name: path,
                         onEvent: handler
                     };
                 } else {
