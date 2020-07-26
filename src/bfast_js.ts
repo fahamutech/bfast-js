@@ -3,12 +3,10 @@ import {DomainController} from "./controllers/DomainController";
 import {FunctionController} from "./controllers/FunctionController";
 import {StorageController} from "./controllers/StorageController";
 import {DomainI} from "./adapters/DomainAdapter";
-import {FunctionAdapter} from "./adapters/FunctionsAdapter";
 import {AuthController} from "./controllers/AuthController";
 import {SocketController} from "./controllers/SocketController";
 import {TransactionAdapter} from "./adapters/TransactionAdapter";
 import {TransactionController} from "./controllers/TransactionController";
-import {RealTimeAdapter} from "./adapters/RealTimeAdapter";
 import {CacheController} from "./controllers/CacheController";
 import {CacheAdapter} from "./adapters/CacheAdapter";
 import {AxiosRestController} from "./controllers/AxiosRestController";
@@ -104,7 +102,7 @@ export const BFast = {
              * exec a http client request
              * @param path {string} function name
              */
-            request(path: string): FunctionAdapter {
+            request(path: string): FunctionController {
                 return new FunctionController(path, new AxiosRestController(), appName);
             },
             /**
@@ -113,7 +111,7 @@ export const BFast = {
              * @param onConnect {function} callback when connection established
              * @param onDisconnect {function} callback when connection terminated
              */
-            event(eventName: string, onConnect?: Function, onDisconnect?: Function): RealTimeAdapter {
+            event(eventName: string, onConnect?: Function, onDisconnect?: Function): SocketController {
                 return new SocketController(eventName, appName, onConnect, onDisconnect);
             },
             onHttpRequest(path: string,
@@ -191,10 +189,11 @@ export const BFast = {
                     throw 'Works In NodeJs Environment Only'
                 }
             },
-            onGuard(handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
+            onGuard(path: string, handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
                 | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
                 if (device.isNode) {
                     return {
+                        path: path,
                         onGuard: handler
                     };
                 } else {
