@@ -18,7 +18,7 @@ export interface CookieOptions {
 }
 
 export interface EventResponseModel {
-    socket: SocketIOClient.Socket,
+    socket: any,
     emit: (data: any) => void;
 }
 
