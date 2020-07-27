@@ -1,10 +1,10 @@
 import {RealTimeAdapter} from "../adapters/RealTimeAdapter";
 import * as io from 'socket.io-client';
 import {BFastConfig} from "../conf";
-import Socket = SocketIOClient.Socket;
+// import Socket = SocketIOClient.Socket;
 
 export class SocketController implements RealTimeAdapter {
-    public readonly socket: Socket;
+    public readonly socket: any;
 
     constructor(private readonly eventName: string, appName = BFastConfig.DEFAULT_APP, onConnect?: Function, onDisconnect?: Function) {
         const namespace = String(eventName)[0] === '/' ? eventName : '/' + eventName;
