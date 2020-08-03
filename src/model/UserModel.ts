@@ -1,4 +1,5 @@
 export interface UserModel {
+    token?: string | undefined;
     objectId?: string;
     createdAt?: any;
     updatedAt?: any;
