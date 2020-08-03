@@ -90,13 +90,13 @@ export class AuthController implements AuthAdapter {
 
     async logOut(options?: AuthOptions): Promise<boolean> {
         const user = await this.currentUser();
-        await this.cacheAdapter.set('_current_user_', null);
-        if (user && user.sessionToken) {
+        if (user && user?.sessionToken) {
             const postHeader = this._geHeadersWithToken(user, options);
             this.restApi.post(BFastConfig.getInstance().databaseURL(this.appName, '/logout'), {}, {
                 headers: postHeader
             }).catch(console.warn);
         }
+        await this.cacheAdapter.set('_current_user_', null);
         return true;
     }
 
