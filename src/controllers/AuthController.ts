@@ -175,9 +175,9 @@ export class AuthController implements AuthAdapter {
         Object.assign(postHeader, {
             'X-Parse-Session-Token': user.sessionToken
         });
-        Object.assign(postHeader, {
-            'authorization': 'Bearer ' + user.token ? user.token : user.sessionToken
-        });
+        // Object.assign(postHeader, {
+        //     'authorization': 'Bearer ' + user.token ? user.token : user.sessionToken
+        // });
         Object.assign(postHeader, {
             'X-Parse-Application-Id': BFastConfig.getInstance().getAppCredential(this.appName).applicationId
         });
