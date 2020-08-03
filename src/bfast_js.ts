@@ -103,7 +103,21 @@ export const BFast = {
              * @param path {string} function name
              */
             request(path: string): FunctionController {
-                return new FunctionController(path, new AxiosRestController(), appName);
+                const _restController = new AxiosRestController();
+                return new FunctionController(
+                    path,
+                    _restController,
+                    new AuthController(
+                        _restController,
+                        new CacheController(
+                            appName,
+                            BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME, appName),
+                            BFastConfig.getInstance().getCacheCollectionName(`cache`, appName)
+                        ),
+                        appName
+                    ),
+                    appName
+                );
             },
             /**
              * listen for a realtime event from a bfast::functions

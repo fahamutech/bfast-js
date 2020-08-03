@@ -1,11 +1,13 @@
 import {FunctionAdapter} from "../adapters/FunctionsAdapter";
 import {BFastConfig} from "../conf";
 import {RestAdapter, RestRequestConfig} from "../adapters/RestAdapter";
+import {AuthAdapter} from "../adapters/AuthAdapter";
 
 export class FunctionController implements FunctionAdapter {
 
     constructor(private readonly functionPath: string,
                 private readonly restApi: RestAdapter,
+                private readonly authAdapter: AuthAdapter,
                 private readonly appName = BFastConfig.DEFAULT_APP) {
     }
 
@@ -18,6 +20,8 @@ export class FunctionController implements FunctionAdapter {
                 postConfig.headers = BFastConfig.getInstance().getHeaders(this.appName);
                 Object.assign(postConfig, config);
             }
+            // const user = await this.authAdapter.currentUser();
+            // postConfig.headers['authorization'] = `Bearer ${user?.sessionToken}`;
             const value = await this.restApi.post(
                 BFastConfig.getInstance().functionsURL(this.functionPath, this.appName) as string,
                 body ? body : {},
@@ -73,5 +77,9 @@ export class FunctionController implements FunctionAdapter {
         );
         return response.data;
     }
+
+    // private _addAuthorizationHeader(){
+    //
+    // }
 
 }
