@@ -1,5 +1,6 @@
 import {QueryController} from "../controllers/QueryController";
 import {RequestOptions} from "./QueryAdapter";
+import {RulesModel} from "../model/RulesModel";
 
 export interface DomainI<T extends DomainModel> {
 
@@ -14,6 +15,8 @@ export interface DomainI<T extends DomainModel> {
     update<T>(objectId: string, model: T, options?: RequestOptions): Promise<T>;
 
     delete<T>(objectId: string, options?: RequestOptions): Promise<T>;
+
+    daasRules(rules: RulesModel): Promise<any>;
 }
 
 export interface DomainModel {

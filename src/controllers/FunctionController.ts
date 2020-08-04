@@ -2,6 +2,7 @@ import {FunctionAdapter} from "../adapters/FunctionsAdapter";
 import {BFastConfig} from "../conf";
 import {RestAdapter, RestRequestConfig} from "../adapters/RestAdapter";
 import {AuthAdapter} from "../adapters/AuthAdapter";
+import {RulesModel} from "../model/RulesModel";
 
 export class FunctionController implements FunctionAdapter {
 
@@ -78,8 +79,5 @@ export class FunctionController implements FunctionAdapter {
         return response.data;
     }
 
-    // private _addAuthorizationHeader(){
-    //
-    // }
 
 }

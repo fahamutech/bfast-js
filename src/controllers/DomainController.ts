@@ -4,12 +4,15 @@ import {CacheAdapter} from "../adapters/CacheAdapter";
 import {BFastConfig} from "../conf";
 import {RestAdapter} from "../adapters/RestAdapter";
 import {RequestOptions} from "../adapters/QueryAdapter";
+import {RulesModel} from "../model/RulesModel";
+import {AuthAdapter} from "../adapters/AuthAdapter";
 
 export class DomainController<T extends DomainModel> implements DomainI<T> {
 
     constructor(private readonly domainName: string,
                 private readonly cacheAdapter: CacheAdapter,
                 private readonly restAdapter: RestAdapter,
+                private readonly authAdapter: AuthAdapter,
                 private readonly appName: string) {
     }
 
@@ -87,6 +90,24 @@ export class DomainController<T extends DomainModel> implements DomainI<T> {
         } catch (e) {
             throw {message: DomainController._getErrorMessage(e)};
         }
+    }
+
+    async daasRules(rules: RulesModel): Promise<any> {
+        if (!rules.applicationId) {
+            rules.applicationId = BFastConfig.getInstance().getAppCredential(this.appName).applicationId;
+        }
+        if (!rules.masterKey) {
+            rules.masterKey = BFastConfig.getInstance().getAppCredential(this.appName).appPassword;
+        }
+        if (!rules.token) {
+            const user = await this.authAdapter.currentUser();
+            rules.token = user?.token;
+        }
+        const value = await this.restAdapter.post(
+            BFastConfig.getInstance().databaseURL(this.appName) as string,
+            rules,
+        );
+        return value.data;
     }
 
     private static _getErrorMessage(e: any) {
