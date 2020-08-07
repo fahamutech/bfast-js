@@ -17,7 +17,8 @@ export interface QueryAdapter<T> {
 
 
 export interface RequestOptions extends CacheOptions {
-    useMasterKey?: boolean
+    useMasterKey?: boolean,
+    returnFields?: string[],
 }
 
 export interface AggregationOptions {

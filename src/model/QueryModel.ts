@@ -5,6 +5,6 @@ export interface QueryModel<T> {
     size?: number;
     orderBy?: Array<{ [P in keyof T]: 1 | -1 }>;
     filter?: FilterModel<T>
-    keys?: Array<string>;
+    return?: Array<string>;
     id?: string;
 }

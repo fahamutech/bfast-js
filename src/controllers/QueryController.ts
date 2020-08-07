@@ -65,7 +65,7 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
                 }
             );
         }
-        const identifier = `count_${this.collectionName}_${filter?filter:{}}`;
+        const identifier = `count_${this.collectionName}_${filter ? filter : {}}`;
         if (this.cacheAdapter.cacheEnabled(options)) {
             const cacheResponse = await this.cacheAdapter.get<number>(identifier);
             if (cacheResponse) {
@@ -158,6 +158,17 @@ export class QueryController<T extends DomainModel> implements QueryAdapter<T> {
     }
 
     async find<T>(queryModel: QueryModel<T>, options?: RequestOptions): Promise<T[]> {
+        const queryRule = {};
+        if (options?.useMasterKey) {
+            Object.assign(queryRule, {
+                'masterKey': BFastConfig.getInstance().getAppCredential(this.appName).appPassword
+            });
+        }
+        queryModel.return = options?.returnFields?options.returnFields: [];
+        Object.assign(queryRule, {
+            applicationId: BFastConfig.getInstance().getAppCredential(this.appName).applicationId,
+            [`query${this.collectionName}`]: queryModel
+        });
         const identifier = `find_${this.collectionName}_${JSON.stringify(queryModel && queryModel.filter ? queryModel.filter : {})}`;
         const findReq = (): Promise<RestResponse> => {
             return this.restAdapter.get(
