@@ -1,14 +1,17 @@
-import {RealTimeAdapter} from "../adapters/RealTimeAdapter";
 import * as io from 'socket.io-client';
 import {BFastConfig} from "../conf";
+
 // import Socket = SocketIOClient.Socket;
 
-export class SocketController implements RealTimeAdapter {
+export class SocketController {
     public readonly socket: any;
 
     constructor(private readonly eventName: string, appName = BFastConfig.DEFAULT_APP, onConnect?: Function, onDisconnect?: Function) {
         const namespace = String(eventName)[0] === '/' ? eventName : '/' + eventName;
-        this.socket = io(BFastConfig.getInstance().functionsURL(namespace, appName), {
+        const url = namespace === '/__changes__'
+            ? BFastConfig.getInstance().databaseURL(appName, namespace)
+            : BFastConfig.getInstance().functionsURL(namespace, appName);
+        this.socket = io(url, {
             autoConnect: false,
             // secure: true,
             transports: ['websocket']

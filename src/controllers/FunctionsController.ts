@@ -1,13 +1,11 @@
-import {FunctionAdapter} from "../adapters/FunctionsAdapter";
 import {BFastConfig} from "../conf";
-import {RestAdapter, RestRequestConfig} from "../adapters/RestAdapter";
+import {HttpClientAdapter, RestRequestConfig} from "../adapters/HttpClientAdapter";
 import {AuthAdapter} from "../adapters/AuthAdapter";
-import {RulesModel} from "../model/RulesModel";
 
-export class FunctionController implements FunctionAdapter {
+export class FunctionsController {
 
     constructor(private readonly functionPath: string,
-                private readonly restApi: RestAdapter,
+                private readonly restApi: HttpClientAdapter,
                 private readonly authAdapter: AuthAdapter,
                 private readonly appName = BFastConfig.DEFAULT_APP) {
     }

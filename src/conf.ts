@@ -1,22 +1,26 @@
 export class BFastConfig {
     static DEFAULT_APP = 'DEFAULT';
     private _DEFAULT_DOMAINS_CACHE_DB_NAME = '__domain';
-    get DEFAULT_DOMAINS_CACHE_DB_NAME() {
+
+    DEFAULT_DOMAINS_CACHE_DB_NAME() {
         return this._DEFAULT_DOMAINS_CACHE_DB_NAME;
     }
 
     private _DEFAULT_AUTH_CACHE_DB_NAME = '__auth';
-    get DEFAULT_AUTH_CACHE_DB_NAME() {
+
+    DEFAULT_AUTH_CACHE_DB_NAME() {
         return this._DEFAULT_AUTH_CACHE_DB_NAME;
     }
 
     private _DEFAULT_CACHE_DB_NAME = '__cache';
-    get DEFAULT_CACHE_DB_NAME() {
+
+    DEFAULT_CACHE_DB_NAME() {
         return this._DEFAULT_CACHE_DB_NAME;
     }
 
     private _DEFAULT_CACHE_TTL_COLLECTION_NAME = '__cache_ttl';
-    get DEFAULT_CACHE_TTL_COLLECTION_NAME() {
+
+    DEFAULT_CACHE_TTL_COLLECTION_NAME() {
         return this._DEFAULT_CACHE_TTL_COLLECTION_NAME;
     }
 

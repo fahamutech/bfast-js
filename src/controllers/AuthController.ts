@@ -1,11 +1,11 @@
-import {RestAdapter} from "../adapters/RestAdapter";
+import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
 import {AuthAdapter, AuthOptions} from "../adapters/AuthAdapter";
 import {UserModel} from "../model/UserModel";
 import {CacheAdapter} from "../adapters/CacheAdapter";
 import {BFastConfig} from "../conf";
 
 export class AuthController implements AuthAdapter {
-    constructor(private readonly restApi: RestAdapter,
+    constructor(private readonly restApi: HttpClientAdapter,
                 private readonly cacheAdapter: CacheAdapter,
                 private readonly appName: string) {
     }
@@ -31,12 +31,7 @@ export class AuthController implements AuthAdapter {
      * @deprecated use #getToken() instead. This method will be removed in 4.x
      */
     async getSessionToken(): Promise<any> {
-        const user = await this.currentUser();
-        if (user && user.sessionToken) {
-            return user.sessionToken;
-        } else {
-            return null;
-        }
+        return this.getToken();
     }
 
     async getToken(): Promise<any> {
@@ -161,7 +156,7 @@ export class AuthController implements AuthAdapter {
 
     async setCurrentUser<T extends UserModel>(user: T): Promise<T | null> {
         await this.cacheAdapter.set<T>('_current_user_', user, {
-            dtl: 30
+            dtl: 6
         });
         return user;
     }

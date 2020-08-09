@@ -1,7 +1,3 @@
-export interface UpdateOperation<T> {
-
-}
-
 export interface UpdateModel {
     $set?: {},
     $inc?: {},

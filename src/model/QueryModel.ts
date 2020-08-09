@@ -6,5 +6,8 @@ export interface QueryModel<T> {
     orderBy?: Array<{ [P in keyof T]: 1 | -1 }>;
     filter?: FilterModel<T>
     return?: Array<string>;
+    count?: boolean,
+    last?: number,
+    first?: number
     id?: string;
 }

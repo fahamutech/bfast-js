@@ -1,7 +1,5 @@
-import {DomainModel} from "../adapters/DomainAdapter";
-
 export interface TransactionModel {
-    method: 'POST' | 'PUT' | 'DELETE';
-    path: string,
-    body: DomainModel
+    action: 'create' | 'update' | 'delete' | 'query';
+    domain: string,
+    data: any
 }

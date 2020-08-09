@@ -1,17 +1,17 @@
-import {TransactionAdapter} from "../adapters/TransactionAdapter";
 import {TransactionModel} from "../model/TransactionModel";
 import {BFastConfig} from "../conf";
-import {DeleteOperation} from "../model/DeleteOperation";
-import {UpdateOperation} from "../model/UpdateOperation";
-import {RestAdapter} from "../adapters/RestAdapter";
+import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
+import {RulesController} from "./RulesController";
+import {QueryBuilder} from "./QueryBuilder";
+import {UpdateBuilderController} from "./UpdateBuilderController";
 
-export class TransactionController implements TransactionAdapter {
+export class TransactionController {
 
     private transactionRequests: TransactionModel[];
 
     constructor(private readonly appName: string,
-                private readonly restApi: RestAdapter,
-                private readonly isNormalBatch = false) {
+                private readonly restApi: HttpClientAdapter,
+                private readonly rulesController: RulesController) {
         this.transactionRequests = [];
     }
 
@@ -20,25 +20,17 @@ export class TransactionController implements TransactionAdapter {
         after?: () => Promise<void>,
         useMasterKey?: boolean
     }): Promise<any> {
-        // if (this.transactionRequests.length === 0) {
-        //     throw new Error('You can not commit an empty transaction');
-        // }
         if (options && options.before) {
             const result = await options.before(this.transactionRequests);
-            if (result && Array.isArray(result) && result.length > 0 && result[0].body && result[0].path && result[0].method) {
+            if (result && Array.isArray(result) && result.length > 0) {
                 this.transactionRequests = result;
             } else if (result && Array.isArray(result) && result.length === 0) {
                 this.transactionRequests = result;
             }
         }
-        const response = await this.restApi.post(`${BFastConfig.getInstance().databaseURL(this.appName, '/batch')}`, {
-            requests: this.transactionRequests,
-            transaction: !this.isNormalBatch,
-        }, {
-            headers: (options && options.useMasterKey === true)
-                ? BFastConfig.getInstance().getMasterHeaders(this.appName)
-                : BFastConfig.getInstance().getHeaders(this.appName),
-        });
+        const transactionRule = await this.rulesController.transaction(this.transactionRequests,
+            BFastConfig.getInstance().getAppCredential(this.appName), {useMasterKey: options?.useMasterKey});
+        const response = await this.restApi.post(BFastConfig.getInstance().databaseURL(this.appName), transactionRule);
         this.transactionRequests.splice(0);
         if (options && options.after) {
             await options.after();
@@ -46,66 +38,30 @@ export class TransactionController implements TransactionAdapter {
         return response.data;
     }
 
-    create(domainName: string, data: Object): TransactionAdapter {
+    create(domain: string, data: any | any[]): TransactionController {
         this.transactionRequests.push({
-            body: data,
-            method: "POST",
-            path: `/classes/${domainName}`
+            data,
+            action: "create",
+            domain
         });
         return this;
     }
 
-    createMany(domainName: string, data: Object[]): TransactionAdapter {
-        const trans = data.map<TransactionModel>(payLoad => {
-            return {
-                body: payLoad,
-                method: "POST",
-                path: `/classes/${domainName}`
-            }
-        });
-        this.transactionRequests.push(...trans);
-        return this;
-    }
-
-    delete(domainName: string, payLoad: { objectId: string, data?: DeleteOperation }): TransactionAdapter {
+    delete(domain: string, query: string | QueryBuilder): TransactionController {
         this.transactionRequests.push({
-            body: payLoad.data ? payLoad.data : {},
-            method: "DELETE",
-            path: `/classes/${domainName}/${payLoad.objectId}`
+            domain,
+            action: "delete",
+            data: {query}
         });
         return this;
     }
 
-    deleteMany(domainName: string, payLoads: { objectId: string, data?: DeleteOperation }[]): TransactionAdapter {
-        const trans = payLoads.map<TransactionModel>(payLoad => {
-            return {
-                body: payLoad.data ? payLoad.data : {},
-                method: "DELETE",
-                path: `/classes/${domainName}/${payLoad.objectId}`
-            }
-        });
-        this.transactionRequests.push(...trans);
-        return this;
-    }
-
-    update(domainName: string, payLoad: { objectId: string, data: UpdateOperation }): TransactionAdapter {
+    update(domain: string, query: string | QueryBuilder, updateModel: UpdateBuilderController): TransactionController {
         this.transactionRequests.push({
-            body: payLoad.data,
-            method: "PUT",
-            path: `/classes/${domainName}/${payLoad.objectId}`
+            domain,
+            action: "update",
+            data: {query, updateModel}
         });
-        return this;
-    }
-
-    updateMany(domainName: string, payLoads: { objectId: string, data: UpdateOperation }[]): TransactionAdapter {
-        const trans = payLoads.map<TransactionModel>(payLoad => {
-            return {
-                body: payLoad.data,
-                method: "PUT",
-                path: `/classes/${domainName}/${payLoad.objectId}`
-            }
-        });
-        this.transactionRequests.push(...trans);
         return this;
     }
 

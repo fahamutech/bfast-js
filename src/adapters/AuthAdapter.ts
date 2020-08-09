@@ -10,16 +10,22 @@ export interface AuthAdapter {
 
     updateUser<T extends UserModel>(userModel: UserModel, options?: AuthOptions): Promise<any>;
 
+    /**
+     * @deprecated use #getToken
+     */
     getSessionToken(): Promise<string>;
 
+    getToken(): Promise<any>
+
     currentUser<T extends UserModel>(): Promise<T | null>;
+
     setCurrentUser<T extends UserModel>(user: T): Promise<T | null>;
 
     signUp<T extends UserModel>(username: string, password: string, attrs: UserModel, options?: AuthOptions): Promise<T>;
 
     logIn<T extends UserModel>(username: string, password: string, options?: AuthOptions): Promise<T>;
 
-    logOut(options?:AuthOptions): Promise<boolean>;
+    logOut(options?: AuthOptions): Promise<boolean>;
 
     requestPasswordReset<T extends UserModel>(email: string, options?: AuthOptions): Promise<T>;
 }

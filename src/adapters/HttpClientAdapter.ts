@@ -1,4 +1,4 @@
-export interface RestAdapter {
+export interface HttpClientAdapter {
     get<T = any, R = RestResponse<T>>(url: string, config?: RestRequestConfig): Promise<R>;
 
     delete<T = any, R = RestResponse<T>>(url: string, config?: RestRequestConfig): Promise<R>;

@@ -1,11 +1,9 @@
 import {AppCredentials, BFastConfig} from "./conf";
-import {DomainController} from "./controllers/DomainController";
-import {FunctionController} from "./controllers/FunctionController";
+import {DatabaseController} from "./controllers/DatabaseController";
+import {FunctionsController} from "./controllers/FunctionsController";
 import {StorageController} from "./controllers/StorageController";
-import {DomainI} from "./adapters/DomainAdapter";
 import {AuthController} from "./controllers/AuthController";
 import {SocketController} from "./controllers/SocketController";
-import {TransactionAdapter} from "./adapters/TransactionAdapter";
 import {TransactionController} from "./controllers/TransactionController";
 import {CacheController} from "./controllers/CacheController";
 import {CacheAdapter} from "./adapters/CacheAdapter";
@@ -15,6 +13,7 @@ import * as device from "browser-or-node";
 import {HttpRequestModel} from "./model/HttpRequestModel";
 import {EventResponseModel, HttpResponseModel} from "./model/HttpResponseModel";
 import {HttpNextModel} from "./model/HttpNextModel";
+import {RulesController} from "./controllers/RulesController";
 
 
 /**
@@ -54,18 +53,20 @@ export const BFast = {
              * a domain/table/collection to deal with
              * @param domainName {string} domain name
              */
-            domain<T>(domainName: string): DomainI<T> {
-                const cacheController = new CacheController(
+            domain<T>(domainName: string): DatabaseController {
+                const authCache = new CacheController(
                     appName,
-                    BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_CACHE_DB_NAME, appName),
-                    BFastConfig.getInstance().getCacheCollectionName(domainName, appName),
+                    BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), appName),
+                    BFastConfig.getInstance().getCacheCollectionName('cache', appName)
                 );
                 const restController = new AxiosRestController()
-                return new DomainController<T>(
+                const authController = new AuthController(restController, authCache, appName);
+                const rulesController = new RulesController(authController)
+                return new DatabaseController(
                     domainName,
-                    cacheController,
                     restController,
-                    new AuthController(restController, cacheController, appName),
+                    authController,
+                    rulesController,
                     appName
                 );
             },
@@ -73,14 +74,14 @@ export const BFast = {
             /**
              * same as #domain
              */
-            collection<T>(collectionName: string): DomainI<T> {
+            collection<T>(collectionName: string): DatabaseController {
                 return this.domain<T>(collectionName);
             },
 
             /**
              * same as #domain
              */
-            table<T>(tableName: string): DomainI<T> {
+            table<T>(tableName: string): DatabaseController {
                 return this.domain<T>(tableName);
             },
 
@@ -88,8 +89,16 @@ export const BFast = {
              * perform transaction to remote database
              * @return {TransactionAdapter}
              */
-            transaction(isNormalBatch?: boolean): TransactionAdapter {
-                return new TransactionController(appName, new AxiosRestController(), isNormalBatch);
+            transaction(): TransactionController {
+                const authCache = new CacheController(
+                    appName,
+                    BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), appName),
+                    BFastConfig.getInstance().getCacheCollectionName('cache', appName)
+                );
+                const restController = new AxiosRestController();
+                const authController = new AuthController(restController, authCache, appName);
+                const rulesController = new RulesController(authController);
+                return new TransactionController(appName, restController, rulesController);
             }
         }
     },
@@ -104,16 +113,16 @@ export const BFast = {
              * exec a http client request
              * @param path {string} function name
              */
-            request(path: string): FunctionController {
+            request(path: string): FunctionsController {
                 const _restController = new AxiosRestController();
-                return new FunctionController(
+                return new FunctionsController(
                     path,
                     _restController,
                     new AuthController(
                         _restController,
                         new CacheController(
                             appName,
-                            BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME, appName),
+                            BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), appName),
                             BFastConfig.getInstance().getCacheCollectionName(`cache`, appName)
                         ),
                         appName
@@ -229,7 +238,7 @@ export const BFast = {
             appName,
             (options && options.database)
                 ? BFastConfig.getInstance().getCacheDatabaseName(options.database, appName)
-                : BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_CACHE_DB_NAME, appName),
+                : BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_CACHE_DB_NAME(), appName),
             (options && options.collection)
                 ? BFastConfig.getInstance().getCacheCollectionName(options.collection, appName)
                 : BFastConfig.getInstance().getCacheCollectionName('cache', appName),
@@ -245,8 +254,8 @@ export const BFast = {
             new AxiosRestController(),
             new CacheController(
                 appName,
-                BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME, appName),
-                BFastConfig.getInstance().getCacheCollectionName(`cache`, appName)
+                BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), appName),
+                BFastConfig.getInstance().getCacheCollectionName('cache', appName)
             ),
             appName
         );
@@ -256,7 +265,9 @@ export const BFast = {
      * utils and enums
      */
     utils: {
-        USER_DOMAIN_NAME: '_User'
+        USER_DOMAIN_NAME: '_User',
+        POLICY_DOMAIN_NAME: '_Policy',
+        TOKEN_DOMAIN_NAME: '_Policy',
     },
 
     /**
@@ -264,7 +275,15 @@ export const BFast = {
      * @param appName
      */
     storage(appName = BFastConfig.DEFAULT_APP): StorageController {
-        return new StorageController(new AxiosRestController(), appName);
+        const authCache = new CacheController(
+            appName,
+            BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), appName),
+            BFastConfig.getInstance().getCacheCollectionName('cache', appName)
+        );
+        const restController = new AxiosRestController()
+        const authController = new AuthController(restController, authCache, appName);
+        const rulesController = new RulesController(authController)
+        return new StorageController(new AxiosRestController(), authController, rulesController, appName);
     }
 
 };
