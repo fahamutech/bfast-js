@@ -2,7 +2,7 @@ const path = require('path');
 
 const clientConfig = {
     target: "web",
-    entry: './src/bfast_js.ts',
+    entry: './src/bfast.ts',
     mode: 'production',
     module: {
         rules: [

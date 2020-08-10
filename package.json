@@ -1,6 +1,6 @@
 {
   "name": "bfastjs",
-  "version": "3.1.4-beta.1",
+  "version": "3.1.4-beta.2",
   "description": "javascript client sdk for bfast::cloud project",
   "main": "dist/bfast_js.js",
   "maintainers": [
@@ -9,10 +9,10 @@
   "types": "dist/src/bfast_js.d.ts",
   "scripts": {
     "test": "mocha ./specs",
-    "build:web": "npx webpack --config webpack.config.js",
+    "build:web": "npx gulp updateNode && npx webpack --config webpack.config.js",
     "publish:web": "npx gulp updateNode && npm run build:web && npm publish",
-    "build:node": "cd node-config && webpack --config webpack-node.config.js",
-    "publish:node": "npx gulp updateNode && npm run build:node && cd node-config && npm publish",
+    "build:node": "npx gulp updateNode && npx tsc --build tsconfig-node.json",
+    "publish:node": "npx gulp updateNode && npm run build:node && cd node && npm publish",
     "publish:all": "npm run publish:web && npm run publish:node"
   },
   "author": "Fahamu Tech",

@@ -1,5 +1,5 @@
 // const gulp = require('gulp');
-const nodeJs = require('./node-config/package.json');
+const nodeJs = require('./node/package.json');
 const webJs = require('./package.json');
 const fs = require('fs');
 
@@ -9,7 +9,7 @@ function defaultTask(cb) {
 
 async function updateNode() {
     nodeJs.version = webJs.version;
-    fs.writeFileSync('./node-config/package.json', JSON.stringify(nodeJs));
+    fs.writeFileSync('./node/package.json', JSON.stringify(nodeJs));
     // return gulp.src('./node_modules/bfastjs/dist/bfast_js.js')
     //     .pipe(gulp.dest('./src/assets/js'));
 }

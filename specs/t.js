@@ -1,4 +1,4 @@
-const {BFast} = require('../node-config/dist/bfast_node');
+const {BFast} = require('../node/dist/bfast_node');
 BFast.init({
     applicationId: 'smartstock_lb', projectId: 'smartstock', cache: {
         enable: false

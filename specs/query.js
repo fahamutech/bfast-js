@@ -1,4 +1,4 @@
-const {BFast} = require('../node-config/dist/bfast_node');
+const {BFast} = require('../node/dist/bfast_node');
 
 BFast.init({applicationId:'ubongokids', projectId:'ubongokids'});
 

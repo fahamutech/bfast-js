@@ -6,8 +6,8 @@ import {AuthAdapter} from "../adapters/AuthAdapter";
 import {UpdateBuilderController} from "./UpdateBuilderController";
 import {QueryBuilder} from "./QueryBuilder";
 import {RulesController} from "./RulesController";
-import {PipelineBuilder} from "./PipelineBuilder";
 import {SocketController} from "./SocketController";
+import {DatabaseChangesModel} from "../model/DatabaseChangesModel";
 
 export class DatabaseController {
 
@@ -35,15 +35,26 @@ export class DatabaseController {
         }
     }
 
-    changes(pipeline?: PipelineBuilder, onConnect?: () => void, onDisconnect?: () => void): SocketController {
+    changes(query?: QueryBuilder, onConnect?: () => void, onDisconnect?: () => void): DatabaseChangesController {
         const socketController = new SocketController('/__changes__', this.appName, onConnect, onDisconnect);
         const applicationId = BFastConfig.getInstance().getAppCredential(this.appName).applicationId;
+        let match: any;
+        if (query && typeof query.build().filter === "object") {
+            match = query.build().filter as object;
+            Object.keys(match).forEach(key => {
+                match[`fullDocument.${key}`] = match[key];
+                delete match[key];
+            });
+        }
         socketController.emit({
             auth: {applicationId: applicationId},
-            body: {domain: this.domainName, pipeline: pipeline? pipeline.build(): []}
+            body: {
+                domain: this.domainName, pipeline: match ? [{$match: match}] : []
+            }
         });
-        return socketController;
+        return new DatabaseChangesController(socketController);
     }
+
 
     async get<T>(id: string, options?: RequestOptions): Promise<T> {
         return this.query().get(id, options);
@@ -90,4 +101,19 @@ export class DatabaseController {
     }
 }
 
+class DatabaseChangesController {
+    constructor(private socketController: SocketController) {
+    }
 
+    addListener(handler: (response: { body: DatabaseChangesModel }) => any) {
+        this.socketController.listener(handler);
+    }
+
+    close() {
+        this.socketController.close()
+    }
+
+    open() {
+        this.socketController.open()
+    }
+}

@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-    "outDir": "node-config/dist/",
+    "outDir": "node/dist/",
     "noImplicitAny": true,
-    "module": "commonjs",
+    "module": "CommonJS",
     "target": "es2015",
     "lib": ["es2017", "es7", "es6", "dom"],
     "jsx": "react",
-    "allowJs": true,
+    "allowJs": false,
     "declaration": true,
     "strict": true,
     "esModuleInterop": false
@@ -16,6 +16,8 @@
     "dist",
     "node",
     "web",
-    "specs"
+    "specs",
+    "node",
+    ".github"
   ]
 }

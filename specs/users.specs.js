@@ -1,4 +1,4 @@
-// const {BFast} = require('../node-config/dist/bfast_node');
+// const {BFast} = require('../node/dist/bfast_node');
 // const fs = require('fs');
 // BFast.init({projectId: 'smartstock', applicationId: 'smartstock_lb', appPassword: 'smartstockfahamutech'});
 // BFast.database().collection(BFast.utils.USER_DOMAIN_NAME).query().find({
