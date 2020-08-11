@@ -2,8 +2,8 @@ import {TransactionModel} from "../model/TransactionModel";
 import {BFastConfig} from "../conf";
 import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
 import {RulesController} from "./RulesController";
-import {QueryBuilder} from "./QueryBuilder";
-import {UpdateBuilderController} from "./UpdateBuilderController";
+import {QueryModel} from "../model/QueryModel";
+import {UpdateModel} from "../model/UpdateOperation";
 
 export class TransactionController {
 
@@ -47,7 +47,7 @@ export class TransactionController {
         return this;
     }
 
-    delete(domain: string, query: string | QueryBuilder): TransactionController {
+    delete(domain: string, query: QueryModel): TransactionController {
         this.transactionRequests.push({
             domain,
             action: "delete",
@@ -56,7 +56,7 @@ export class TransactionController {
         return this;
     }
 
-    update(domain: string, query: string | QueryBuilder, updateModel: UpdateBuilderController): TransactionController {
+    update(domain: string, query: QueryModel, updateModel: UpdateModel): TransactionController {
         this.transactionRequests.push({
             domain,
             action: "update",

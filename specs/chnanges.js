@@ -1,24 +1,22 @@
-const {UpdateBuilderController} = require("../node/dist/controllers/UpdateBuilderController");
-const {QueryBuilder} = require("../node/dist/controllers/QueryBuilder");
 const {BFast} = require('../node/dist/bfast');
-const http = require('http');
 
-BFast.init({databaseURL: 'http://localhost:3003', applicationId: 'daas', projectId: 'daas', appPassword: 'daas'});
+BFast.init({applicationId: 'ubongokids', projectId: 'ubongokids'});
 
-const changes = BFast.database().domain('test').changes(null,
-    () => console.log('connect'), () => console.log('disconnect'));
+const changes = BFast.database().domain('test')
+    .query()
+    .changes(() => console.log('connect'), () => console.log('disconnect'));
 changes.addListener(response => {
     console.log(response.body);
 });
 
 async function run() {
-    await BFast.database().domain('test').save([{name: 'mambo'}, {age: 30}]);
-    await BFast.database().domain('test').save({name: 'john'});
-    const query = new QueryBuilder().equalTo('name', 'mambo');
-    const query1 = new QueryBuilder().equalTo('name', 'john');
-    const update = new UpdateBuilderController().set('name', 'ethan');
-    await BFast.database().domain('test').update(query, update);
-    await BFast.database().domain('test').delete(query1);
+    const result = await BFast.database().domain('test').save([{name: 'mambo'}, {age: 30}]);
+    // await BFast.database().domain('test').save({name: 'john'});
+    await BFast.database().domain('test')
+        .query().equalTo('name', 'mambo')
+        .updateBuilder().set('name','ethan')
+        .update()
+    await BFast.database().domain('test').query().equalTo('name', 'john').delete();
     await BFast.database().domain('test').save({name: 'xyz'});
 }
 

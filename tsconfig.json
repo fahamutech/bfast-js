@@ -9,7 +9,7 @@
     "allowJs": true,
     "declaration": true,
     "strict": true,
-    "esModuleInterop": false
+    "esModuleInterop": true
   },
   "exclude": [
     "node_modules",

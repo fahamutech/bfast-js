@@ -1,10 +1,9 @@
 import {AppCredentials} from "../conf";
 import {RequestOptions} from "../adapters/QueryAdapter";
-import {QueryBuilder} from "./QueryBuilder";
-import {UpdateBuilderController} from "./UpdateBuilderController";
-import {PipelineBuilder} from "./PipelineBuilder";
 import {TransactionModel} from "../model/TransactionModel";
 import {AuthAdapter} from "../adapters/AuthAdapter";
+import {QueryModel} from "../model/QueryModel";
+import {UpdateModel} from "../model/UpdateOperation";
 
 export class RulesController {
     constructor(private readonly authAdapter: AuthAdapter) {
@@ -38,32 +37,21 @@ export class RulesController {
         }
     }
 
-    async deleteRule(domain: string, query: string | QueryBuilder, appCredential: AppCredentials, options?: RequestOptions): Promise<Object> {
+    async deleteRule(domain: string, query: QueryModel, appCredential: AppCredentials, options?: RequestOptions): Promise<Object> {
         const deleteRule = {}
         if (options && options?.useMasterKey === true) {
             Object.assign(deleteRule, {
                 masterKey: appCredential.appPassword
             });
         }
-        if (query && typeof query === "string") {
-            Object.assign(deleteRule, {
-                applicationId: appCredential.applicationId,
-                [`delete${domain}`]: {
-                    id: query
-                }
-            });
-        } else if (query instanceof QueryBuilder) {
-            Object.assign(deleteRule, {
-                applicationId: appCredential.applicationId,
-                [`delete${domain}`]: {
-                    filter: query.build().filter
-                }
-            });
-        }
+        Object.assign(deleteRule, {
+            applicationId: appCredential.applicationId,
+            [`delete${domain}`]: query
+        });
         return this.addToken(deleteRule);
     }
 
-    async updateRule(domain: string, query: string | QueryBuilder, updateBuilder: UpdateBuilderController,
+    async updateRule(domain: string, query: QueryModel, updateModel: UpdateModel,
                      appCredential: AppCredentials, options?: RequestOptions): Promise<Object> {
         const updateRule = {}
         if (options && options?.useMasterKey === true) {
@@ -71,29 +59,18 @@ export class RulesController {
                 masterKey: appCredential.appPassword
             });
         }
-        if (query && typeof query === "string") {
-            Object.assign(updateRule, {
-                applicationId: appCredential.applicationId,
-                [`update${domain}`]: {
-                    id: query,
-                    update: updateBuilder.build(),
-                    return: options?.returnFields ? options.returnFields : []
-                }
-            });
-        } else if (query instanceof QueryBuilder) {
-            Object.assign(updateRule, {
-                applicationId: appCredential.applicationId,
-                [`update${domain}`]: {
-                    filter: query.build().filter,
-                    update: updateBuilder.build(),
-                    return: options?.returnFields ? options.returnFields : []
-                }
-            });
-        }
+        query.return = options?.returnFields ? options.returnFields : []
+        Object.assign(query, {
+            update: updateModel
+        });
+        Object.assign(updateRule, {
+            applicationId: appCredential.applicationId,
+            [`update${domain}`]: query
+        });
         return this.addToken(updateRule);
     }
 
-    async aggregateRule(domain: string, pipeline: PipelineBuilder, appCredentials: AppCredentials, options?: RequestOptions): Promise<Object> {
+    async aggregateRule(domain: string, pipeline: any[], appCredentials: AppCredentials, options?: RequestOptions): Promise<Object> {
         const aggregateRule = {};
         if (options && options?.useMasterKey === true) {
             Object.assign(aggregateRule, {
@@ -102,13 +79,12 @@ export class RulesController {
         }
         Object.assign(aggregateRule, {
             applicationId: appCredentials.applicationId,
-            [`aggregate${domain}`]: pipeline.build()
+            [`aggregate${domain}`]: pipeline
         });
         return this.addToken(aggregateRule);
     }
 
-    async queryRule(domain: string, query: QueryBuilder, appCredentials: AppCredentials, options?: RequestOptions): Promise<Object> {
-        const queryModel = query.build();
+    async queryRule(domain: string, queryModel: QueryModel, appCredentials: AppCredentials, options?: RequestOptions): Promise<Object> {
         const queryRule = {};
         if (options && options?.useMasterKey === true) {
             Object.assign(queryRule, {

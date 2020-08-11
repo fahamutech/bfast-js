@@ -1,10 +1,8 @@
-import {FilterModel} from "./FilterModel";
-
-export interface QueryModel<T> {
+export interface QueryModel {
     skip?: number;
     size?: number;
-    orderBy?: Array<{ [P in keyof T]: 1 | -1 }>;
-    filter?: FilterModel<T>
+    orderBy?: Array<object>;
+    filter?: any;
     return?: Array<string>;
     count?: boolean,
     last?: number,

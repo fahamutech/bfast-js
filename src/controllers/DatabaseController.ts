@@ -3,8 +3,6 @@ import {BFastConfig} from "../conf";
 import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
 import {RequestOptions} from "../adapters/QueryAdapter";
 import {AuthAdapter} from "../adapters/AuthAdapter";
-import {UpdateBuilderController} from "./UpdateBuilderController";
-import {QueryBuilder} from "./QueryBuilder";
 import {RulesController} from "./RulesController";
 import {SocketController} from "./SocketController";
 import {DatabaseChangesModel} from "../model/DatabaseChangesModel";
@@ -28,43 +26,15 @@ export class DatabaseController {
 
     async getAll<T>(pagination?: { size: number, skip: number }, options?: RequestOptions): Promise<T[]> {
         try {
-            const totalCount = pagination ? pagination.size : await this.query().find(new QueryBuilder().count(true), options);
-            return await this.query().find(new QueryBuilder().skip(pagination ? pagination.skip : 0).size(totalCount as number), options);
+            const totalCount = pagination ? pagination.size : await this.query().count(true).find(options);
+            return await this.query().skip(pagination ? pagination.skip : 0).size(totalCount as number).find(options);
         } catch (e) {
             throw {message: DatabaseController._getErrorMessage(e)};
         }
     }
 
-    changes(query?: QueryBuilder, onConnect?: () => void, onDisconnect?: () => void): DatabaseChangesController {
-        const socketController = new SocketController('/__changes__', this.appName, onConnect, onDisconnect);
-        const applicationId = BFastConfig.getInstance().getAppCredential(this.appName).applicationId;
-        let match: any;
-        if (query && typeof query.build().filter === "object") {
-            match = query.build().filter as object;
-            Object.keys(match).forEach(key => {
-                match[`fullDocument.${key}`] = match[key];
-                delete match[key];
-            });
-        }
-        socketController.emit({
-            auth: {applicationId: applicationId},
-            body: {
-                domain: this.domainName, pipeline: match ? [{$match: match}] : []
-            }
-        });
-        return new DatabaseChangesController(socketController);
-    }
-
-
     async get<T>(id: string, options?: RequestOptions): Promise<T> {
-        return this.query().get(id, options);
-    }
-
-    async delete<T>(query: string | QueryBuilder, options?: RequestOptions): Promise<T> {
-        const deleteRule = await this.rulesController.deleteRule(this.domainName, query,
-            BFastConfig.getInstance().getAppCredential(this.appName), options);
-        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), deleteRule);
-        return DatabaseController._extractResultFromServer(response.data, 'delete', this.domainName);
+        return this.query().byId(id).find<T>(options);
     }
 
     query(): QueryController {
@@ -72,15 +42,7 @@ export class DatabaseController {
             this.appName);
     }
 
-    async update<T>(query: string | QueryBuilder, updateModel: UpdateBuilderController,
-                    options?: RequestOptions): Promise<T> {
-        const updateRule = await this.rulesController.updateRule(this.domainName, query, updateModel,
-            BFastConfig.getInstance().getAppCredential(this.appName), options);
-        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), updateRule);
-        return DatabaseController._extractResultFromServer(response.data, 'update', this.domainName);
-    }
-
-    private static _extractResultFromServer(data: any, rule: string, domain: string) {
+    static _extractResultFromServer(data: any, rule: string, domain: string) {
         if (data && data[`${rule}${domain}`]) {
             return data[`${rule}${domain}`];
         } else {
@@ -92,7 +54,7 @@ export class DatabaseController {
         }
     }
 
-    private static _getErrorMessage(e: any) {
+    static _getErrorMessage(e: any) {
         if (e.message) {
             return e.message;
         } else {
@@ -101,7 +63,7 @@ export class DatabaseController {
     }
 }
 
-class DatabaseChangesController {
+export class DatabaseChangesController {
     constructor(private socketController: SocketController) {
     }
 

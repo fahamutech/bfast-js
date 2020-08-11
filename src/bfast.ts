@@ -52,6 +52,7 @@ export const BFast = {
             /**
              * a domain/table/collection to deal with
              * @param domainName {string} domain name
+             * @return {DatabaseController}
              */
             domain<T>(domainName: string): DatabaseController {
                 const authCache = new CacheController(
@@ -73,6 +74,7 @@ export const BFast = {
 
             /**
              * same as #domain
+             * @return {DatabaseController}
              */
             collection<T>(collectionName: string): DatabaseController {
                 return this.domain<T>(collectionName);
@@ -80,6 +82,7 @@ export const BFast = {
 
             /**
              * same as #domain
+             * @return {DatabaseController}
              */
             table<T>(tableName: string): DatabaseController {
                 return this.domain<T>(tableName);
@@ -87,7 +90,7 @@ export const BFast = {
 
             /**
              * perform transaction to remote database
-             * @return {TransactionAdapter}
+             * @return {TransactionController}
              */
             transaction(): TransactionController {
                 const authCache = new CacheController(
