@@ -11,7 +11,7 @@ const clientConfig = {
                 use: [
                     {
                         loader: 'ts-loader',
-                        // options: {configFile: "tsconfig-node.json"}
+                        options: {configFile: "tsconfig-node.json"}
                     }
                 ],
                 exclude: /node_modules/,

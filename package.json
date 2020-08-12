@@ -1,12 +1,12 @@
 {
   "name": "bfastjs",
-  "version": "4.0.0-beta.2",
+  "version": "4.0.0-beta.3",
   "description": "javascript client sdk for bfast::cloud project",
-  "main": "dist/bfast_js.js",
+  "main": "dist/bfast.js",
   "maintainers": [
     "Fahamu Tech"
   ],
-  "types": "dist/src/bfast_js.d.ts",
+  "types": "dist/bfast.d.ts",
   "scripts": {
     "test": "mocha ./specs",
     "build:web": "npx gulp updateNode && npx webpack --config webpack.config.js",
