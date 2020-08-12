@@ -1,10 +1,9 @@
 import {CacheAdapter} from "../adapters/CacheAdapter";
-// @ts-ignore
-import * as localForage from 'localforage';
 import {BFastConfig} from "../conf";
 import {RequestOptions} from "../adapters/QueryAdapter";
-// @ts-ignore
-import * as device from "browser-or-node";
+
+const device = require("browser-or-node");
+const localForage = require('localforage');
 
 export class CacheController implements CacheAdapter {
 
@@ -51,12 +50,11 @@ export class CacheController implements CacheAdapter {
 
     async get<T extends any>(identifier: string): Promise<T> {
         if (device.isNode) {
-            // @ts-ignore
-            return null;
+            return null as any;
         }
         await this.remove(identifier);
         // @ts-ignore
-        return await this._getCacheDatabase()?.getItem<T>(identifier);
+        return this._getCacheDatabase()?.getItem<T>(identifier) as any;
     }
 
     async set<T>(identifier: string, data: T, options?: { dtl: number }): Promise<T> {
