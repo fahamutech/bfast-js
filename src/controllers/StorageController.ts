@@ -4,6 +4,7 @@ import {RequestOptions} from "../adapters/QueryAdapter";
 // @ts-ignore
 import * as device from "browser-or-node";
 import {AuthAdapter} from "../adapters/AuthAdapter";
+// @ts-ignore
 import FormDataNode from 'form-data';
 import {RulesController} from "./RulesController";
 

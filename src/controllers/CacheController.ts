@@ -1,4 +1,5 @@
 import {CacheAdapter} from "../adapters/CacheAdapter";
+// @ts-ignore
 import * as localForage from 'localforage';
 import {BFastConfig} from "../conf";
 import {RequestOptions} from "../adapters/QueryAdapter";
@@ -12,7 +13,7 @@ export class CacheController implements CacheAdapter {
                 private readonly  collection: string) {
     }
 
-    private _getCacheDatabase(): LocalForage | undefined {
+    private _getCacheDatabase(): any {
         if (device.isNode) {
             return undefined;
         }
@@ -22,7 +23,7 @@ export class CacheController implements CacheAdapter {
         });
     }
 
-    private _getTTLStore(): LocalForage | undefined {
+    private _getTTLStore(): any {
         if (device.isNode) {
             return undefined;
         }
@@ -54,7 +55,8 @@ export class CacheController implements CacheAdapter {
             return null;
         }
         await this.remove(identifier);
-        return await this._getCacheDatabase()?.getItem<T>(identifier) as any;
+        // @ts-ignore
+        return await this._getCacheDatabase()?.getItem<T>(identifier);
     }
 
     async set<T>(identifier: string, data: T, options?: { dtl: number }): Promise<T> {
@@ -62,6 +64,7 @@ export class CacheController implements CacheAdapter {
             // @ts-ignore
             return null;
         }
+        // @ts-ignore
         const response = await this._getCacheDatabase()?.setItem<T>(identifier, data);
         await this._getTTLStore()?.setItem(identifier, CacheController._getDayToLeave(options ? options.dtl : 7));
         return response as any;
@@ -76,7 +79,8 @@ export class CacheController implements CacheAdapter {
         if (device.isNode) {
             return true;
         }
-        const dayToLeave = await this._getTTLStore()?.getItem<number>(identifier);
+        // @ts-ignore
+        const dayToLeave = await this._getTTLStore()?.getItem<number>(identifier as any);
         if (force || (dayToLeave && dayToLeave < new Date().getTime())) {
             await this._getTTLStore()?.removeItem(identifier);
             await this._getCacheDatabase()?.removeItem(identifier);

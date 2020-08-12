@@ -22,7 +22,7 @@ const clientConfig = {
         extensions: ['.tsx', '.ts', '.js']
     },
     output: {
-        filename: 'bfast_js.js',
+        filename: 'bfast.js',
         path: path.resolve(__dirname, './dist'),
         library: '',
         libraryExport: '',

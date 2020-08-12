@@ -14,7 +14,7 @@ async function run() {
     // await BFast.database().domain('test').save({name: 'john'});
     await BFast.database().domain('test')
         .query().equalTo('name', 'mambo')
-        .updateBuilder().set('name','ethan')
+        .updateBuilder().set('name', 'ethan')
         .update()
     await BFast.database().domain('test').query().equalTo('name', 'john').delete();
     await BFast.database().domain('test').save({name: 'xyz'});

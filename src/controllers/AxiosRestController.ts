@@ -1,5 +1,6 @@
 import {HttpClientAdapter, RestRequestConfig, RestResponse} from "../adapters/HttpClientAdapter";
 
+// @ts-ignore
 import axios from "axios";
 
 export class AxiosRestController implements HttpClientAdapter {
