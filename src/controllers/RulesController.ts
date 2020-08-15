@@ -113,24 +113,24 @@ export class RulesController {
         Object.assign(transactionRule, {
             applicationId: appCredentials.applicationId,
         });
-        transactions.forEach(value => {
+        for (const value of transactions) {
             if (value.action === "create") {
-                const createRule: any = this.createRule(value.domain, value.data, appCredentials, options);
+                const createRule: any = await this.createRule(value.domain, value.data, appCredentials, options);
                 Object.assign(transactionRule.transaction.commit, {
                     [`${value.action}${value.domain}`]: createRule[`${value.action}${value.domain}`]
                 });
             } else if (value.action === "update") {
-                const updateRule: any = this.updateRule(value.domain, value.data['query'], value.data['updateModel'], appCredentials, options);
+                const updateRule: any = await this.updateRule(value.domain, value.data['query'], value.data['updateModel'], appCredentials, options);
                 Object.assign(transactionRule.transaction.commit, {
                     [`${value.action}${value.domain}`]: updateRule[`${value.action}${value.domain}`]
                 });
             } else if (value.action === "delete") {
-                const deleteQuery: any = this.deleteRule(value.domain, value.data['query'], appCredentials, options);
+                const deleteQuery: any = await this.deleteRule(value.domain, value.data['query'], appCredentials, options);
                 Object.assign(transactionRule.transaction.commit, {
                     [`${value.action}${value.domain}`]: deleteQuery[`${value.action}${value.domain}`]
                 });
             }
-        });
+        }
         return this.addToken(transactionRule);
     }
 
