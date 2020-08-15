@@ -139,4 +139,23 @@ export class BfastFunctions {
             throw 'Works In NodeJs Environment Only'
         }
     }
+
+    onJob(schedule: {
+        second?: number,
+        minute?: number,
+        hour?: number,
+        date?: number,
+        month?: number,
+        year?: number,
+        dayOfWeek?: number
+    }, handler: (job: any) => void) {
+        if (device.isNode) {
+            return {
+                onJob: handler,
+                rule: schedule,
+            };
+        } else {
+            throw 'Works In NodeJs Environment Only';
+        }
+    }
 }
