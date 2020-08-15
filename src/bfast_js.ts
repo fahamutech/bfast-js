@@ -213,7 +213,25 @@ export const BFast = {
                         onGuard: handler
                     };
                 } else {
-                    throw 'Works In NodeJs Environment Only'
+                    throw 'Works In NodeJs Environment Only';
+                }
+            },
+            onJob(rule: {
+                second?: number,
+                minute?: number,
+                hour?: number,
+                date?: number,
+                month?: number,
+                year?: number,
+                dayOfWeek?: number
+            }, handler: (job: any) => void) {
+                if (device.isNode) {
+                    return {
+                        onJob: handler,
+                        rule,
+                    };
+                } else {
+                    throw 'Works In NodeJs Environment Only';
                 }
             },
         };
