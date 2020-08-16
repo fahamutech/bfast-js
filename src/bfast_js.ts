@@ -216,19 +216,25 @@ export const BFast = {
                     throw 'Works In NodeJs Environment Only';
                 }
             },
-            onJob(rule: {
-                second?: number,
-                minute?: number,
-                hour?: number,
-                date?: number,
-                month?: number,
-                year?: number,
-                dayOfWeek?: number
-            }, handler: (job: any) => void) {
+            onJob(schedule: {
+                second?: string,
+                minute?: string,
+                hour?: string,
+                day?: string,
+                month?: string,
+                dayOfWeek?: string
+            }, handler: (job: any) => any) {
+                const defaultRule: any = {second: '*', minute: '*', month: '*', day: '*', dayOfWeek: '*', hour: '*'};
+                Object.keys(schedule).forEach(key=>{
+                    delete defaultRule[key];
+                });
+                Object.assign(schedule,defaultRule);
+                // @ts-ignore
+                const rule: any = Object.keys(schedule).map(x => schedule[x]).join(' ');
                 if (device.isNode) {
                     return {
                         onJob: handler,
-                        rule,
+                        rule: rule,
                     };
                 } else {
                     throw 'Works In NodeJs Environment Only';
