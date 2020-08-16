@@ -15,7 +15,6 @@ import * as device from "browser-or-node";
 import {HttpRequestModel} from "./model/HttpRequestModel";
 import {EventResponseModel, HttpResponseModel} from "./model/HttpResponseModel";
 import {HttpNextModel} from "./model/HttpNextModel";
-import Socket = SocketIOClient.Socket;
 
 
 /**
@@ -56,14 +55,17 @@ export const BFast = {
              * @param domainName {string} domain name
              */
             domain<T>(domainName: string): DomainI<T> {
+                const cacheController = new CacheController(
+                    appName,
+                    BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_CACHE_DB_NAME, appName),
+                    BFastConfig.getInstance().getCacheCollectionName(domainName, appName),
+                );
+                const restController = new AxiosRestController()
                 return new DomainController<T>(
                     domainName,
-                    new CacheController(
-                        appName,
-                        BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_CACHE_DB_NAME, appName),
-                        BFastConfig.getInstance().getCacheCollectionName(domainName, appName),
-                    ),
-                    new AxiosRestController(),
+                    cacheController,
+                    restController,
+                    new AuthController(restController, cacheController, appName),
                     appName
                 );
             },
@@ -193,7 +195,7 @@ export const BFast = {
                     throw 'Works In NodeJs Environment Only'
                 }
             },
-            onEvent(path: string, handler: (request: { auth?: any, body?: any}, response: EventResponseModel) => any) {
+            onEvent(path: string, handler: (request: { auth?: any, body?: any }, response: EventResponseModel) => any) {
                 if (device.isNode) {
                     return {
                         name: path,
@@ -211,7 +213,31 @@ export const BFast = {
                         onGuard: handler
                     };
                 } else {
-                    throw 'Works In NodeJs Environment Only'
+                    throw 'Works In NodeJs Environment Only';
+                }
+            },
+            onJob(schedule: {
+                second?: string,
+                minute?: string,
+                hour?: string,
+                day?: string,
+                month?: string,
+                dayOfWeek?: string
+            }, handler: (job: any) => any) {
+                const defaultRule: any = {second: '*', minute: '*', month: '*', day: '*', dayOfWeek: '*', hour: '*'};
+                Object.keys(schedule).forEach(key=>{
+                    delete defaultRule[key];
+                });
+                Object.assign(schedule,defaultRule);
+                // @ts-ignore
+                const rule: any = Object.keys(schedule).map(x => schedule[x]).join(' ');
+                if (device.isNode) {
+                    return {
+                        onJob: handler,
+                        rule: rule,
+                    };
+                } else {
+                    throw 'Works In NodeJs Environment Only';
                 }
             },
         };

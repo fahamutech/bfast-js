@@ -51,7 +51,12 @@ export class AuthController implements AuthAdapter {
     }
 
     async getToken(): Promise<any> {
-
+        const user = await this.currentUser();
+        if (user && user.token) {
+            return user.token;
+        } else {
+            return null;
+        }
     }
 
     async getUsername(): Promise<any> {
@@ -90,13 +95,13 @@ export class AuthController implements AuthAdapter {
 
     async logOut(options?: AuthOptions): Promise<boolean> {
         const user = await this.currentUser();
-        await this.cacheAdapter.set('_current_user_', null);
         if (user && user.sessionToken) {
             const postHeader = this._geHeadersWithToken(user, options);
             this.restApi.post(BFastConfig.getInstance().databaseURL(this.appName, '/logout'), {}, {
                 headers: postHeader
             }).catch(console.warn);
         }
+        await this.cacheAdapter.set('_current_user_', null);
         return true;
     }
 
@@ -175,9 +180,9 @@ export class AuthController implements AuthAdapter {
         Object.assign(postHeader, {
             'X-Parse-Session-Token': user.sessionToken
         });
-        Object.assign(postHeader, {
-            'authorization': 'Bearer ' + user.token ? user.token : user.sessionToken
-        });
+        // Object.assign(postHeader, {
+        //     'authorization': 'Bearer ' + user.token ? user.token : user.sessionToken
+        // });
         Object.assign(postHeader, {
             'X-Parse-Application-Id': BFastConfig.getInstance().getAppCredential(this.appName).applicationId
         });
@@ -185,7 +190,9 @@ export class AuthController implements AuthAdapter {
     }
 
     async setCurrentUser<T extends UserModel>(user: T): Promise<T | null> {
-        user.token = user.sessionToken;
+        if (user && user.sessionToken) {
+            user.token = user.sessionToken;
+        }
         await this.cacheAdapter.set<T>('_current_user_', user, {
             dtl: 30
         });

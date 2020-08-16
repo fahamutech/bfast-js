@@ -1,3 +1,5 @@
+import {RulesModel} from "../model/RulesModel";
+
 export interface FunctionAdapter {
     post<T>(body?: { [key: string]: any }, config?: { [key: string]: any }): Promise<T>;
 
