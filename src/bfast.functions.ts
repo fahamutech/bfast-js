@@ -12,7 +12,6 @@ import * as device from "browser-or-node";
 
 export class BfastFunctions {
     constructor(private readonly appName: string) {
-
     }
 
     /**

@@ -19,6 +19,7 @@ export interface CookieOptions {
 
 export interface EventResponseModel {
     socket: any,
+    broadcast: (data: any)=>void;
     emit: (data: any) => void;
 }
 
