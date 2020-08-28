@@ -110,7 +110,7 @@ export class QueryController {
         return this;
     }
 
-    lessThan(field: string, value: any[]): QueryController {
+    lessThan(field: string, value: any): QueryController {
         Object.assign(this.query.filter, {
             [field]: {
                 $lt: value
@@ -119,7 +119,7 @@ export class QueryController {
         return this;
     }
 
-    lessThanOrEqual(field: string, value: any[]): QueryController {
+    lessThanOrEqual(field: string, value: any): QueryController {
         Object.assign(this.query.filter, {
             [field]: {
                 $lte: value
