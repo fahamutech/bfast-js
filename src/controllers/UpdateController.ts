@@ -24,6 +24,11 @@ export class UpdateController {
         return this;
     }
 
+    doc<T extends object>(doc: T): UpdateController {
+        Object.assign(this.query.$set, doc);
+        return this;
+    }
+
     increment(field: string, amount: number = 1): UpdateController {
         Object.assign(this.query.$inc, {
             [field]: amount
