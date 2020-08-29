@@ -1,17 +1,17 @@
 import {AppCredentials, BFastConfig} from "../conf";
 import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
-import {RequestOptions} from "../adapters/QueryAdapter";
 // @ts-ignore
 import * as device from "browser-or-node";
-import {AuthAdapter} from "../adapters/AuthAdapter";
 // @ts-ignore
 import FormDataNode from 'form-data';
 import {RulesController} from "./RulesController";
+import {AuthController} from "./AuthController";
+import {RequestOptions} from "./QueryController";
 
 export class StorageController {
 
     constructor(private readonly restApi: HttpClientAdapter,
-                private readonly auth: AuthAdapter,
+                private readonly auth: AuthController,
                 private readonly rulesController: RulesController,
                 private readonly appName = BFastConfig.DEFAULT_APP) {
     }
@@ -21,19 +21,19 @@ export class StorageController {
             throw new Error('file object to save required');
         }
         if (device.isNode && file instanceof ReadableStream) {
-            return this._handleFileUploadInNode(file, uploadProgress, BFastConfig.getInstance().getAppCredential(this.appName), options);
+            return this._handleFileUploadInNode(file, uploadProgress, BFastConfig.getInstance().credential(this.appName), options);
         } else {
-            return this._handleFileUploadInWeb(file, uploadProgress, BFastConfig.getInstance().getAppCredential(this.appName), options);
+            return this._handleFileUploadInWeb(file, uploadProgress, BFastConfig.getInstance().credential(this.appName), options);
         }
     }
 
     async list(query: { keyword?: string, size?: number, skip?: number, after?: string } = {}, options?: RequestOptions): Promise<any[]> {
-        const filesRule = await this.rulesController.storage("list", query, BFastConfig.getInstance().getAppCredential(this.appName), options);
+        const filesRule = await this.rulesController.storage("list", query, BFastConfig.getInstance().credential(this.appName), options);
         return this._handleFileRuleRequest(filesRule, 'list');
     }
 
     async delete(filename: string, options?: RequestOptions): Promise<string> {
-        const filesRule = await this.rulesController.storage("delete", {filename}, BFastConfig.getInstance().getAppCredential(this.appName), options);
+        const filesRule = await this.rulesController.storage("delete", {filename}, BFastConfig.getInstance().credential(this.appName), options);
         return this._handleFileRuleRequest(filesRule, 'delete');
     }
 

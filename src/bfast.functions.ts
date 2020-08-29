@@ -4,9 +4,9 @@ import {AuthController} from "./controllers/AuthController";
 import {CacheController} from "./controllers/CacheController";
 import {BFastConfig} from "./conf";
 import {SocketController} from "./controllers/SocketController";
-import {HttpRequestModel} from "./model/HttpRequestModel";
-import {EventResponseModel, HttpResponseModel} from "./model/HttpResponseModel";
-import {HttpNextModel} from "./model/HttpNextModel";
+import {HttpRequestModel} from "./models/HttpRequestModel";
+import {EventResponseModel, HttpResponseModel} from "./models/HttpResponseModel";
+import {HttpNextModel} from "./models/HttpNextModel";
 // @ts-ignore
 import * as device from "browser-or-node";
 
@@ -19,18 +19,21 @@ export class BfastFunctions {
      * @param path {string} function name
      */
     request(path: string): FunctionsController {
+        const config = BFastConfig.getInstance();
         const _restController = new AxiosRestController();
         return new FunctionsController(
             path,
             _restController,
             new AuthController(
+                this.appName,
                 _restController,
                 new CacheController(
                     this.appName,
-                    BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), this.appName),
-                    BFastConfig.getInstance().getCacheCollectionName(`cache`, this.appName)
+                    config.cacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), this.appName),
+                    config.cacheCollectionName(`cache`, this.appName),
+                    config.cacheAdapter(this.appName)
                 ),
-                this.appName
+                config.authAdapter(this.appName)
             ),
             this.appName
         );
@@ -148,10 +151,10 @@ export class BfastFunctions {
         dayOfWeek?: string
     }, handler: (job: any) => any) {
         const defaultRule: any = {second: '*', minute: '*', month: '*', day: '*', dayOfWeek: '*', hour: '*'};
-        Object.keys(schedule).forEach(key=>{
+        Object.keys(schedule).forEach(key => {
             delete defaultRule[key];
         });
-        Object.assign(schedule,defaultRule);
+        Object.assign(schedule, defaultRule);
         // @ts-ignore
         const rule: any = Object.keys(schedule).map(x => schedule[x]).join(' ');
         if (device.isNode) {

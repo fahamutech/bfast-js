@@ -17,13 +17,15 @@ export class BfastDatabase {
      * @return {DatabaseController}
      */
     domain<T>(domainName: string): DatabaseController {
+        const config = BFastConfig.getInstance();
         const authCache = new CacheController(
             this.appName,
-            BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), this.appName),
-            BFastConfig.getInstance().getCacheCollectionName('cache', this.appName)
+            config.cacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), this.appName),
+            config.cacheCollectionName('cache', this.appName),
+            config.cacheAdapter(this.appName)
         );
         const restController = new AxiosRestController()
-        const authController = new AuthController(restController, authCache, this.appName);
+        const authController = new AuthController(this.appName, restController, authCache, config.authAdapter(this.appName));
         const rulesController = new RulesController(authController)
         return new DatabaseController(
             domainName,
@@ -55,13 +57,15 @@ export class BfastDatabase {
      * @return {TransactionController}
      */
     transaction(): TransactionController {
+        const config = BFastConfig.getInstance();
         const authCache = new CacheController(
             this.appName,
-            BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), this.appName),
-            BFastConfig.getInstance().getCacheCollectionName('cache', this.appName)
+            config.cacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), this.appName),
+            config.cacheCollectionName('cache', this.appName),
+            config.cacheAdapter(this.appName)
         );
         const restController = new AxiosRestController();
-        const authController = new AuthController(restController, authCache, this.appName);
+        const authController = new AuthController(this.appName, restController, authCache, config.authAdapter(this.appName));
         const rulesController = new RulesController(authController);
         return new TransactionController(this.appName, restController, rulesController);
     }

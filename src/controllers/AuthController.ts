@@ -1,21 +1,23 @@
 import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
 import {AuthAdapter, AuthOptions} from "../adapters/AuthAdapter";
-import {UserModel} from "../model/UserModel";
-import {CacheAdapter} from "../adapters/CacheAdapter";
-import {BFastConfig} from "../conf";
+import {UserModel} from "../models/UserModel";
+import {CacheController} from "./CacheController";
 
-export class AuthController implements AuthAdapter {
-    constructor(private readonly restApi: HttpClientAdapter,
-                private readonly cacheAdapter: CacheAdapter,
-                private readonly appName: string) {
+export class AuthController {
+    constructor(
+        private readonly appName: string,
+        private readonly restApi: HttpClientAdapter,
+        private readonly cacheController: CacheController,
+        private readonly authAdapter: AuthAdapter
+    ) {
     }
 
-    async authenticated<T extends UserModel>(options?: AuthOptions): Promise<any> {
-        return await this.currentUser();
+    async authenticated<T extends UserModel>(userId: string, options?: AuthOptions): Promise<any> {
+        return this.authAdapter.authenticated(userId, options);
     }
 
     async currentUser<T extends UserModel>(): Promise<T | null> {
-        return await this.cacheAdapter.get<T>('_current_user_');
+        return await this.cacheController.get<T>('_current_user_');
     }
 
     async getEmail(): Promise<any> {
@@ -25,13 +27,6 @@ export class AuthController implements AuthAdapter {
         } else {
             return null;
         }
-    }
-
-    /**
-     * @deprecated use #getToken() instead. This method will be removed in 4.x
-     */
-    async getSessionToken(): Promise<any> {
-        return this.getToken();
     }
 
     async getToken(): Promise<any> {
@@ -52,112 +47,56 @@ export class AuthController implements AuthAdapter {
         }
     }
 
-    async logIn<T extends UserModel>(username: string, password: string, options?: AuthOptions): Promise<T> {
-        const authRule = {};
-        Object.assign(authRule, {
-            'applicationId': BFastConfig.getInstance().getAppCredential(this.appName).applicationId
-        });
-        Object.assign(authRule, {
-            auth: {
-                signIn: {
-                    username,
-                    password
-                }
-            }
-        });
-        const response = await this.restApi.post<T>(BFastConfig.getInstance().databaseURL(this.appName), authRule);
-        const data = response.data;
-        if (data && data.auth && data.auth.signIn) {
-            await this.cacheAdapter.set<T>('_current_user_', data.auth.signIn, {
-                dtl: 7
-            });
-            return data.auth.signIn;
-        } else {
-            throw {message: data.errors && data.errors.auth && data.errors.auth.signIn ? data.errors.auth.signIn.message : 'Fails to login'};
+    async logIn<T extends UserModel>(username: string, password: string, dtl = 6, options?: AuthOptions): Promise<T> {
+        if (!username) {
+            throw {message: "Username required"};
         }
+        if (!password) {
+            throw {message: "Password required"}
+        }
+        const user: any = await this.authAdapter.logIn(username, password, this.appName, options);
+        await this.cacheController.set<T>('_current_user_', user, {
+            dtl
+        });
+        return user;
     }
 
     async logOut(options?: AuthOptions): Promise<boolean> {
-        await this.cacheAdapter.set('_current_user_', null);
-        return true;
+        await this.cacheController.set('_current_user_', null);
+        return this.authAdapter.logOut(options);
     }
 
     async requestPasswordReset<T extends UserModel>(email: string, options?: AuthOptions): Promise<any> {
-        const authRule = {};
-        Object.assign(authRule, {
-            'applicationId': BFastConfig.getInstance().getAppCredential(this.appName).applicationId
-        });
-        Object.assign(authRule, {
-            auth: {
-                reset: {
-                    email
-                }
-            }
-        });
-        const response = await this.restApi.post<T>(BFastConfig.getInstance().databaseURL(this.appName), authRule);
-        const data = response.data;
-        if (data && data.auth && data.auth.reset) {
-            return data.auth.reset;
-        } else {
-            throw {message: data.errors && data.errors.auth && data.errors.auth.reset ? data.errors.auth.reset.message : 'Fails to reset password'};
+        if (!email) {
+            throw {message: "Email required to reset your account"};
         }
+        return this.authAdapter.requestPasswordReset(email, this.appName, options);
     }
 
-    async signUp<T extends UserModel>(username: string, password: string, attrs: { [key: string]: any } = {}, options?: AuthOptions): Promise<T> {
-        const authRule = {};
-        Object.assign(authRule, {
-            'applicationId': BFastConfig.getInstance().getAppCredential(this.appName).applicationId
-        });
-        Object.assign(attrs, {
-            username,
-            password
-        });
-        attrs.email = attrs.email ? attrs.email : '';
-        Object.assign(authRule, {
-            auth: {
-                signUp: attrs
-            }
-        });
-        const response = await this.restApi.post<T>(BFastConfig.getInstance().databaseURL(this.appName), authRule);
-        const data = response.data;
-        if (data && data.auth && data.auth.signUp) {
-            await this.cacheAdapter.set<T>('_current_user_', data.auth.signUp, {
-                dtl: 7
-            });
-            return data.auth.signUp;
-        } else {
-            throw {message: data.errors && data.errors.auth && data.errors.auth.signUp ? data.errors.auth.signUp.message : 'Fails to signUp'};
+    async signUp<T extends UserModel>(username: string, password: string, attrs: { [key: string]: any } = {}, dtl = 6, options?: AuthOptions): Promise<T> {
+        if (!username) {
+            throw {message: "Username required"};
         }
-    }
-
-    async updateUser<T extends UserModel>(userModel: UserModel, options?: AuthOptions): Promise<any> {
-        throw {message: "Not supported, use _User collection in your secure env with masterKey to update user details"};
-        // const user = await this.currentUser();
-        // if (user && user.token) {
-        //     const postHeaders = this._geHeadersWithToken(user, options);
-        //     const response = await this.restApi.put<UserModel>(
-        //         BFastConfig.getInstance().databaseURL(this.appName, '/users/' + user.objectId),
-        //         userModel, {
-        //             headers: postHeaders
-        //         });
-        //     delete userModel.password;
-        //     const data = response.data;
-        //     data.token = data.sessionToken;
-        //     Object.assign(user, data);
-        //     Object.assign(user, userModel);
-        //     await this.cacheAdapter.set<T>('_current_user_', user as T, {
-        //         dtl: 30
-        //     });
-        //     return user;
-        // } else {
-        //     throw new Error('No current user in your device');
-        // }
-    }
-
-    async setCurrentUser<T extends UserModel>(user: T): Promise<T | null> {
-        await this.cacheAdapter.set<T>('_current_user_', user, {
-            dtl: 6
+        if (!password) {
+            throw {message: "Password required"}
+        }
+        const user: any = await this.authAdapter.signUp(username, password, attrs, this.appName, options);
+        await this.cacheController.set<T>('_current_user_', user, {
+            dtl
         });
         return user;
+    }
+
+    async updateUser<T extends UserModel>(userId: string, attrs: { [key: string]: any } = {}, options?: AuthOptions): Promise<any> {
+        if (!userId) {
+            throw {message: "Please provide id of user to be updated"};
+        }
+        return this.authAdapter.updateUser(userId, attrs, options);
+    }
+
+    async setCurrentUser<T extends UserModel>(user: T, dtl = 6): Promise<T | null> {
+        return this.cacheController.set<T>('_current_user_', user, {
+            dtl
+        });
     }
 }

@@ -1,3 +1,9 @@
+import {AuthAdapter} from "./adapters/AuthAdapter";
+import {CacheAdapter} from "./adapters/CacheAdapter";
+import {HttpClientAdapter} from "./adapters/HttpClientAdapter";
+import {DefaultCacheFactory} from "./factories/cache";
+import {DefaultAuthFactory} from "./factories/auth";
+
 export class BFastConfig {
     static DEFAULT_APP = 'DEFAULT';
     private _DEFAULT_DOMAINS_CACHE_DB_NAME = '__domain';
@@ -31,37 +37,26 @@ export class BFastConfig {
 
     private static instance: BFastConfig;
 
-    static getInstance(config?: AppCredentials, appName = BFastConfig.DEFAULT_APP): BFastConfig {
+    static getInstance(): BFastConfig {
         if (!BFastConfig.instance) {
             BFastConfig.instance = new BFastConfig();
-        }
-        if (config) {
-            this.instance.credentials[appName] = config;
         }
         return BFastConfig.instance;
     }
 
-    getAppCredential(appName = BFastConfig.DEFAULT_APP) {
+    setCredential(config: AppCredentials, appName = BFastConfig.DEFAULT_APP) {
+        if (!BFastConfig.instance) {
+            throw new Error("Call BFast.init() to initialize configurations first")
+        }
+        BFastConfig.instance.credentials[appName] = config;
+    }
+
+    credential(appName = BFastConfig.DEFAULT_APP) {
         if (!this.credentials[appName]) {
             throw new Error(`The app -> ${appName} is not initialized`);
         }
         return this.credentials[appName];
     }
-
-    getHeaders(appName: string): { [key: string]: any } {
-        return {
-            'Content-Type': 'application/json',
-            'X-Parse-Application-Id': this.credentials[appName].applicationId
-        }
-    };
-
-    getMasterHeaders(appName: string): { [key: string]: any } {
-        return {
-            'Content-Type': 'application/json',
-            'X-Parse-Application-Id': this.credentials[appName].applicationId,
-            'X-Parse-Master-Key': this.credentials[appName].appPassword,
-        }
-    };
 
     functionsURL(path: string, appName: string): string {
         if (path.startsWith('http')) {
@@ -82,22 +77,22 @@ export class BFastConfig {
             }
         }
         if (suffix) {
-            return `https://${this.getAppCredential(appName).projectId}-daas.bfast.fahamutech.com${suffix}`;
+            return `https://${this.credential(appName).projectId}-daas.bfast.fahamutech.com${suffix}`;
         } else {
-            return `https://${this.getAppCredential(appName).projectId}-daas.bfast.fahamutech.com`;
+            return `https://${this.credential(appName).projectId}-daas.bfast.fahamutech.com`;
         }
 
     };
 
-    getCacheDatabaseName(name: string, appName: string): string {
+    cacheDatabaseName(name: string, appName: string): string {
         if (name && name !== '') {
-            return `bfast/${this.getAppCredential(appName).projectId}/${appName}/${name}`;
+            return `bfast/${this.credential(appName).projectId}/${appName}/${name}`;
         } else {
-            return `bfast/${this.getAppCredential(appName).projectId}/${appName}`;
+            return `bfast/${this.credential(appName).projectId}/${appName}`;
         }
     }
 
-    getCacheCollectionName(name: string, appName: string): string {
+    cacheCollectionName(name: string, appName: string): string {
         if (name && name !== '') {
             return `${name}/${appName}`;
         } else {
@@ -105,6 +100,32 @@ export class BFastConfig {
         }
     }
 
+    authAdapter(appName: string): AuthAdapter {
+        const adapters = this.credential(appName)?.adapters;
+        if (adapters && adapters.auth && typeof adapters.auth === 'function') {
+            return adapters.auth();
+        } else {
+            return new DefaultAuthFactory();
+        }
+    }
+
+    cacheAdapter(appName: string): CacheAdapter {
+        const adapters = this.credential(appName)?.adapters;
+        if (adapters && adapters.cache && typeof adapters.cache === "function") {
+            return adapters.cache();
+        } else {
+            return new DefaultCacheFactory();
+        }
+    }
+
+    httpAdapter(appName: string): HttpClientAdapter | null {
+        const adapters = this.credential(appName)?.adapters;
+        if (adapters && adapters.http && typeof adapters.http === "function") {
+            return adapters.http();
+        } else {
+            return null;
+        }
+    }
 }
 
 export interface AppCredentials {
@@ -113,7 +134,12 @@ export interface AppCredentials {
     projectId: string;
     databaseURL?: string;
     appPassword?: string;
-    cache?: CacheConfigOptions
+    cache?: CacheConfigOptions;
+    adapters?: {
+        auth?: () => AuthAdapter,
+        cache?: () => CacheAdapter,
+        http?: () => HttpClientAdapter
+    }
 }
 
 export interface CacheConfigOptions {

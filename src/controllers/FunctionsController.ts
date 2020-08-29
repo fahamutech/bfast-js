@@ -1,12 +1,12 @@
 import {BFastConfig} from "../conf";
 import {HttpClientAdapter, RestRequestConfig} from "../adapters/HttpClientAdapter";
-import {AuthAdapter} from "../adapters/AuthAdapter";
+import {AuthController} from "./AuthController";
 
 export class FunctionsController {
 
     constructor(private readonly functionPath: string,
                 private readonly restApi: HttpClientAdapter,
-                private readonly authAdapter: AuthAdapter,
+                private readonly authAdapter: AuthController,
                 private readonly appName = BFastConfig.DEFAULT_APP) {
     }
 
@@ -16,7 +16,6 @@ export class FunctionsController {
             if (config && config.headers) {
                 Object.assign(postConfig, config);
             } else {
-                postConfig.headers = BFastConfig.getInstance().getHeaders(this.appName);
                 Object.assign(postConfig, config);
             }
             // const user = await this.authAdapter.currentUser();
@@ -37,7 +36,6 @@ export class FunctionsController {
         if (config && config.headers) {
             Object.assign(deleteConfig, config);
         } else {
-            deleteConfig.headers = BFastConfig.getInstance().getHeaders(this.appName);
             Object.assign(deleteConfig, config);
         }
         const response = await this.restApi.delete(
@@ -52,7 +50,6 @@ export class FunctionsController {
         if (config && config.headers) {
             Object.assign(getConfig, config);
         } else {
-            getConfig.headers = BFastConfig.getInstance().getHeaders(this.appName);
             Object.assign(getConfig, config);
         }
         const response = await this.restApi.get(
@@ -67,7 +64,6 @@ export class FunctionsController {
         if (config && config.headers) {
             Object.assign(putConfig, config)
         } else {
-            putConfig.headers = BFastConfig.getInstance().getHeaders(this.appName);
             Object.assign(putConfig, config);
         }
         const response = await this.restApi.put(BFastConfig.getInstance().functionsURL(this.functionPath, this.appName) as string,

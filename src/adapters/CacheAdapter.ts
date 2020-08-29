@@ -1,15 +1,15 @@
-import {RequestOptions} from "./QueryAdapter";
+import {RequestOptions} from "../controllers/QueryController";
 
 export interface CacheAdapter {
-    set<T>(identifier: string, data: T, options?: { dtl: number }): Promise<T>;
+    set<T>(identifier: string, data: T, database: string, collection: string, options?: { dtl: number }): Promise<T>;
 
-    get<T>(identifier: string): Promise<T>;
+    get<T>(identifier: string, database: string, collection: string): Promise<T>;
 
-    keys(): Promise<string[] | undefined>;
+    keys(database: string, collection: string): Promise<string[] | undefined>;
 
-    clearAll(): Promise<boolean>;
+    clearAll(database: string, collection: string): Promise<boolean>;
 
-    remove(identifier: string, force?: boolean): Promise<boolean>;
+    remove(identifier: string, database: string, collection: string, force?: boolean): Promise<boolean>;
 
-    cacheEnabled(options?: RequestOptions): boolean;
+    cacheEnabled(appName: string, options?: RequestOptions): boolean;
 }

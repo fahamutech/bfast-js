@@ -1,24 +1,23 @@
-import {QueryController} from "./QueryController";
+import {QueryController, RequestOptions} from "./QueryController";
 import {BFastConfig} from "../conf";
 import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
-import {RequestOptions} from "../adapters/QueryAdapter";
-import {AuthAdapter} from "../adapters/AuthAdapter";
 import {RulesController} from "./RulesController";
 import {SocketController} from "./SocketController";
-import {DatabaseChangesModel} from "../model/DatabaseChangesModel";
+import {DatabaseChangesModel} from "../models/DatabaseChangesModel";
+import {AuthController} from "./AuthController";
 
 export class DatabaseController {
 
     constructor(private readonly domainName: string,
                 private readonly restAdapter: HttpClientAdapter,
-                private readonly authAdapter: AuthAdapter,
+                private readonly authAdapter: AuthController,
                 private readonly rulesController: RulesController,
                 private readonly appName: string) {
     }
 
     async save<T>(model: T | T[], options?: RequestOptions): Promise<T> {
         const createRule = await this.rulesController.createRule(this.domainName, model,
-            BFastConfig.getInstance().getAppCredential(this.appName), options);
+            BFastConfig.getInstance().credential(this.appName), options);
         const response = await this.restAdapter.post(
             `${BFastConfig.getInstance().databaseURL(this.appName)}`, createRule);
         return DatabaseController._extractResultFromServer(response.data, 'create', this.domainName);

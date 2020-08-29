@@ -1,10 +1,9 @@
-import {RequestOptions} from "../adapters/QueryAdapter";
 import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
 import {BFastConfig} from "../conf";
 import {RulesController} from "./RulesController";
 import {SocketController} from "./SocketController";
 import {DatabaseChangesController, DatabaseController} from "./DatabaseController";
-import {QueryModel} from "../model/QueryModel";
+import {QueryModel} from "../models/QueryModel";
 import {UpdateController} from "./UpdateController";
 
 export enum QueryOrder {
@@ -174,7 +173,7 @@ export class QueryController {
 
     async delete<T>(options?: RequestOptions): Promise<T> {
         const deleteRule = await this.rulesController.deleteRule(this.domain, this.buildQuery(),
-            BFastConfig.getInstance().getAppCredential(this.appName), options);
+            BFastConfig.getInstance().credential(this.appName), options);
         const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), deleteRule);
         return DatabaseController._extractResultFromServer(response.data, 'delete', this.domain);
     }
@@ -191,7 +190,7 @@ export class QueryController {
 
     changes(onConnect?: () => void, onDisconnect?: () => void): DatabaseChangesController {
         const socketController = new SocketController('/__changes__', this.appName, onConnect, onDisconnect);
-        const applicationId = BFastConfig.getInstance().getAppCredential(this.appName).applicationId;
+        const applicationId = BFastConfig.getInstance().credential(this.appName).applicationId;
         let match: any;
         if (this.buildQuery() && typeof this.buildQuery().filter === "object") {
             match = this.buildQuery().filter as object;
@@ -212,13 +211,13 @@ export class QueryController {
     // ********* need improvement ************ //
     async aggregate<V = any>(pipeline: any[], options: RequestOptions): Promise<V> {
         const aggregateRule = await this.rulesController.aggregateRule(this.domain, pipeline,
-            BFastConfig.getInstance().getAppCredential(this.appName), options);
+            BFastConfig.getInstance().credential(this.appName), options);
         return this.aggregateRuleRequest(aggregateRule);
     }
 
     async find<T>(options?: RequestOptions): Promise<T> {
         const queryRule = await this.rulesController.queryRule(this.domain, this.buildQuery(),
-            BFastConfig.getInstance().getAppCredential(this.appName), options);
+            BFastConfig.getInstance().credential(this.appName), options);
         // const identifier = `find_${this.collectionName}_${JSON.stringify(queryModel && queryModel.filter ? queryModel.filter : {})}`;
         // const cacheResponse = await this.cacheAdapter.get<T[]>(identifier);
         // if (this.cacheAdapter.cacheEnabled(options) && (cacheResponse != undefined || cacheResponse !== null)) {
@@ -273,4 +272,42 @@ export class QueryController {
         }
     }
 
+}
+
+export interface RequestOptions extends CacheOptions {
+    useMasterKey?: boolean,
+    returnFields?: string[],
+}
+
+interface CacheOptions {
+    /**
+     * enable cache in method level, override global option
+     */
+    cacheEnable?: boolean;
+    /**
+     * cache to expire flag
+     */
+    dtl?: number;
+
+    /**
+     * callback to response from network data, just before that data is updated to cache
+     * @param identifier {string} cache identifier
+     * @param data {T extend object} fresh data from network
+     // * @deprecated use #onUpdated
+     */
+    freshDataCallback?: <T>(value: { identifier: string, data: T }) => void;
+
+    // /**
+    //  * callback to response from network data, just before that data is updated to cache
+    //  * @param identifier {string} cache identifier
+    //  * @param data {T extend object} fresh data from network
+    //  */
+    // onUpdated?: <T>(value: { identifier: string, data: T }) => void;
+}
+
+// According to https://parseplatform.org/Parse-SDK-JS/api/2.1.0/Parse.Query.html#fullText
+export interface FullTextOptions {
+    language?: string;
+    caseSensitive?: boolean;
+    diacriticSensitive?: boolean;
 }

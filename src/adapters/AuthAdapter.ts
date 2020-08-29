@@ -1,37 +1,21 @@
-import {UserModel} from "../model/UserModel";
+import {UserModel} from "../models/UserModel";
 
 export interface AuthAdapter {
 
-    authenticated<T extends UserModel>(): Promise<T>;
+    authenticated<T extends UserModel>(userId: string, options?: AuthOptions): Promise<T>;
 
-    getEmail(): Promise<string>;
+    updateUser<T extends UserModel>(id: string, attrs: object, options?: AuthOptions): Promise<any>;
 
-    getUsername(): Promise<string>;
+    signUp<T extends UserModel>(username: string, password: string, attrs: object, appName: string, options?: AuthOptions): Promise<T>;
 
-    updateUser<T extends UserModel>(userModel: UserModel, options?: AuthOptions): Promise<any>;
-
-    /**
-     * @deprecated use #getToken
-     */
-    getSessionToken(): Promise<string>;
-
-    getToken(): Promise<any>
-
-    currentUser<T extends UserModel>(): Promise<T | null>;
-
-    setCurrentUser<T extends UserModel>(user: T): Promise<T | null>;
-
-    signUp<T extends UserModel>(username: string, password: string, attrs: UserModel, options?: AuthOptions): Promise<T>;
-
-    logIn<T extends UserModel>(username: string, password: string, options?: AuthOptions): Promise<T>;
+    logIn<T extends UserModel>(username: string, password: string, appName: string, options?: AuthOptions): Promise<T>;
 
     logOut(options?: AuthOptions): Promise<boolean>;
 
-    requestPasswordReset<T extends UserModel>(email: string, options?: AuthOptions): Promise<T>;
+    requestPasswordReset<T extends UserModel>(email: string, appName: string, options?: AuthOptions): Promise<T>;
 }
 
 export interface AuthOptions {
     useMasterKey?: boolean;
-    sessionToken?: string;
-    // installationId?: string;
+    token?: string;
 }

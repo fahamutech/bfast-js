@@ -1,10 +1,10 @@
-import {UpdateModel} from "../model/UpdateOperation";
+import {UpdateModel} from "../models/UpdateOperation";
 import {BFastConfig} from "../conf";
 import {DatabaseController} from "./DatabaseController";
 import {RulesController} from "./RulesController";
-import {RequestOptions} from "../adapters/QueryAdapter";
-import {QueryModel} from "../model/QueryModel";
+import {QueryModel} from "../models/QueryModel";
 import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
+import {RequestOptions} from "./QueryController";
 
 export class UpdateController {
     private query: UpdateModel = {$set: {}};
@@ -89,7 +89,7 @@ export class UpdateController {
 
     async update(options?: RequestOptions): Promise<any> {
         const updateRule = await this.rulesController.updateRule(this.domain, this.queryModel, this.build(),
-            BFastConfig.getInstance().getAppCredential(this.appName), options);
+            BFastConfig.getInstance().credential(this.appName), options);
         const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), updateRule);
         return DatabaseController._extractResultFromServer(response.data, 'update', this.domain);
     }

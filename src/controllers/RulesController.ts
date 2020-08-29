@@ -1,12 +1,12 @@
 import {AppCredentials} from "../conf";
-import {RequestOptions} from "../adapters/QueryAdapter";
-import {TransactionModel} from "../model/TransactionModel";
-import {AuthAdapter} from "../adapters/AuthAdapter";
-import {QueryModel} from "../model/QueryModel";
-import {UpdateModel} from "../model/UpdateOperation";
+import {TransactionModel} from "../models/TransactionModel";
+import {QueryModel} from "../models/QueryModel";
+import {UpdateModel} from "../models/UpdateOperation";
+import {AuthController} from "./AuthController";
+import {RequestOptions} from "./QueryController";
 
 export class RulesController {
-    constructor(private readonly authAdapter: AuthAdapter) {
+    constructor(private readonly authAdapter: AuthController) {
     }
 
     async createRule(domain: string, data: any, appCredential: AppCredentials, options?: RequestOptions): Promise<Object> {

@@ -1,9 +1,9 @@
-import {TransactionModel} from "../model/TransactionModel";
+import {TransactionModel} from "../models/TransactionModel";
 import {BFastConfig} from "../conf";
 import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
 import {RulesController} from "./RulesController";
-import {QueryModel} from "../model/QueryModel";
-import {UpdateModel} from "../model/UpdateOperation";
+import {QueryModel} from "../models/QueryModel";
+import {UpdateModel} from "../models/UpdateOperation";
 
 export class TransactionController {
 
@@ -29,7 +29,7 @@ export class TransactionController {
             }
         }
         const transactionRule = await this.rulesController.transaction(this.transactionRequests,
-            BFastConfig.getInstance().getAppCredential(this.appName), {useMasterKey: options?.useMasterKey});
+            BFastConfig.getInstance().credential(this.appName), {useMasterKey: options?.useMasterKey});
         const response = await this.restApi.post(BFastConfig.getInstance().databaseURL(this.appName), transactionRule);
         this.transactionRequests.splice(0);
         if (options && options.after) {

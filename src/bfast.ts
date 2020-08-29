@@ -19,25 +19,26 @@ export class BFast {
      *
      * @param options
      * @param appName {string} application name for multiple apps access
-     * @return AppCredentials of current init project
      */
-    static init(options: AppCredentials, appName: string = BFastConfig.DEFAULT_APP): AppCredentials {
+    static init(options: AppCredentials, appName: string = BFastConfig.DEFAULT_APP) {
         options.cache = {
             enable: false,
         }
-        return BFastConfig.getInstance(options, appName).getAppCredential(appName);
+        BFastConfig.getInstance().setCredential(options, appName);
     }
 
     /**
-     * return a config object
+     * get configuration  of a specific app
+     * @param appName
      */
-    static getConfig(appName = BFastConfig.DEFAULT_APP, config?: AppCredentials): BFastConfig {
-        return BFastConfig.getInstance(config, appName);
+    static getConfig(appName = BFastConfig.DEFAULT_APP): AppCredentials {
+        return BFastConfig.getInstance().credential(appName);
     }
 
     /**
      *
-     * @param appName other app/project name from DEFAULT to work with
+     * @param appName other app/project name other than DEFAULT to work with
+     * @return BfastDatabase - Controller for perming database operations
      */
     static database(appName: string = BFastConfig.DEFAULT_APP): BfastDatabase {
         return new BfastDatabase(appName);
@@ -57,14 +58,18 @@ export class BFast {
      * @param appName other app/project name to work with
      */
     static cache(options?: { database: string, collection: string }, appName = BFastConfig.DEFAULT_APP): CacheController {
+        const config = BFastConfig.getInstance();
+        const databaseName = (options && options.database)
+            ? config.cacheDatabaseName(options.database, appName)
+            : config.cacheDatabaseName(config.DEFAULT_CACHE_DB_NAME(), appName);
+        const collectionName = (options && options.collection)
+            ? config.cacheCollectionName(options.collection, appName)
+            : config.cacheCollectionName('cache', appName);
         return new CacheController(
             appName,
-            (options && options.database)
-                ? BFastConfig.getInstance().getCacheDatabaseName(options.database, appName)
-                : BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_CACHE_DB_NAME(), appName),
-            (options && options.collection)
-                ? BFastConfig.getInstance().getCacheCollectionName(options.collection, appName)
-                : BFastConfig.getInstance().getCacheCollectionName('cache', appName),
+            databaseName,
+            collectionName,
+            config.cacheAdapter(appName)
         );
     }
 
@@ -73,14 +78,19 @@ export class BFast {
      * @param appName other app/project name to work with
      */
     static auth(appName = BFastConfig.DEFAULT_APP) {
+        const config = BFastConfig.getInstance();
+        const axiosRestController = new AxiosRestController();
+        const cacheController = new CacheController(
+            appName,
+            config.cacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), appName),
+            config.cacheCollectionName('user', appName),
+            config.cacheAdapter(appName)
+        );
         return new AuthController(
-            new AxiosRestController(),
-            new CacheController(
-                appName,
-                BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), appName),
-                BFastConfig.getInstance().getCacheCollectionName('cache', appName)
-            ),
-            appName
+            appName,
+            axiosRestController,
+            cacheController,
+            config.authAdapter(appName)
         );
     }
 
@@ -90,7 +100,7 @@ export class BFast {
     static utils = {
         USER_DOMAIN_NAME: '_User',
         POLICY_DOMAIN_NAME: '_Policy',
-        TOKEN_DOMAIN_NAME: '_Policy',
+        TOKEN_DOMAIN_NAME: '_Token',
     }
 
     /**
@@ -98,13 +108,15 @@ export class BFast {
      * @param appName
      */
     static storage(appName = BFastConfig.DEFAULT_APP): StorageController {
+        const config = BFastConfig.getInstance();
         const authCache = new CacheController(
             appName,
-            BFastConfig.getInstance().getCacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), appName),
-            BFastConfig.getInstance().getCacheCollectionName('cache', appName)
+            config.cacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), appName),
+            config.cacheCollectionName('cache', appName),
+            config.cacheAdapter(appName)
         );
         const restController = new AxiosRestController()
-        const authController = new AuthController(restController, authCache, appName);
+        const authController = new AuthController(appName, restController, authCache, config.authAdapter(appName));
         const rulesController = new RulesController(authController)
         return new StorageController(new AxiosRestController(), authController, rulesController, appName);
     }
