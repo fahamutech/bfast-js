@@ -37,17 +37,14 @@ export class DefaultCacheFactory implements CacheAdapter {
             return null as any;
         }
         await this.remove(identifier, database, collection);
-        // @ts-ignore
-        return DefaultCacheFactory._getCacheDatabase()?.getItem<T>(identifier) as any;
+        return DefaultCacheFactory._getCacheDatabase(database, collection)?.getItem(identifier) as any;
     }
 
     async set<T>(identifier: string, data: T, database: string, collection: string, options?: { dtl: number }): Promise<T> {
         if (device.isNode) {
-            // @ts-ignore
-            return null;
+            return null as any;
         }
-        // @ts-ignore
-        const response = await DefaultCacheFactory._getCacheDatabase()?.setItem<T>(identifier, data);
+        const response = await DefaultCacheFactory._getCacheDatabase(database, collection).setItem(identifier, data);
         await DefaultCacheFactory._getCacheDatabase(database, '_ttl')?.setItem(identifier, DefaultCacheFactory._getDayToLeave(options ? options.dtl : 7));
         return response as any;
     }
@@ -61,8 +58,7 @@ export class DefaultCacheFactory implements CacheAdapter {
         if (device.isNode) {
             return true;
         }
-        // @ts-ignore
-        const dayToLeave = await this._getTTLStore()?.getItem<number>(identifier as any);
+        const dayToLeave = await DefaultCacheFactory._getCacheDatabase(database, '_ttl').getItem(identifier as any);
         if (force || (dayToLeave && dayToLeave < new Date().getTime())) {
             await DefaultCacheFactory._getCacheDatabase(database, '_ttl')?.removeItem(identifier);
             await DefaultCacheFactory._getCacheDatabase(database, collection)?.removeItem(identifier);
