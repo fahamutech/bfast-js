@@ -16,10 +16,14 @@ export class DatabaseController {
     }
 
     async save<T>(model: T | T[], options?: RequestOptions): Promise<T> {
-        const createRule = await this.rulesController.createRule(this.domainName, model,
-            BFastConfig.getInstance().credential(this.appName), options);
+        const credential = BFastConfig.getInstance().credential(this.appName);
+        const createRule = await this.rulesController.createRule(this.domainName, model, credential, options);
         const response = await this.restAdapter.post(
-            `${BFastConfig.getInstance().databaseURL(this.appName)}`, createRule);
+            `${BFastConfig.getInstance().databaseURL(this.appName)}`, createRule, {
+                headers: {
+                    'x-parse-application-id': credential.applicationId
+                }
+            });
         return DatabaseController._extractResultFromServer(response.data, 'create', this.domainName);
     }
 

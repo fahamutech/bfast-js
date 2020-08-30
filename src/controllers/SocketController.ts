@@ -8,7 +8,7 @@ export class SocketController {
 
     constructor(private readonly eventName: string, appName = BFastConfig.DEFAULT_APP, onConnect?: Function, onDisconnect?: Function) {
         const namespace = String(eventName)[0] === '/' ? eventName : '/' + eventName;
-        const url = namespace === '/__changes__'
+        const url = namespace === '/v2/__changes__'
             ? BFastConfig.getInstance().databaseURL(appName, namespace)
             : BFastConfig.getInstance().functionsURL(namespace, appName);
         this.socket = io(url, {

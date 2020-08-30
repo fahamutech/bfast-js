@@ -24,7 +24,11 @@ export class DefaultAuthFactory implements AuthAdapter {
                 }
             }
         });
-        const response = await this.restApi.post<T>(BFastConfig.getInstance().databaseURL(appName), authRule);
+        const response = await this.restApi.post<T>(BFastConfig.getInstance().databaseURL(appName), authRule, {
+            headers: {
+                'x-parse-application-id': BFastConfig.getInstance().credential(appName).applicationId
+            }
+        });
         const data = response.data;
         if (data && data.auth && data.auth.signIn) {
             return data.auth.signIn;
@@ -49,7 +53,11 @@ export class DefaultAuthFactory implements AuthAdapter {
                 }
             }
         });
-        const response = await this.restApi.post<T>(BFastConfig.getInstance().databaseURL(appName), authRule);
+        const response = await this.restApi.post<T>(BFastConfig.getInstance().databaseURL(appName), authRule, {
+            headers: {
+                'x-parse-application-id': BFastConfig.getInstance().credential(appName).applicationId
+            }
+        });
         const data = response.data;
         if (data && data.auth && data.auth.reset) {
             return data.auth.reset;
@@ -73,7 +81,11 @@ export class DefaultAuthFactory implements AuthAdapter {
                 signUp: attrs
             }
         });
-        const response = await this.restApi.post<T>(BFastConfig.getInstance().databaseURL(appName), authRule);
+        const response = await this.restApi.post<T>(BFastConfig.getInstance().databaseURL(appName), authRule, {
+            headers: {
+                'x-parse-application-id': BFastConfig.getInstance().credential(appName).applicationId
+            }
+        });
         const data = response.data;
         if (data && data.auth && data.auth.signUp) {
             return data.auth.signUp;

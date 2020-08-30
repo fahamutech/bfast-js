@@ -28,9 +28,14 @@ export class TransactionController {
                 this.transactionRequests = result;
             }
         }
+        const credential = BFastConfig.getInstance().credential(this.appName);
         const transactionRule = await this.rulesController.transaction(this.transactionRequests,
-            BFastConfig.getInstance().credential(this.appName), {useMasterKey: options?.useMasterKey});
-        const response = await this.restApi.post(BFastConfig.getInstance().databaseURL(this.appName), transactionRule);
+            credential, {useMasterKey: options?.useMasterKey});
+        const response = await this.restApi.post(BFastConfig.getInstance().databaseURL(this.appName), transactionRule, {
+            headers: {
+                'x-parse-application-id': credential.applicationId
+            }
+        });
         this.transactionRequests.splice(0);
         if (options && options.after) {
             await options.after();

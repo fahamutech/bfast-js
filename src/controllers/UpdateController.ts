@@ -88,9 +88,13 @@ export class UpdateController {
     }
 
     async update(options?: RequestOptions): Promise<any> {
-        const updateRule = await this.rulesController.updateRule(this.domain, this.queryModel, this.build(),
-            BFastConfig.getInstance().credential(this.appName), options);
-        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), updateRule);
+        const credential = BFastConfig.getInstance().credential(this.appName);
+        const updateRule = await this.rulesController.updateRule(this.domain, this.queryModel, this.build(), credential, options);
+        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), updateRule, {
+            headers: {
+                'x-parse-application': credential.applicationId
+            }
+        });
         return DatabaseController._extractResultFromServer(response.data, 'update', this.domain);
     }
 }

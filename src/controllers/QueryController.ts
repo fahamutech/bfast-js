@@ -13,6 +13,7 @@ export enum QueryOrder {
 
 export class QueryController {
     private query: QueryModel = {
+        id: undefined,
         filter: {},
         return: [],
         skip: 0,
@@ -172,9 +173,13 @@ export class QueryController {
     }
 
     async delete<T>(options?: RequestOptions): Promise<T> {
-        const deleteRule = await this.rulesController.deleteRule(this.domain, this.buildQuery(),
-            BFastConfig.getInstance().credential(this.appName), options);
-        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), deleteRule);
+        const credential = BFastConfig.getInstance().credential(this.appName);
+        const deleteRule = await this.rulesController.deleteRule(this.domain, this.buildQuery(), credential, options);
+        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), deleteRule, {
+            headers: {
+                'x-parse-application-id': credential.applicationId
+            }
+        });
         return DatabaseController._extractResultFromServer(response.data, 'delete', this.domain);
     }
 
@@ -189,7 +194,7 @@ export class QueryController {
     }
 
     changes(onConnect?: () => void, onDisconnect?: () => void): DatabaseChangesController {
-        const socketController = new SocketController('/__changes__', this.appName, onConnect, onDisconnect);
+        const socketController = new SocketController('/v2/__changes__', this.appName, onConnect, onDisconnect);
         const applicationId = BFastConfig.getInstance().credential(this.appName).applicationId;
         let match: any;
         if (this.buildQuery() && typeof this.buildQuery().filter === "object") {
@@ -237,7 +242,12 @@ export class QueryController {
     }
 
     async queryRuleRequest(queryRule: any): Promise<any> {
-        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), queryRule);
+        const credential = BFastConfig.getInstance().credential(this.appName);
+        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), queryRule, {
+            headers: {
+                'x-parse-application-id': credential.applicationId
+            }
+        });
         const data = response.data;
         if (data && data[`query${this.domain}`]) {
             return data[`query${this.domain}`];
@@ -255,7 +265,12 @@ export class QueryController {
     }
 
     async aggregateRuleRequest(pipelineRule: any): Promise<any> {
-        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), pipelineRule);
+        const credential = BFastConfig.getInstance().credential(this.appName);
+        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), pipelineRule, {
+            headers: {
+                'x-parse-application-id': credential.applicationId
+            }
+        });
         const data = response.data;
         if (data && data[`aggregate${this.domain}`]) {
             return data[`aggregate${this.domain}`];

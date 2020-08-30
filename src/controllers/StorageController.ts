@@ -38,7 +38,12 @@ export class StorageController {
     }
 
     private async _handleFileRuleRequest(storageRule: any, action: string): Promise<any> {
-        const response = await this.restApi.post(BFastConfig.getInstance().databaseURL(this.appName), storageRule);
+        const credential = BFastConfig.getInstance().credential(this.appName);
+        const response = await this.restApi.post(BFastConfig.getInstance().databaseURL(this.appName), storageRule, {
+            headers: {
+                'x-parse-application-id': credential.applicationId
+            }
+        });
         const data = response.data;
         if (data && data.files && data.files.list && Array.isArray(data.files.list)) {
             return data.files.list;
@@ -57,6 +62,7 @@ export class StorageController {
         if (options && options?.useMasterKey === true) {
             Object.assign(headers, {
                 'masterKey': appCredentials.appPassword,
+                'x-parse-application-id': appCredentials.applicationId
             });
         }
         const token = await this.auth.getToken();
@@ -66,7 +72,7 @@ export class StorageController {
         const formData = new FormDataNode();
         formData.append('file_stream', readStream);
         const response = await this.restApi.post<{ urls: string[] }>(
-            BFastConfig.getInstance().databaseURL(this.appName, '/storage/' + appCredentials.applicationId), formData,
+            BFastConfig.getInstance().databaseURL(this.appName, '/v2/storage/' + appCredentials.applicationId), formData,
             {
                 onUploadProgress: uploadProgress,
                 headers
@@ -82,6 +88,7 @@ export class StorageController {
         if (options && options?.useMasterKey === true) {
             Object.assign(headers, {
                 'masterKey': appCredentials.appPassword,
+                'x-parse-application-id': appCredentials.applicationId
             });
         }
         const token = await this.auth.getToken();
@@ -91,7 +98,7 @@ export class StorageController {
         const formData = new FormData();
         formData.append('file', file);
         const response = await this.restApi.post<{ urls: string[] }>(
-            BFastConfig.getInstance().databaseURL(this.appName, '/storage/' + appCredentials.applicationId), formData,
+            BFastConfig.getInstance().databaseURL(this.appName, '/v2/storage/' + appCredentials.applicationId), formData,
             {
                 onUploadProgress: uploadProgress,
                 headers

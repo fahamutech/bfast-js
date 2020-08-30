@@ -68,7 +68,7 @@ export class BFastConfig {
         return `https://${this.credentials[appName].projectId}-faas.bfast.fahamutech.com${path}`
     };
 
-    databaseURL(appName: string, suffix?: string): string {
+    databaseURL(appName: string, suffix = '/v2'): string {
         if (this.credentials[appName].databaseURL && this.credentials[appName].databaseURL?.startsWith('http')) {
             if (suffix) {
                 return this.credentials[appName].databaseURL + suffix;
