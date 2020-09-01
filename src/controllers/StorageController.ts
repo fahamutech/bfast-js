@@ -72,7 +72,7 @@ export class StorageController {
         const formData = new FormDataNode();
         formData.append('file_stream', readStream);
         const response = await this.restApi.post<{ urls: string[] }>(
-            BFastConfig.getInstance().databaseURL(this.appName, '/v2/storage/' + appCredentials.applicationId), formData,
+            BFastConfig.getInstance().databaseURL(this.appName, '/storage/' + appCredentials.applicationId), formData,
             {
                 onUploadProgress: uploadProgress,
                 headers
@@ -98,7 +98,7 @@ export class StorageController {
         const formData = new FormData();
         formData.append('file', file);
         const response = await this.restApi.post<{ urls: string[] }>(
-            BFastConfig.getInstance().databaseURL(this.appName, '/v2/storage/' + appCredentials.applicationId), formData,
+            BFastConfig.getInstance().databaseURL(this.appName, '/storage/' + appCredentials.applicationId), formData,
             {
                 onUploadProgress: uploadProgress,
                 headers
