@@ -17,6 +17,7 @@ export class AuthController {
     }
 
     async currentUser<T extends UserModel>(): Promise<T | null> {
+        await this.cacheController.remove('_current_user_');
         return await this.cacheController.get<T>('_current_user_');
     }
 
