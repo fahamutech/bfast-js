@@ -17,7 +17,7 @@ export class CacheController {
     }
 
     async get<T extends any>(identifier: string): Promise<T> {
-        await this.remove(identifier);
+        // await this.remove(identifier);
         return this.cacheAdapter.get<T>(identifier, this.database, this.collection);
     }
 
