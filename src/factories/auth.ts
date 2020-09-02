@@ -118,5 +118,9 @@ export class DefaultAuthFactory implements AuthAdapter {
         // }
     }
 
+    requestEmailVerification<T extends UserModel>(email: string, appName: string, options?: AuthOptions): Promise<T> {
+        throw 'Not supported yet use your implementation';
+    }
+
 
 }

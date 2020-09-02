@@ -13,6 +13,7 @@ export interface AuthAdapter {
     logOut(options?: AuthOptions): Promise<boolean>;
 
     requestPasswordReset<T extends UserModel>(email: string, appName: string, options?: AuthOptions): Promise<T>;
+    requestEmailVerification<T extends UserModel>(email: string, appName: string, options?: AuthOptions): Promise<T>;
 }
 
 export interface AuthOptions {
