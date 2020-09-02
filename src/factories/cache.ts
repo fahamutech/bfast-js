@@ -20,14 +20,14 @@ export class DefaultCacheFactory implements CacheAdapter {
         if (device.isNode) {
             return [];
         }
-        return DefaultCacheFactory._getCacheDatabase(database, collection).keys();
+        return DefaultCacheFactory._getCacheDatabase(database, collection)?.keys();
     }
 
     async clearAll(database: string, collection: string): Promise<boolean> {
         if (device.isNode) {
             return true;
         }
-        await DefaultCacheFactory._getCacheDatabase(database, collection).clear();
+        await DefaultCacheFactory._getCacheDatabase(database, collection)?.clear();
         await DefaultCacheFactory._getCacheDatabase(database, '_ttl')?.clear();
         return true;
     }
@@ -37,7 +37,7 @@ export class DefaultCacheFactory implements CacheAdapter {
             return null as any;
         }
         await this.remove(identifier, database, collection);
-        return DefaultCacheFactory._getCacheDatabase(database, collection).getItem(identifier) as any;
+        return DefaultCacheFactory._getCacheDatabase(database, collection)?.getItem(identifier) as any;
     }
 
     async set<T>(identifier: string, data: T, database: string, collection: string, options?: { dtl: number }): Promise<T> {
@@ -58,7 +58,6 @@ export class DefaultCacheFactory implements CacheAdapter {
         if (device.isNode) {
             return true;
         }
-        await DefaultCacheFactory._getCacheDatabase(database, collection).removeItem(identifier);
         const dayToLeave = await DefaultCacheFactory._getCacheDatabase(database, '_ttl').getItem(identifier as any);
         if (force || (dayToLeave && dayToLeave < new Date().getTime())) {
             await DefaultCacheFactory._getCacheDatabase(database, '_ttl')?.removeItem(identifier);
