@@ -95,9 +95,16 @@ export class AuthController {
         return this.authAdapter.updateUser(userId, attrs, options);
     }
 
-    async setCurrentUser<T extends UserModel>(user: T, dtl = 6): Promise<T | null> {
-        return this.cacheController.set<T>('_current_user_', user, {
+    async setCurrentUser(user: any, dtl = 6): Promise<any> {
+        return this.cacheController.set('_current_user_', user, {
             dtl
         });
+    }
+
+    async requestEmailVerification(email: string, options?: AuthOptions): Promise<any> {
+        if (!email) {
+            throw {message: "Email required"}
+        }
+        return this.authAdapter.requestPasswordReset(email, this.appName, options)
     }
 }
