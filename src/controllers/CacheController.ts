@@ -26,7 +26,7 @@ export class CacheController {
     }
 
     async remove(identifier: string, force = false): Promise<boolean> {
-        return this.cacheAdapter.remove(identifier, this.database, this.collection);
+        return this.cacheAdapter.remove(identifier, this.database, this.collection, force);
     }
 
 }
