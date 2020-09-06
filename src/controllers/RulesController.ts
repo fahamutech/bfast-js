@@ -54,7 +54,7 @@ export class RulesController {
     async updateRule(domain: string, query: QueryModel, updateModel: UpdateModel,
                      appCredential: AppCredentials, options?: RequestOptions): Promise<Object> {
         const updateRule = {}
-        if (options && options?.useMasterKey === true) {
+        if (options && options.useMasterKey === true) {
             Object.assign(updateRule, {
                 masterKey: appCredential.appPassword
             });
@@ -66,6 +66,30 @@ export class RulesController {
         Object.assign(updateRule, {
             applicationId: appCredential.applicationId,
             [`update${domain}`]: query
+        });
+        return this.addToken(updateRule);
+    }
+
+    async updateManyRule(domain: string, payload: { query: QueryModel, update: UpdateModel }[],
+                         appCredential: AppCredentials, options?: RequestOptions): Promise<Object> {
+        const updateRule = {}
+        if (options && options.useMasterKey === true) {
+            Object.assign(updateRule, {
+                masterKey: appCredential.appPassword
+            });
+        }
+        Object.assign(updateRule, {
+            applicationId: appCredential.applicationId
+        });
+        const updateRequests = payload.map(value => {
+            value.query.return = options?.returnFields ? options.returnFields : []
+            Object.assign(value.query, {
+                update: value.update
+            });
+            return value.query;
+        });
+        Object.assign(updateRule, {
+            [`update${domain}`]: updateRequests
         });
         return this.addToken(updateRule);
     }
@@ -107,7 +131,7 @@ export class RulesController {
         };
         if (options && options?.useMasterKey === true) {
             Object.assign(transactionRule, {
-                'masterKey': appCredentials.appPassword
+                masterKey: appCredentials.appPassword
             });
         }
         Object.assign(transactionRule, {
@@ -120,12 +144,19 @@ export class RulesController {
                     [`${value.action}${value.domain}`]: createRule[`${value.action}${value.domain}`]
                 });
             } else if (value.action === "update") {
-                const updateRule: any = await this.updateRule(value.domain, value.data['query'], value.data['updateModel'], appCredentials, options);
-                Object.assign(transactionRule.transaction.commit, {
-                    [`${value.action}${value.domain}`]: updateRule[`${value.action}${value.domain}`]
-                });
-            } else if (value.action === "delete") {
-                const deleteQuery: any = await this.deleteRule(value.domain, value.data['query'], appCredentials, options);
+                if (value.data && Array.isArray(value.data)) {
+                    const updateRule: any = await this.updateManyRule(value.domain, value.data, appCredentials, options);
+                    Object.assign(transactionRule.transaction.commit, {
+                        [`${value.action}${value.domain}`]: updateRule[`${value.action}${value.domain}`]
+                    });
+                } else if (value.data && value.data.query && value.data.update) {
+                    const updateRule: any = await this.updateRule(value.domain, value.data.query, value.data.update, appCredentials, options);
+                    Object.assign(transactionRule.transaction.commit, {
+                        [`${value.action}${value.domain}`]: updateRule[`${value.action}${value.domain}`]
+                    });
+                }
+            } else if (value.action === "delete" && value.data && value.data.query) {
+                const deleteQuery: any = await this.deleteRule(value.domain, value.data.query, appCredentials, options);
                 Object.assign(transactionRule.transaction.commit, {
                     [`${value.action}${value.domain}`]: deleteQuery[`${value.action}${value.domain}`]
                 });

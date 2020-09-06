@@ -52,20 +52,25 @@ export class TransactionController {
         return this;
     }
 
-    delete(domain: string, query: QueryModel): TransactionController {
+    delete(domain: string, payload: { query: QueryModel }): TransactionController {
         this.transactionRequests.push({
             domain,
             action: "delete",
-            data: {query}
+            data: payload as any
         });
         return this;
     }
 
-    update(domain: string, query: QueryModel, updateModel: UpdateModel): TransactionController {
+    update(
+        domain: string,
+        payload:
+            { query: QueryModel, update: UpdateModel }
+            | { query: QueryModel, update: UpdateModel }[]
+    ): TransactionController {
         this.transactionRequests.push({
             domain,
             action: "update",
-            data: {query, updateModel}
+            data: payload as any
         });
         return this;
     }
