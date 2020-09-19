@@ -2,12 +2,15 @@ const path = require('path');
 
 const clientConfig = {
     target: "web",
-    entry: './src/bfast.ts',
+    entry: {
+        es: './src/bfast.ts'
+    },
     mode: 'production',
     module: {
         rules: [
             {
                 test: /\.tsx?$/,
+                type: 'javascript/esm',
                 use: [
                     {
                         loader: 'ts-loader',
