@@ -1,11 +1,16 @@
 import {CacheAdapter} from "../adapters/CacheAdapter";
 import {BFastConfig} from "../conf";
 import {RequestOptions} from "../controllers/QueryController";
+import {SecurityController} from "../controllers/SecurityController";
 
 const device = require("browser-or-node");
 const localForage = require('localforage');
 
 export class DefaultCacheFactory implements CacheAdapter {
+
+    constructor(private readonly securityController: SecurityController) {
+    }
+
     private static _getCacheDatabase(database: string, collection: string): any {
         if (device.isNode) {
             return undefined;
@@ -32,20 +37,29 @@ export class DefaultCacheFactory implements CacheAdapter {
         return true;
     }
 
-    async get<T extends any>(identifier: string, database: string, collection: string): Promise<T> {
+    async get<T extends any>(identifier: string, database: string, collection: string, options: { secure?: boolean } = {secure: false}): Promise<T> {
         if (device.isNode) {
             return null as any;
         }
         await this.remove(identifier, database, collection);
-        return DefaultCacheFactory._getCacheDatabase(database, collection)?.getItem(identifier) as any;
+        const response = await DefaultCacheFactory._getCacheDatabase(database, collection)?.getItem(identifier);
+        if (options.secure === true) {
+            return this.securityController.decrypt(response) as any;
+        } else {
+            return response;
+        }
     }
 
-    async set<T>(identifier: string, data: T, database: string, collection: string, options?: { dtl: number }): Promise<T> {
+    async set<T>(identifier: string, data: T, database: string, collection: string, options: { dtl?: number, secure?: boolean } = {secure: false}): Promise<T> {
         if (device.isNode) {
             return null as any;
         }
+        if (options.secure === true) {
+            data = await this.securityController.encrypt(data) as any;
+        }
         const response = await DefaultCacheFactory._getCacheDatabase(database, collection).setItem(identifier, data);
-        await DefaultCacheFactory._getCacheDatabase(database, '_ttl')?.setItem(identifier, DefaultCacheFactory._getDayToLeave(options ? options.dtl : 7));
+        await DefaultCacheFactory._getCacheDatabase(database, '_ttl')?.setItem(identifier,
+            DefaultCacheFactory._getDayToLeave(options && options.dtl ? options.dtl : 7));
         return response as any;
     }
 

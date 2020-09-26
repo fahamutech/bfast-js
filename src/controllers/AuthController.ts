@@ -18,7 +18,13 @@ export class AuthController {
 
     async currentUser<T extends UserModel>(): Promise<T | null> {
         await this.cacheController.remove('_current_user_');
-        return await this.cacheController.get<T>('_current_user_');
+        const user: any = await this.cacheController.get<T>('_current_user_', {secure: true});
+        if (typeof user === "string") {
+            await this.setCurrentUser(null);
+            return null;
+        } else {
+            return user;
+        }
     }
 
     async getEmail(): Promise<any> {
@@ -56,14 +62,12 @@ export class AuthController {
             throw {message: "Password required"}
         }
         const user: any = await this.authAdapter.logIn(username, password, this.appName, options);
-        await this.cacheController.set<T>('_current_user_', user, {
-            dtl
-        });
+        await this.setCurrentUser(user, dtl);
         return user;
     }
 
     async logOut(options?: AuthOptions): Promise<boolean> {
-        await this.cacheController.set('_current_user_', null);
+        await this.setCurrentUser(null);
         return this.authAdapter.logOut(options);
     }
 
@@ -82,9 +86,7 @@ export class AuthController {
             throw {message: "Password required"}
         }
         const user: any = await this.authAdapter.signUp(username, password, attrs, this.appName, options);
-        await this.cacheController.set<T>('_current_user_', user, {
-            dtl
-        });
+        await this.setCurrentUser(user, dtl);
         return user;
     }
 
@@ -95,10 +97,15 @@ export class AuthController {
         return this.authAdapter.updateUser(userId, attrs, options);
     }
 
-    async setCurrentUser(user: any, dtl = 6): Promise<any> {
-        return this.cacheController.set('_current_user_', user, {
+    async setCurrentUser(user: { [key: string]: any } | null, dtl = 6): Promise<any> {
+        if (typeof user !== "object") {
+            throw "user parameter require a map";
+        }
+        await this.cacheController.set('_current_user_', user, {
+            secure: true,
             dtl
         });
+        return user;
     }
 
     async requestEmailVerification(email: string, options?: AuthOptions): Promise<any> {

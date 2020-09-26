@@ -3,6 +3,7 @@ import {CacheAdapter} from "./adapters/CacheAdapter";
 import {HttpClientAdapter} from "./adapters/HttpClientAdapter";
 import {DefaultCacheFactory} from "./factories/cache";
 import {DefaultAuthFactory} from "./factories/auth";
+import {SecurityController} from "./controllers/SecurityController";
 
 export class BFastConfig {
     static DEFAULT_APP = 'DEFAULT';
@@ -110,11 +111,12 @@ export class BFastConfig {
     }
 
     cacheAdapter(appName: string): CacheAdapter {
-        const adapters = this.credential(appName)?.adapters;
+        const credentials = this.credential(appName);
+        const adapters = credentials?.adapters;
         if (adapters && adapters.cache && typeof adapters.cache === "function") {
             return adapters.cache();
         } else {
-            return new DefaultCacheFactory();
+            return new DefaultCacheFactory(new SecurityController(credentials.projectId?credentials.projectId: '_@bfast@_'));
         }
     }
 

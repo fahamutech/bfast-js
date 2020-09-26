@@ -16,12 +16,12 @@ export class CacheController {
         return this.cacheAdapter.clearAll(this.database, this.collection);
     }
 
-    async get<T extends any>(identifier: string): Promise<T> {
+    async get<T extends any>(identifier: string, options: { secure?: boolean } = {secure: false}): Promise<T> {
         await this.remove(identifier);
-        return this.cacheAdapter.get<T>(identifier, this.database, this.collection);
+        return this.cacheAdapter.get<T>(identifier, this.database, this.collection, {secure: options.secure});
     }
 
-    async set<T>(identifier: string, data: T, options?: { dtl: number }): Promise<T> {
+    async set<T>(identifier: string, data: T, options: { dtl?: number, secure?: boolean } = {secure: false}): Promise<T> {
         return this.cacheAdapter.set(identifier, data, this.database, this.collection, options);
     }
 

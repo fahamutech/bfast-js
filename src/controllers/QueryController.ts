@@ -193,9 +193,10 @@ export class QueryController {
         );
     }
 
-    changes(onConnect?: () => void, onDisconnect?: () => void): DatabaseChangesController {
+    changes(onConnect?: () => void, onDisconnect?: () => void, options: RequestOptions = {useMasterKey: false}): DatabaseChangesController {
         const socketController = new SocketController('/v2/__changes__', this.appName, onConnect, onDisconnect);
         const applicationId = BFastConfig.getInstance().credential(this.appName).applicationId;
+        const masterKey = BFastConfig.getInstance().credential(this.appName).appPassword;
         let match: any;
         if (this.buildQuery() && typeof this.buildQuery().filter === "object") {
             match = this.buildQuery().filter as object;
@@ -205,7 +206,7 @@ export class QueryController {
             });
         }
         socketController.emit({
-            auth: {applicationId: applicationId},
+            auth: {applicationId: applicationId, masterKey: options.useMasterKey === true ? masterKey : null},
             body: {
                 domain: this.domain, pipeline: match ? [{$match: match}] : []
             }
@@ -223,22 +224,7 @@ export class QueryController {
     async find<T>(options?: RequestOptions): Promise<T> {
         const queryRule = await this.rulesController.queryRule(this.domain, this.buildQuery(),
             BFastConfig.getInstance().credential(this.appName), options);
-        // const identifier = `find_${this.collectionName}_${JSON.stringify(queryModel && queryModel.filter ? queryModel.filter : {})}`;
-        // const cacheResponse = await this.cacheAdapter.get<T[]>(identifier);
-        // if (this.cacheAdapter.cacheEnabled(options) && (cacheResponse != undefined || cacheResponse !== null)) {
-        //     this.queryRuleRequest(queryRule)
-        //         .then(value => {
-        //             if (options && options.freshDataCallback) {
-        //                 options.freshDataCallback({identifier, data: value});
-        //             }
-        //             return this.cacheAdapter.set<T[]>(identifier, value);
-        //         })
-        //         .catch();
-        //     return cacheResponse;
-        // } else {
-        //  this.cacheAdapter.set<T[]>(identifier, response).catch();
         return await this.queryRuleRequest(queryRule);
-        // }
     }
 
     async queryRuleRequest(queryRule: any): Promise<any> {
