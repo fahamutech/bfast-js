@@ -305,10 +305,3 @@ interface CacheOptions {
     //  */
     // onUpdated?: <T>(value: { identifier: string, data: T }) => void;
 }
-
-// According to https://parseplatform.org/Parse-SDK-JS/api/2.1.0/Parse.Query.html#fullText
-export interface FullTextOptions {
-    language?: string;
-    caseSensitive?: boolean;
-    diacriticSensitive?: boolean;
-}

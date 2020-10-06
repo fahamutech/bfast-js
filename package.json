@@ -1,6 +1,6 @@
 {
   "name": "bfastjs",
-  "version": "4.0.0-beta.24",
+  "version": "4.0.0-beta.25",
   "description": "javascript client sdk for bfast::cloud project",
   "main": "dist/bfast.js",
   "maintainers": [
@@ -24,7 +24,7 @@
     "crypto-js": "^4.0.0",
     "form-data": "^3.0.0",
     "localforage": "^1.9.0",
-    "socket.io-client": "^2.3.0"
+    "socket.io-client": "^2.3.1"
   },
   "devDependencies": {
     "@types/crypto-js": "^3.1.47",
