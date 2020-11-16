@@ -1,6 +1,6 @@
-const {BFast} = require('../node/dist/bfast');
+const {BFast} = require('./dist/bfast/bundles/bfastjs.umd');
 
-BFast.init({applicationId: 'ubongokids', projectId: 'ubongokids'});
+// BFast.init({applicationId: 'ubongokids', projectId: 'ubongokids'});
 
 const changes = BFast.database().domain('test')
     .query()

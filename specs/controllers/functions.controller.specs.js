@@ -1,5 +1,5 @@
 const {describe, it} = require('mocha');
-const {BFast} = require('../../node/dist/bfast');
+const {BFast} = require('./dist/bfast/bundles/bfastjs.umd');
 const assert = require('assert');
 
 describe('Jobs functions', function () {
