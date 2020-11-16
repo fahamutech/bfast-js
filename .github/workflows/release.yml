@@ -17,7 +17,7 @@ jobs:
       - name: Publish if version has been updated
         run: |
           npm install
-          ng build --prod
+          npx ng build --prod
           npm publish dist/bfast
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
