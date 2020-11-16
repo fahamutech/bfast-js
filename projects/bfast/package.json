@@ -1,0 +1,15 @@
+{
+  "name": "bfastjs",
+  "version": "4.0.0",
+  "bundleDependencies": [
+    "axios",
+    "browser-or-node",
+    "crypto-js",
+    "form-data",
+    "localforage",
+    "socket.io-client"
+  ],
+  "dependencies": {
+    "tslib": "^2.0.0"
+  }
+}
