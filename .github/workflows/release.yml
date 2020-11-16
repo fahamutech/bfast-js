@@ -13,13 +13,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@master
         with:
-          node-version: 12.0.0
+          node-version: 12.x
       - name: Publish if version has been updated
-        uses: pascalgn/npm-publish-action
-        with:
-          tag_name: "v%s"
-          tag_message: "v%s"
-          commit_pattern: "^Release (\\S+)"
+        run: |
+          npm install
+          ng build --prod
+          npm publish dist/bfast
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
