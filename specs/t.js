@@ -1,9 +1,4 @@
-const {BFast} = require('../node-config/dist/bfast_node');
-BFast.init({
-    applicationId: 'smartstock_lb', projectId: 'smartstock', cache: {
-        enable: false
-    }
-});
+const {BFast} = require('./dist/bfast/bundles/bfastjs.umd');
 // console.log(BFast.getConfig().DEFAULT_DOMAINS_CACHE_DB_NAME);
 // BFast.database().collection('stocks').query().find({size: 1}).then(console.log);
 // BFast.cache().set('name','joshua').then(console.log);

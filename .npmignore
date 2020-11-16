@@ -12,5 +12,7 @@ node_modules
 *.zip
 .github
 node-config
+gulpfile.js
+node
 /dist/node
 /src
