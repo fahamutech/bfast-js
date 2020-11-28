@@ -38,13 +38,62 @@ BFast.init({
 if you don't supply app name DEFAULT_APP name will be used. That all you need to set up a bfast sdk.
 You will only call this once in your app just before you use any api this sdk.
 
+## React | NextJS Support
+
+Create useBFast.js file:
+
+```javascript
+import { useRef, useState, useEffect } from "react";
+
+export default function useBFast() {
+  const dbRef = useRef();
+  const [isDBLoaded, setIsDBLoaded] = useState(false);
+  const { BFast } = dbRef.current || {};
+
+  useEffect(() => {
+    dbRef.current = {
+      BFast: require("bfastjs").BFast,
+    };
+
+    setIsDBLoaded(true);
+  }, []);
+
+  return Object.freeze({
+    isDBLoaded,
+    BFast,
+  });
+}
+```
+
+Use in app as:
+
+```javascript
+import useBFast from "../PATH_TO/useBFast";
+
+export default function MyComponent(props) {
+  const { isDBLoaded, BFast } = useBFast();
+  
+  useEffect(() => {
+    if (isDBLoaded) {
+      console.log(BFast);
+      // use BFast
+      BFast.BFast.init({
+        applicationId: "",
+        projectId: "",
+      });
+    }
+  }, [isDBLoaded]);
+
+  return (
+    <>
+      <div>
+        BFast App!
+      </div>
+    </>
+  );
+}
+```
+
 ## Database
 
 You can manipulate a database instance from bfast cloud project or the instance you deploy in your own infrastructure.
-
-
-
-
-
-
-
