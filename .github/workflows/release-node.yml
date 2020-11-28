@@ -17,8 +17,6 @@ jobs:
       - name: Publish if version has been updated
         run: |
           npm install
-          npm deprecate bfastnode ""
-          npm deprecate bfastnode@4.0.0-beta.25 ""
           npm run publish:node
          # npm publish dist/bfast
         env:
