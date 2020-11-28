@@ -17,7 +17,7 @@ jobs:
       - name: Publish if version has been updated
         run: |
           npm install
-          npm run publish:all
+          npm run publish:node
          # npm publish dist/bfast
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
