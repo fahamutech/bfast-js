@@ -13,6 +13,8 @@ import {BfastFunctions} from "./bfast.functions";
  * @maintained Fahamu Tech ( fahamutechdevelopers@gmail.com )
  */
 
+
+
 export class BFast {
 
     /**
@@ -122,3 +124,5 @@ export class BFast {
     }
 
 }
+
+export const bfast = BFast

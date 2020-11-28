@@ -1,7 +1,7 @@
 const path = require('path');
 
 const clientConfig = {
-    target: "web",
+    target: ["web", "node"],
     entry: './src/bfast.ts',
     mode: 'production',
     module: {
@@ -25,8 +25,6 @@ const clientConfig = {
     output: {
         filename: 'bfast.js',
         path: path.resolve(__dirname, './dist'),
-        library: '',
-        libraryExport: '',
         globalObject: 'this',
         libraryTarget: "umd"
     }

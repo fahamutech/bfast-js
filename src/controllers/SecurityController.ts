@@ -1,7 +1,3 @@
-import AES from "crypto-js/aes";
-import * as encUtf8 from "crypto-js/enc-utf8";
-
-
 export class SecurityController {
     constructor(private readonly secret: string) {
     }
@@ -10,14 +6,13 @@ export class SecurityController {
         if (!data) {
             return data;
         }
-        return AES.encrypt(JSON.stringify(data), this.secret).toString();
+        return JSON.stringify(data).split('').reverse().join('')
     }
 
     async decrypt(data: string): Promise<{ [key: string]: any } | null> {
         if (!data) {
             return null;
         }
-        const bytes = AES.decrypt(data, this.secret);
-        return JSON.parse(bytes.toString(encUtf8));
+        return JSON.parse(data.split('').reverse().join(''));
     }
 }

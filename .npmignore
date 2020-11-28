@@ -1,5 +1,6 @@
 specs
 /specs
+node
 tsconfig.json
 tsconfig-node.json
 webpack.config.js
