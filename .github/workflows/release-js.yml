@@ -5,7 +5,7 @@ on:
       - master
 jobs:
   npm-publish:
-    name: npm-publish
+    name: npm-publish-web
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
