@@ -3,6 +3,7 @@ node_modules
 /dist
 dist
 node
+/node
 .idea
 .vscode
 /bfastjs-1.1.7.tgz
