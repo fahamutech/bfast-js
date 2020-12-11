@@ -116,7 +116,7 @@ export class BFastConfig {
         if (adapters && adapters.cache && typeof adapters.cache === "function") {
             return adapters.cache();
         } else {
-            return new DefaultCacheFactory(new SecurityController(credentials.projectId?credentials.projectId: '_@bfast@_'));
+            return new DefaultCacheFactory(new SecurityController(credentials.projectId ? credentials.projectId : '_@bfast@_'));
         }
     }
 
