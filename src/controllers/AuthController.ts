@@ -4,6 +4,9 @@ import {UserModel} from "../models/UserModel";
 import {CacheController} from "./CacheController";
 
 export class AuthController {
+
+    userCacheColl = '_current_user_';
+
     constructor(
         private readonly appName: string,
         private readonly restApi: HttpClientAdapter,
@@ -18,8 +21,8 @@ export class AuthController {
 
     async currentUser<T extends UserModel>(): Promise<T | null> {
         try {
-            await this.cacheController.remove('_current_user_');
-            const user: any = await this.cacheController.get<T>('_current_user_', {secure: true});
+            await this.cacheController.remove(this.userCacheColl);
+            const user: any = await this.cacheController.get<T>(this.userCacheColl, {secure: true});
             if (!user) {
                 return null;
             } else if (typeof user === "string") {
@@ -108,7 +111,7 @@ export class AuthController {
         // if (typeof user !== "object") {
         //     throw "user parameter require a map";
         // }
-        await this.cacheController.set('_current_user_', user, {
+        await this.cacheController.set(this.userCacheColl, user, {
             secure: true,
             dtl
         });
