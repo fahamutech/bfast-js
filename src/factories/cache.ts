@@ -38,15 +38,19 @@ export class DefaultCacheFactory implements CacheAdapter {
     }
 
     async get<T extends any>(identifier: string, database: string, collection: string, options: { secure?: boolean } = {secure: false}): Promise<T> {
-        if (device.isNode) {
-            return null as any;
-        }
-        await this.remove(identifier, database, collection);
-        const response = await DefaultCacheFactory._getCacheDatabase(database, collection)?.getItem(identifier);
-        if (options.secure === true) {
-            return this.securityController.decrypt(response) as any;
-        } else {
-            return response;
+        try {
+            if (device.isNode) {
+                return null as any;
+            }
+            await this.remove(identifier, database, collection);
+            const response = await DefaultCacheFactory._getCacheDatabase(database, collection)?.getItem(identifier);
+            if (options.secure === true) {
+                return await this.securityController.decrypt(response) as any;
+            } else {
+                return response;
+            }
+        } catch (e) {
+            return this.set<any>(identifier, null, database, collection, options)
         }
     }
 
@@ -59,7 +63,7 @@ export class DefaultCacheFactory implements CacheAdapter {
         }
         const response = await DefaultCacheFactory._getCacheDatabase(database, collection).setItem(identifier, data);
         await DefaultCacheFactory._getCacheDatabase(database, '_ttl')?.setItem(identifier,
-            DefaultCacheFactory._getDayToLeave(options && options.dtl ? options.dtl : 7));
+            String(DefaultCacheFactory._getDayToLeave(options && options.dtl ? options.dtl : 7)));
         return response as any;
     }
 

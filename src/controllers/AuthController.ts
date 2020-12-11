@@ -17,13 +17,17 @@ export class AuthController {
     }
 
     async currentUser<T extends UserModel>(): Promise<T | null> {
-        await this.cacheController.remove('_current_user_');
-        const user: any = await this.cacheController.get<T>('_current_user_', {secure: true});
-        if (typeof user === "string") {
-            await this.setCurrentUser(null);
+        try {
+            await this.cacheController.remove('_current_user_');
+            const user: any = await this.cacheController.get<T>('_current_user_', {secure: true});
+            if (typeof user === "string") {
+                await this.setCurrentUser(null);
+                return null;
+            } else {
+                return user;
+            }
+        } catch (e) {
             return null;
-        } else {
-            return user;
         }
     }
 
@@ -98,9 +102,9 @@ export class AuthController {
     }
 
     async setCurrentUser(user: { [key: string]: any } | null, dtl = 6): Promise<any> {
-        if (typeof user !== "object") {
-            throw "user parameter require a map";
-        }
+        // if (typeof user !== "object") {
+        //     throw "user parameter require a map";
+        // }
         await this.cacheController.set('_current_user_', user, {
             secure: true,
             dtl
@@ -112,6 +116,6 @@ export class AuthController {
         if (!email) {
             throw {message: "Email required"}
         }
-        return this.authAdapter.requestPasswordReset(email, this.appName, options)
+        return this.authAdapter.requestEmailVerification(email, this.appName, options)
     }
 }
