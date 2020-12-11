@@ -38,20 +38,20 @@ export class DefaultCacheFactory implements CacheAdapter {
     }
 
     async get<T extends any>(identifier: string, database: string, collection: string, options: { secure?: boolean } = {secure: false}): Promise<T> {
-        try {
-            if (device.isNode) {
-                return null as any;
-            }
-            await this.remove(identifier, database, collection);
-            const response = await DefaultCacheFactory._getCacheDatabase(database, collection)?.getItem(identifier);
-            if (options.secure === true) {
-                return await this.securityController.decrypt(response) as any;
-            } else {
-                return response;
-            }
-        } catch (e) {
-            return this.set<any>(identifier, null, database, collection, options)
+        //  try {
+        if (device.isNode) {
+            return null as any;
         }
+        await this.remove(identifier, database, collection);
+        const response = await DefaultCacheFactory._getCacheDatabase(database, collection)?.getItem(identifier);
+        if (options.secure === true) {
+            return await this.securityController.decrypt(response) as any;
+        } else {
+            return response;
+        }
+        // } catch (e) {
+        //     return this.set<any>(identifier, null, database, collection, options)
+        // }
     }
 
     async set<T>(identifier: string, data: T, database: string, collection: string, options: { dtl?: number, secure?: boolean } = {secure: false}): Promise<T> {

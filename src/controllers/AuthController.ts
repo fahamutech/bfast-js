@@ -20,13 +20,16 @@ export class AuthController {
         try {
             await this.cacheController.remove('_current_user_');
             const user: any = await this.cacheController.get<T>('_current_user_', {secure: true});
-            if (typeof user === "string") {
+            if (!user) {
+                return null;
+            } else if (typeof user === "string") {
                 await this.setCurrentUser(null);
                 return null;
             } else {
                 return user;
             }
         } catch (e) {
+            await this.setCurrentUser(null);
             return null;
         }
     }

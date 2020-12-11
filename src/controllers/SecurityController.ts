@@ -10,9 +10,13 @@ export class SecurityController {
     }
 
     async decrypt(data: string): Promise<{ [key: string]: any } | null> {
-        if (!data) {
+        try{
+            if (!data) {
+                return null;
+            }
+            return JSON.parse(data.split('').reverse().join(''));
+        }catch (e){
             return null;
         }
-        return JSON.parse(data.split('').reverse().join(''));
     }
 }
