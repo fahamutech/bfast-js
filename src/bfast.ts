@@ -126,3 +126,5 @@ export class BFast {
 }
 
 export const bfast = BFast
+
+export default bfast;

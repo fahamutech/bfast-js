@@ -228,19 +228,14 @@ export class QueryController {
     }
 
     async queryRuleRequest(queryRule: any): Promise<any> {
-        const credential = BFastConfig.getInstance().credential(this.appName);
-        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), queryRule, {
-            headers: {
-                'x-parse-application-id': credential.applicationId
-            }
-        });
+        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), queryRule);
         const data = response.data;
         if (data && data[`query${this.domain}`]) {
             return data[`query${this.domain}`];
         } else {
             const errors = data.errors;
             let queryError: any = {message: "Query not succeed"};
-            Object.keys(errors).forEach(value => {
+            Object.keys(errors && typeof errors === "object"?errors: {}).forEach(value => {
                 if (value.includes('query')) {
                     queryError = errors[value];
                 }
@@ -251,12 +246,7 @@ export class QueryController {
     }
 
     async aggregateRuleRequest(pipelineRule: any): Promise<any> {
-        const credential = BFastConfig.getInstance().credential(this.appName);
-        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), pipelineRule, {
-            headers: {
-                'x-parse-application-id': credential.applicationId
-            }
-        });
+        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), pipelineRule);
         const data = response.data;
         if (data && data[`aggregate${this.domain}`]) {
             return data[`aggregate${this.domain}`];
@@ -297,11 +287,4 @@ interface CacheOptions {
      // * @deprecated use #onUpdated
      */
     freshDataCallback?: <T>(value: { identifier: string, data: T }) => void;
-
-    // /**
-    //  * callback to response from network data, just before that data is updated to cache
-    //  * @param identifier {string} cache identifier
-    //  * @param data {T extend object} fresh data from network
-    //  */
-    // onUpdated?: <T>(value: { identifier: string, data: T }) => void;
 }
