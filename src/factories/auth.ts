@@ -33,7 +33,7 @@ export class DefaultAuthFactory implements AuthAdapter {
         if (data && data.auth && data.auth.signIn) {
             return data.auth.signIn;
         } else {
-            throw {message: data.errors && data.errors['auth.sigIn'] ? data.errors['auth.sigIn'].message : 'Fails to login'};
+            throw {message: data.errors && data.errors['auth.sigIn'] ? data.errors['auth.sigIn'].message : 'Username/Password is not valid'};
         }
     }
 
@@ -90,7 +90,7 @@ export class DefaultAuthFactory implements AuthAdapter {
         if (data && data.auth && data.auth.signUp) {
             return data.auth.signUp;
         } else {
-            throw {message: data.errors && data.errors.auth && data.errors['auth.signUp'] ? data.errors['auth.signUp'].message : 'Fails to signUp'};
+            throw {message: data.errors && data.errors.auth && data.errors['auth.signUp'] ? data.errors['auth.signUp'].message : 'Username/Email already exist'};
         }
     }
 
