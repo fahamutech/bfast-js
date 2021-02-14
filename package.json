@@ -1,6 +1,6 @@
 {
   "name": "bfastjs",
-  "version": "4.0.8",
+  "version": "4.0.9",
   "description": "javascript client sdk for bfast::cloud project",
   "repository": "https://github.com/fahamutech/bfast-js",
   "main": "dist/bfast.js",
