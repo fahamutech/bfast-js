@@ -17,7 +17,7 @@ export class CacheController {
     }
 
     async get<T extends any>(identifier: string, options: { secure?: boolean } = {secure: false}): Promise<T> {
-        await this.remove(identifier);
+        // await this.remove(identifier);
         return this.cacheAdapter.get<T>(identifier, this.database, this.collection, {secure: options.secure});
     }
 
@@ -25,8 +25,8 @@ export class CacheController {
         return this.cacheAdapter.set(identifier, data, this.database, this.collection, options);
     }
 
-    async remove(identifier: string, force = false): Promise<boolean> {
-        return this.cacheAdapter.remove(identifier, this.database, this.collection, force);
+    async remove(identifier: string, force = true): Promise<boolean> {
+        return this.cacheAdapter.remove(identifier, this.database, this.collection, true);
     }
 
 }

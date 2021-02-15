@@ -72,18 +72,18 @@ export class DefaultCacheFactory implements CacheAdapter {
         return date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
     }
 
-    async remove(identifier: string, database: string, collection: string, force = false): Promise<boolean> {
+    async remove(identifier: string, database: string, collection: string, force = true): Promise<boolean> {
         if (isNode()) {
             return true;
         }
-        const dayToLeave = await DefaultCacheFactory._getCacheDatabase(database, '_ttl').getItem(identifier as any);
-        if (force || (dayToLeave && dayToLeave < new Date().getTime())) {
-            await DefaultCacheFactory._getCacheDatabase(database, '_ttl')?.removeItem(identifier);
-            await DefaultCacheFactory._getCacheDatabase(database, collection)?.removeItem(identifier);
-            return true;
-        } else {
-            return false;
-        }
+        // const dayToLeave = await DefaultCacheFactory._getCacheDatabase(database, '_ttl').getItem(identifier as any);
+        // if (force || (dayToLeave && dayToLeave < new Date().getTime())) {
+        //     await DefaultCacheFactory._getCacheDatabase(database, '_ttl')?.removeItem(identifier);
+        await DefaultCacheFactory._getCacheDatabase(database, collection)?.removeItem(identifier);
+        return true;
+        // } else {
+        //     return false;
+        // }
     }
 
     cacheEnabled(appName: string, options?: RequestOptions): boolean {
