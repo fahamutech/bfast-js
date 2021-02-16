@@ -21,7 +21,6 @@ export class AuthController {
 
     async currentUser<T extends UserModel>(): Promise<T | null> {
         try {
-            await this.cacheController.remove(this.userCacheColl);
             const user: any = await this.cacheController.get<T>(this.userCacheColl, {secure: true});
             if (!user) {
                 return null;
@@ -112,8 +111,7 @@ export class AuthController {
         //     throw "user parameter require a map";
         // }
         await this.cacheController.set(this.userCacheColl, user, {
-            secure: true,
-            dtl
+            secure: true
         });
         return user;
     }
