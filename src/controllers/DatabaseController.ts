@@ -32,7 +32,7 @@ export class DatabaseController {
             const totalCount = pagination ? pagination.size : await this.query().count(true).find(options);
             return await this.query().skip(pagination ? pagination.skip : 0).size(totalCount as number).find(options);
         } catch (e) {
-            throw {message: DatabaseController._getErrorMessage(e ? e : 'un know error')};
+            throw {message: DatabaseController._getErrorMessage(e ? e : 'unknown error')};
         }
     }
 
