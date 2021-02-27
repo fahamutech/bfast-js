@@ -270,6 +270,11 @@ export interface RequestOptions extends CacheOptions {
     returnFields?: string[],
 }
 
+export interface FileOptions extends RequestOptions {
+    pn?: boolean;
+    filename?: string
+}
+
 interface CacheOptions {
     /**
      * enable cache in method level, override global option

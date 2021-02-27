@@ -6,7 +6,9 @@ import * as device from "browser-or-node";
 import FormDataNode from 'form-data';
 import {RulesController} from "./RulesController";
 import {AuthController} from "./AuthController";
-import {RequestOptions} from "./QueryController";
+import {FileOptions, RequestOptions} from "./QueryController";
+import {FileModel} from "../models/file.model";
+import {Readable} from 'stream';
 
 export class StorageController {
 
@@ -16,14 +18,19 @@ export class StorageController {
                 private readonly appName = BFastConfig.DEFAULT_APP) {
     }
 
-    async save(file: File | ReadableStream, uploadProgress: (progress: any) => void, options?: RequestOptions): Promise<string> {
-        if (!(file && file instanceof File && file.name)) {
-            throw new Error('file object to save required');
-        }
-        if (device.isNode && file instanceof ReadableStream) {
-            return this._handleFileUploadInNode(file, uploadProgress, BFastConfig.getInstance().credential(this.appName), options);
+    async save(file: FileModel, uploadProgress: (progress: any) => void, options?: FileOptions): Promise<string> {
+        if (device.isNode) {
+            if (file && file.filename && file.data && file.data instanceof Readable) {
+                return this._handleFileUploadInNode(file, uploadProgress, BFastConfig.getInstance().credential(this.appName), options);
+            } else {
+                throw new Error('file object to save is invalid, data and filename is required field');
+            }
         } else {
-            return this._handleFileUploadInWeb(file, uploadProgress, BFastConfig.getInstance().credential(this.appName), options);
+            if (file && file.data && file.data instanceof File && file.filename) {
+                return this._handleFileUploadInWeb(file, uploadProgress, BFastConfig.getInstance().credential(this.appName), options);
+            } else {
+                throw new Error('file object to save is invalid, data and filename is required field');
+            }
         }
     }
 
@@ -56,39 +63,55 @@ export class StorageController {
         }
     }
 
-    private async _handleFileUploadInNode(readStream: ReadableStream, uploadProgress: (progress: any) => void,
-                                          appCredentials: AppCredentials, options?: RequestOptions): Promise<string> {
+    private async _fileUploadRequest(formData: any, headers: object, applicationId: string, progress: any, options: FileOptions) {
+        const query = {};
+        Object.assign(query, {
+            pn: options.pn ? options.pn : false,
+        });
+        if (options.filename) {
+            Object.assign(query, {
+                filename: options.filename
+            })
+        }
+        return this.restApi.post<{ urls: string[] }>(
+            BFastConfig.getInstance().databaseURL(this.appName, '/storage/' + applicationId), formData,
+            {
+                onUploadProgress: progress,
+                headers,
+                params: query
+            }
+        );
+    }
+
+    private async _handleFileUploadInNode(file: FileModel, uploadProgress: (progress: any) => void,
+                                          appCredentials: AppCredentials, options: FileOptions = {}): Promise<string> {
         const headers = {}
         if (options && options?.useMasterKey === true) {
             Object.assign(headers, {
-                'masterKey': appCredentials.appPassword,
-                'x-parse-application-id': appCredentials.applicationId
+                'masterKey': appCredentials.appPassword
             });
         }
         const token = await this.auth.getToken();
-        Object.assign(headers, {
-            'Authorization': `Bearer ${token}`
-        });
         const formData = new FormDataNode();
-        formData.append('file_stream', readStream);
-        const response = await this.restApi.post<{ urls: string[] }>(
-            BFastConfig.getInstance().databaseURL(this.appName, '/storage/' + appCredentials.applicationId), formData,
-            {
-                onUploadProgress: uploadProgress,
-                headers
-            }
-        );
+        formData.append('file', file.data, file.filename);
+        Object.assign(headers, {
+            'Authorization': `Bearer ${token}`,
+            ...formData.getHeaders()
+        });
+        options.pn = file.pn;
+        options.filename = file.filename;
+        const response = await this._fileUploadRequest(
+            formData, headers, appCredentials.applicationId, uploadProgress, options)
         let databaseUrl = BFastConfig.getInstance().databaseURL(this.appName);
         return databaseUrl + response.data.urls[0];
     }
 
-    private async _handleFileUploadInWeb(file: File, uploadProgress: (progress: any) => void,
-                                         appCredentials: AppCredentials, options?: RequestOptions): Promise<string> {
+    private async _handleFileUploadInWeb(file: FileModel, uploadProgress: (progress: any) => void,
+                                         appCredentials: AppCredentials, options: FileOptions = {}): Promise<string> {
         const headers = {}
         if (options && options?.useMasterKey === true) {
             Object.assign(headers, {
-                'masterKey': appCredentials.appPassword,
-                'x-parse-application-id': appCredentials.applicationId
+                'masterKey': appCredentials.appPassword
             });
         }
         const token = await this.auth.getToken();
@@ -96,17 +119,13 @@ export class StorageController {
             'Authorization': `Bearer ${token}`
         });
         const formData = new FormData();
-        formData.append('file', file);
-        const response = await this.restApi.post<{ urls: string[] }>(
-            BFastConfig.getInstance().databaseURL(this.appName, '/storage/' + appCredentials.applicationId), formData,
-            {
-                onUploadProgress: uploadProgress,
-                headers
-            }
-        );
+        formData.append('file', file.data as any, file.filename);
+        options.pn = file.pn;
+        options.filename = file.filename;
+        const response = await this._fileUploadRequest(
+            formData, headers, appCredentials.applicationId, uploadProgress, options
+        )
         let databaseUrl = BFastConfig.getInstance().databaseURL(this.appName);
         return databaseUrl + response.data.urls[0];
     }
-
-
 }

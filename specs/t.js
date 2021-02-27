@@ -1,12 +1,18 @@
-const {bfast,BFast} = require('../node/dist/bfast');
+const {bfast} = require('../node/dist/bfast');
+const {ReadStream} = require('fs');
 
-// bfast.init({
-//     applicationId: 'smartstock_lb', projectId: 'smartstock', cache: {
-//         enable: false
-//     }
-// });
-// console.log(BFast.getConfig().DEFAULT_DOMAINS_CACHE_DB_NAME);
-// BFast.database().collection('stocks').query().find({size: 1}).then(console.log);
-// BFast.cache().set('name','joshua').then(console.log);
-// console.log(BFast.functions().onHttpRequest('/',request => {}));
-// console.log(BFast.functions().onEvent('/',data => {}));
+bfast.init({
+    applicationId: 'smartstock_lb',
+    projectId: 'smartstock',
+});
+const b = bfast.storage().save({
+    filename: 'hello.txt',
+    data: ReadStream.from('Hello world!'),
+    pn: true
+}, progress => console.log(progress));
+
+b.then(value => {
+    console.log(value);
+}).catch(reason => {
+    console.log(reason && reason.response ? reason.response.data : reason.toString());
+});
