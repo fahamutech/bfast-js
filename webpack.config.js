@@ -20,7 +20,10 @@ const clientConfig = {
         ]
     },
     resolve: {
-        extensions: ['.tsx', '.ts', '.js']
+        extensions: ['.tsx', '.ts', '.js'],
+        fallback: {
+            "stream": false
+        }
     },
     output: {
         filename: 'bfast.js',

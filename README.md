@@ -1,14 +1,20 @@
-# BFast::Cloud | Web Client SDK
+# BFast::Cloud | JS Client SDK
 
-Sdk library to be used in a client-side web like (Angular, React) and plain javascript.
+Sdk library to be used in a client-side web like (Angular, React) and NodeJs env.
 
 ## Get Started
 
-You can use `https://www.unpkg.com/bfastjs` to add it as a `<script src="https://www.unpkg.com/bfastjs"></script>` direct to your 
- html file. Or you can install it direct from npm.
+*Web*
 
+You can use `https://www.unpkg.com/bfastjs` to add it as a `<script src="https://www.unpkg.com/bfastjs"></script>` direct to your
+html file. Or you can install it direct from npm.
 ```shell script
-john@pc:~/Desktop/my-project$ npm install --save bfastjs
+john@pc:~$ npm install --save bfastjs
+```
+
+*NodeJs*
+```shell script
+john@pc:~$ npm install --save bfastnode
 ```
 
 ***Note***
@@ -19,7 +25,7 @@ For bfastjs < 3.x.x work with bfast-daas < 1.x.x and bfast-faas < 1.x.x
 Before you call any API you need to initialize your SDK
 
 ```javascript
-const {BFast} = require('bfastjs');
+const {bfast} = require('bfastjs');
 
 BFast.init({
     applicationId: 'your-bfast-project-applicationId', // required if you connect to bfast cloud project [ optional if you have a bfast cloud project]
