@@ -15,7 +15,7 @@ import {BfastFunctions} from "./bfast.functions";
 
 
 
-export class BFast {
+export class bfast {
 
     /**
      *
@@ -125,6 +125,6 @@ export class BFast {
 
 }
 
-export const bfast = BFast
+export const BFast = bfast
 
 export default bfast;

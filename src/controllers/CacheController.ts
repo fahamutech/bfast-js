@@ -17,7 +17,6 @@ export class CacheController {
     }
 
     async get<T extends any>(identifier: string, options: { secure?: boolean } = {secure: false}): Promise<T> {
-        // await this.remove(identifier);
         return this.cacheAdapter.get<T>(identifier, this.database, this.collection, {secure: options.secure});
     }
 

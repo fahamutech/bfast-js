@@ -1,5 +1,4 @@
 import {CacheAdapter} from "../adapters/CacheAdapter";
-import {BFastConfig} from "../conf";
 import {RequestOptions} from "../controllers/QueryController";
 import {SecurityController} from "../controllers/SecurityController";
 import {isNode} from "../utils/bfast.util";
@@ -33,24 +32,17 @@ export class DefaultCacheFactory implements CacheAdapter {
             return true;
         }
         await DefaultCacheFactory._getCacheDatabase(database, collection)?.clear();
-        await DefaultCacheFactory._getCacheDatabase(database, '_ttl')?.clear();
         return true;
     }
 
     async get<T extends any>(identifier: string, database: string, collection: string, options: { secure?: boolean } = {secure: false}): Promise<T> {
-        //  try {
         if (isNode()) {
             return null as any;
         }
-        await this.remove(identifier, database, collection);
-        const response = await DefaultCacheFactory._getCacheDatabase(database, collection)?.getItem(identifier);
-        if (options.secure === true) {
-            return await this.securityController.decrypt(response) as any;
-        } else {
-            return response;
-        }
-        // } catch (e) {
-        //     return this.set<any>(identifier, null, database, collection, options)
+        // if (options.secure === true) {
+        //     return await this.securityController.decrypt(response) as any;
+        // } else {
+        return await DefaultCacheFactory._getCacheDatabase(database, collection)?.getItem(identifier);
         // }
     }
 
@@ -58,19 +50,16 @@ export class DefaultCacheFactory implements CacheAdapter {
         if (isNode()) {
             return null as any;
         }
-        if (options.secure === true) {
-            data = await this.securityController.encrypt(data) as any;
-        }
-        const response = await DefaultCacheFactory._getCacheDatabase(database, collection).setItem(identifier, data);
-        await DefaultCacheFactory._getCacheDatabase(database, '_ttl')?.setItem(identifier,
-            String(DefaultCacheFactory._getDayToLeave(options && options.dtl ? options.dtl : 7)));
-        return response as any;
+        // if (options.secure === true) {
+        //     data = await this.securityController.encrypt(data) as any;
+        // }
+        return DefaultCacheFactory._getCacheDatabase(database, collection).setItem(identifier, data);
     }
 
-    private static _getDayToLeave(days: number) {
-        const date = new Date();
-        return date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    }
+    // private static _getDayToLeave(days: number) {
+    //     const date = new Date();
+    //     return date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    // }
 
     async remove(identifier: string, database: string, collection: string, force = true): Promise<boolean> {
         if (isNode()) {
@@ -90,10 +79,11 @@ export class DefaultCacheFactory implements CacheAdapter {
         if (isNode()) {
             return false;
         }
-        if (options && options.cacheEnable !== undefined && options.cacheEnable !== null) {
-            return options.cacheEnable;
-        } else {
-            return BFastConfig.getInstance().credential(appName).cache?.enable === true;
-        }
+        // if (options && options.cacheEnable !== undefined && options.cacheEnable !== null) {
+        //     return options.cacheEnable;
+        // } else {
+        //     return BFastConfig.getInstance().credential(appName).cache?.enable === true;
+        // }
+        return true;
     }
 }
