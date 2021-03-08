@@ -1,6 +1,7 @@
 import {Socket} from "net";
 import {OutgoingHttpHeaders} from "http";
 import {HttpRequestModel} from "./HttpRequestModel";
+import SocketIO, {EngineSocket} from "socket.io";
 
 export type Send<ResBody = any, T = HttpResponseModel<ResBody>> = (body?: ResBody) => T;
 export type Errback = (err: Error) => void;
@@ -18,8 +19,8 @@ export interface CookieOptions {
 }
 
 export interface EventResponseModel {
-    socket: any,
-    engine: any,
+    socket: SocketIO.Socket,
+    engine: SocketIO.Server,
     broadcast: (data: any)=>void;
     emit: (data: any) => void;
 }
