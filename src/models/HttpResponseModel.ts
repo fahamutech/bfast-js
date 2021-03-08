@@ -1,7 +1,6 @@
 import {Socket} from "net";
 import {OutgoingHttpHeaders} from "http";
 import {HttpRequestModel} from "./HttpRequestModel";
-import SocketIO, {EngineSocket} from "socket.io";
 
 export type Send<ResBody = any, T = HttpResponseModel<ResBody>> = (body?: ResBody) => T;
 export type Errback = (err: Error) => void;
@@ -19,10 +18,17 @@ export interface CookieOptions {
 }
 
 export interface EventResponseModel {
-    socket: SocketIO.Socket,
-    engine: SocketIO.Server,
-    broadcast: (data: any)=>void;
-    emit: (data: any) => void;
+    socket: any,
+    engine: any,
+    topic: (topicName: string) => {
+        announce: (responseData: any) => any,
+        join: () => any,
+        broadcast: (responseData: any) => any
+    },
+    emit: (data: any) => any;
+    broadcast: (data: any) => any;
+    announce: (data: any) => any,
+    emitTo: (socketId: string, data: any) => any
 }
 
 // interface Send<R = any, T = HttpResponseModel> extends SendBase {
