@@ -196,6 +196,7 @@ export class QueryController {
     changes(onConnect?: () => void, onDisconnect?: () => void, options: RequestOptions = {useMasterKey: false}): DatabaseChangesController {
         const socketController = new SocketController('/v2/__changes__', this.appName, onConnect, onDisconnect);
         const applicationId = BFastConfig.getInstance().credential(this.appName).applicationId;
+        const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
         const masterKey = BFastConfig.getInstance().credential(this.appName).appPassword;
         let match: any;
         if (this.buildQuery() && typeof this.buildQuery().filter === "object") {
@@ -206,7 +207,11 @@ export class QueryController {
             });
         }
         socketController.emit({
-            auth: {applicationId: applicationId, masterKey: options.useMasterKey === true ? masterKey : null},
+            auth: {
+                applicationId: applicationId,
+                topic: `${projectId}_${this.domain}`,
+                masterKey: options.useMasterKey === true ? masterKey : null
+            },
             body: {
                 domain: this.domain, pipeline: match ? [{$match: match}] : []
             }
@@ -235,7 +240,7 @@ export class QueryController {
         } else {
             const errors = data.errors;
             let queryError: any = {message: "Query not succeed"};
-            Object.keys(errors && typeof errors === "object"?errors: {}).forEach(value => {
+            Object.keys(errors && typeof errors === "object" ? errors : {}).forEach(value => {
                 if (value.includes('query')) {
                     queryError = errors[value];
                 }
