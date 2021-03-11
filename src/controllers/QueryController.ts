@@ -194,7 +194,6 @@ export class QueryController {
     }
 
     changes(onConnect?: () => void, onDisconnect?: () => void, options: RequestOptions = {useMasterKey: false}): DatabaseChangesController {
-        const socketController = new SocketController('/v2/__changes__', this.appName, onConnect, onDisconnect);
         const applicationId = BFastConfig.getInstance().credential(this.appName).applicationId;
         const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
         const masterKey = BFastConfig.getInstance().credential(this.appName).appPassword;
@@ -206,16 +205,21 @@ export class QueryController {
                 delete match[key];
             });
         }
-        socketController.emit({
-            auth: {
-                applicationId: applicationId,
-                topic: `${projectId}_${this.domain}`,
-                masterKey: options.useMasterKey === true ? masterKey : null
-            },
-            body: {
-                domain: this.domain, pipeline: match ? [{$match: match}] : []
+        const socketController = new SocketController('/v2/__changes__', this.appName, () => {
+            if (onConnect && typeof onConnect === "function") {
+                onConnect();
             }
-        });
+            socketController.emit({
+                auth: {
+                    applicationId: applicationId,
+                    topic: `${projectId}_${this.domain}`,
+                    masterKey: options.useMasterKey === true ? masterKey : null
+                },
+                body: {
+                    domain: this.domain, pipeline: match ? [{$match: match}] : []
+                }
+            });
+        }, onDisconnect);
         return new DatabaseChangesController(socketController);
     }
 

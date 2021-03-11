@@ -41,8 +41,7 @@ export class DatabaseController {
     }
 
     query(): QueryController {
-        return new QueryController(this.domainName, this.restAdapter, this.rulesController,
-            this.appName);
+        return new QueryController(this.domainName, this.restAdapter, this.rulesController, this.appName);
     }
 
     static _extractResultFromServer(data: any, rule: string, domain: string) {
