@@ -7,7 +7,7 @@ import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
 import {RequestOptions} from "./QueryController";
 
 export class UpdateController {
-    private query: UpdateModel = {$set: {}};
+    private updateModel: UpdateModel = {$set: {}, upsert: false};
 
     constructor(private readonly domain: string,
                 private readonly queryModel: QueryModel,
@@ -18,19 +18,26 @@ export class UpdateController {
 
 
     set(field: string, value: any): UpdateController {
-        Object.assign(this.query.$set, {
+        Object.assign(this.updateModel.$set, {
             [field]: value
         });
         return this;
     }
 
+    upsert(value: boolean = false) {
+        Object.assign(this.updateModel, {
+            upsert: value
+        });
+        return this;
+    }
+
     doc<T extends object>(doc: T): UpdateController {
-        Object.assign(this.query.$set, doc);
+        Object.assign(this.updateModel.$set, doc);
         return this;
     }
 
     increment(field: string, amount: number = 1): UpdateController {
-        Object.assign(this.query.$inc, {
+        Object.assign(this.updateModel.$inc, {
             [field]: amount
         });
         return this;
@@ -41,21 +48,21 @@ export class UpdateController {
     }
 
     currentDate(field: string): UpdateController {
-        Object.assign(this.query.$currentDate, {
+        Object.assign(this.updateModel.$currentDate, {
             [field]: true
         });
         return this;
     }
 
     minimum(field: string, value: any): UpdateController {
-        Object.assign(this.query.$min, {
+        Object.assign(this.updateModel.$min, {
             [field]: value
         });
         return this;
     }
 
     maximum(field: string, value: any): UpdateController {
-        Object.assign(this.query.$max, {
+        Object.assign(this.updateModel.$max, {
             [field]: value
         });
         return this;
@@ -63,28 +70,28 @@ export class UpdateController {
 
 
     multiply(field: string, quantity: number): UpdateController {
-        Object.assign(this.query.$mul, {
+        Object.assign(this.updateModel.$mul, {
             [field]: quantity
         });
         return this;
     }
 
     renameField(field: string, value: string): UpdateController {
-        Object.assign(this.query.$rename, {
+        Object.assign(this.updateModel.$rename, {
             [field]: value
         });
         return this;
     }
 
     removeField(field: string): UpdateController {
-        Object.assign(this.query.$unset, {
+        Object.assign(this.updateModel.$unset, {
             [field]: ''
         });
         return this;
     }
 
     private build(): UpdateModel {
-        return this.query;
+        return this.updateModel;
     }
 
     async update(options?: RequestOptions): Promise<any> {

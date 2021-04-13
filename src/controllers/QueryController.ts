@@ -233,13 +233,13 @@ export class QueryController {
     async find<T>(options?: RequestOptions): Promise<T> {
         const queryRule = await this.rulesController.queryRule(this.domain, this.buildQuery(),
             BFastConfig.getInstance().credential(this.appName), options);
-        return await this.queryRuleRequest(queryRule);
+        return this.queryRuleRequest(queryRule);
     }
 
     async queryRuleRequest(queryRule: any): Promise<any> {
         const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), queryRule);
         const data = response.data;
-        if (data && data[`query${this.domain}`]) {
+        if (data && data[`query${this.domain}`] !== undefined) {
             return data[`query${this.domain}`];
         } else {
             const errors = data.errors;

@@ -90,7 +90,11 @@ export class DefaultAuthFactory implements AuthAdapter {
         if (data && data.auth && data.auth.signUp) {
             return data.auth.signUp;
         } else {
-            throw {message: data.errors && data.errors.auth && data.errors['auth.signUp'] ? data.errors['auth.signUp'].message : 'Username/Email already exist'};
+            let message = data.errors && data.errors['auth.signUp'] ? data.errors['auth.signUp'].message : 'Username/Email already exist';
+            if (message.toString().includes('E11000')) {
+                message = 'Username/Email already exist'
+            }
+            throw {message: message};
         }
     }
 
