@@ -52,6 +52,7 @@ export class RulesController {
     }
 
     async updateRule(domain: string, query: QueryModel, updateModel: UpdateModel,
+                     upsert: boolean,
                      appCredential: AppCredentials, options?: RequestOptions): Promise<Object> {
         const updateRule = {}
         if (options && options.useMasterKey === true) {
@@ -59,10 +60,9 @@ export class RulesController {
                 masterKey: appCredential.appPassword
             });
         }
-        query.return = options?.returnFields ? options.returnFields : []
-        Object.assign(query, {
-            update: updateModel
-        });
+        query.return = options?.returnFields ? options.returnFields : [];
+        query.upsert = upsert;
+        query.update = updateModel;
         Object.assign(updateRule, {
             applicationId: appCredential.applicationId,
             [`update${domain}`]: query
@@ -150,7 +150,7 @@ export class RulesController {
                         [`${value.action}${value.domain}`]: updateRule[`${value.action}${value.domain}`]
                     });
                 } else if (value.data && value.data.query && value.data.update) {
-                    const updateRule: any = await this.updateRule(value.domain, value.data.query, value.data.update, appCredentials, options);
+                    const updateRule: any = await this.updateRule(value.domain, value.data.query, value.data.update, value.data.upsert, appCredentials, options);
                     Object.assign(transactionRule.transaction.commit, {
                         [`${value.action}${value.domain}`]: updateRule[`${value.action}${value.domain}`]
                     });

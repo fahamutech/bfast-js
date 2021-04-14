@@ -8,4 +8,6 @@ export interface QueryModel {
     last?: number,
     first?: number
     id?: string;
+    update?: any,
+    upsert?: boolean
 }

@@ -4,5 +4,5 @@ import {UpdateModel} from "./UpdateOperation";
 export interface TransactionModel {
     action: 'create' | 'update' | 'delete' | 'query';
     domain: string,
-    data: { query: QueryModel, update: UpdateModel }
+    data: { query: QueryModel, update: UpdateModel, upsert: boolean }
 }

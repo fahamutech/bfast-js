@@ -7,7 +7,8 @@ import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
 import {RequestOptions} from "./QueryController";
 
 export class UpdateController {
-    private updateModel: UpdateModel = {$set: {}, upsert: false};
+    private updateModel: UpdateModel = {$set: {}};
+    private _upsert = false;
 
     constructor(private readonly domain: string,
                 private readonly queryModel: QueryModel,
@@ -25,9 +26,7 @@ export class UpdateController {
     }
 
     upsert(value: boolean = false) {
-        Object.assign(this.updateModel, {
-            upsert: value
-        });
+        this._upsert = value;
         return this;
     }
 
@@ -96,7 +95,7 @@ export class UpdateController {
 
     async update(options?: RequestOptions): Promise<any> {
         const credential = BFastConfig.getInstance().credential(this.appName);
-        const updateRule = await this.rulesController.updateRule(this.domain, this.queryModel, this.build(), credential, options);
+        const updateRule = await this.rulesController.updateRule(this.domain, this.queryModel, this.build(), this._upsert, credential, options);
         const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), updateRule, {
             headers: {
                 'x-parse-application': credential.applicationId
