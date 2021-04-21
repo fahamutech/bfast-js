@@ -38,9 +38,10 @@ export class TransactionController {
         });
         this.transactionRequests.splice(0);
         if (options && options.after) {
-            await options.after();
+            options.after().catch(_ => {
+            });
         }
-        return response.data;
+        return TransactionController._extractResultFromServer(response.data);
     }
 
     create(domain: string, data: any | any[]): TransactionController {
@@ -73,6 +74,18 @@ export class TransactionController {
             data: payload as any
         });
         return this;
+    }
+
+    static _extractResultFromServer(data: any) {
+        if (data && data['transaction']) {
+            return data['transaction'];
+        } else {
+            if (data && data.errors && data.errors['transaction']) {
+                throw data.errors['transaction'];
+            } else {
+                throw {message: 'Server general failure', errors: data.errors};
+            }
+        }
     }
 
 }

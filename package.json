@@ -1,6 +1,6 @@
 {
   "name": "bfastjs",
-  "version": "4.2.4",
+  "version": "4.2.3",
   "description": "javascript client sdk for bfast::cloud project",
   "repository": "https://github.com/fahamutech/bfast-js",
   "main": "dist/bfast.js",
@@ -25,7 +25,7 @@
     "bufferutil": "^4.0.3",
     "form-data": "^4.0.0",
     "localforage": "^1.9.0",
-    "socket.io-client": "^3.1.2",
+    "socket.io-client": "^3.1.3",
     "utf-8-validate": "^5.0.4"
   },
   "devDependencies": {
