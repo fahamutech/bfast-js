@@ -7,7 +7,16 @@ import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
 import {RequestOptions} from "./QueryController";
 
 export class UpdateController {
-    private updateModel: UpdateModel = {$set: {}};
+    private updateModel: UpdateModel = {
+        $set: {},
+        $currentDate: {},
+        $min: {},
+        $max: {},
+        $mul: {},
+        $rename: {},
+        $unset: {},
+        upsert: false
+    };
     private _upsert = false;
 
     constructor(private readonly domain: string,
