@@ -15,8 +15,7 @@ export class UpdateController {
         $max: {},
         $mul: {},
         $rename: {},
-        $unset: {},
-        upsert: false
+        $unset: {}
     };
     private _upsert = false;
 
@@ -105,6 +104,7 @@ export class UpdateController {
 
     async update(options?: RequestOptions): Promise<any> {
         const credential = BFastConfig.getInstance().credential(this.appName);
+        // delete this.updateModel.upsert;
         Object.keys(this.updateModel).forEach(key => {
             try {
                 // @ts-ignore

@@ -6,6 +6,5 @@ export interface UpdateModel {
     $max?: {},
     $mul?: {},
     $rename?: {},
-    $unset?: {},
-    upsert?: boolean,
+    $unset?: {}
 }
