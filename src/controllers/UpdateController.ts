@@ -9,6 +9,7 @@ import {RequestOptions} from "./QueryController";
 export class UpdateController {
     private updateModel: UpdateModel = {
         $set: {},
+        $inc: {},
         $currentDate: {},
         $min: {},
         $max: {},
