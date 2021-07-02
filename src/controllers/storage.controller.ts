@@ -1,18 +1,18 @@
 import {AppCredentials, BFastConfig} from "../conf";
-import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
 // @ts-ignore
 import * as device from "browser-or-node";
 // @ts-ignore
 import FormDataNode from 'form-data';
-import {RulesController} from "./RulesController";
-import {AuthController} from "./AuthController";
-import {FileOptions, RequestOptions} from "./QueryController";
+import {RulesController} from "./rules.controller";
+import {AuthController} from "./auth.controller";
+import {FileOptions, RequestOptions} from "./query.controller";
 import {FileModel} from "../models/file.model";
 import {Readable} from 'stream';
+import {HttpClientController} from "./http-client.controller";
 
 export class StorageController {
 
-    constructor(private readonly restApi: HttpClientAdapter,
+    constructor(private readonly httpClientController: HttpClientController,
                 private readonly auth: AuthController,
                 private readonly rulesController: RulesController,
                 private readonly appName = BFastConfig.DEFAULT_APP) {
@@ -46,7 +46,7 @@ export class StorageController {
 
     private async _handleFileRuleRequest(storageRule: any, action: string): Promise<any> {
         const credential = BFastConfig.getInstance().credential(this.appName);
-        const response = await this.restApi.post(BFastConfig.getInstance().databaseURL(this.appName), storageRule, {
+        const response = await this.httpClientController.post(BFastConfig.getInstance().databaseURL(this.appName), storageRule, {
             headers: {
                 'x-parse-application-id': credential.applicationId
             }
@@ -73,7 +73,7 @@ export class StorageController {
                 filename: options.filename
             })
         }
-        return this.restApi.post<{ urls: string[] }>(
+        return this.httpClientController.post<{ urls: string[] }>(
             BFastConfig.getInstance().databaseURL(this.appName, '/storage/' + applicationId), formData,
             {
                 onUploadProgress: progress,

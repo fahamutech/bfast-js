@@ -1,10 +1,11 @@
 import {UpdateModel} from "../models/UpdateOperation";
 import {BFastConfig} from "../conf";
-import {DatabaseController} from "./DatabaseController";
-import {RulesController} from "./RulesController";
+import {DatabaseController} from "./database.controller";
+import {RulesController} from "./rules.controller";
 import {QueryModel} from "../models/QueryModel";
-import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
-import {RequestOptions} from "./QueryController";
+import {HttpClientAdapter} from "../adapters/http-client.adapter";
+import {RequestOptions} from "./query.controller";
+import {HttpClientController} from "./http-client.controller";
 
 export class UpdateController {
     private updateModel: UpdateModel = {
@@ -22,7 +23,7 @@ export class UpdateController {
     constructor(private readonly domain: string,
                 private readonly queryModel: QueryModel,
                 private readonly appName: string,
-                private readonly restAdapter: HttpClientAdapter,
+                private readonly httpClientController: HttpClientController,
                 private readonly rulesController: RulesController) {
     }
 
@@ -117,7 +118,7 @@ export class UpdateController {
             }
         });
         const updateRule = await this.rulesController.updateRule(this.domain, this.queryModel, this.build(), this._upsert, credential, options);
-        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), updateRule);
+        const response = await this.httpClientController.post(BFastConfig.getInstance().databaseURL(this.appName), updateRule);
         return DatabaseController._extractResultFromServer(response.data, 'update', this.domain);
     }
 }

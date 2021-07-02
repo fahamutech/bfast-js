@@ -1,16 +1,16 @@
 import {TransactionModel} from "../models/TransactionModel";
 import {BFastConfig} from "../conf";
-import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
-import {RulesController} from "./RulesController";
+import {RulesController} from "./rules.controller";
 import {QueryModel} from "../models/QueryModel";
 import {UpdateModel} from "../models/UpdateOperation";
+import {HttpClientController} from "./http-client.controller";
 
 export class TransactionController {
 
     private transactionRequests: TransactionModel[];
 
     constructor(private readonly appName: string,
-                private readonly restApi: HttpClientAdapter,
+                private readonly httpClientController: HttpClientController,
                 private readonly rulesController: RulesController) {
         this.transactionRequests = [];
     }
@@ -31,7 +31,7 @@ export class TransactionController {
         const credential = BFastConfig.getInstance().credential(this.appName);
         const transactionRule = await this.rulesController.transaction(this.transactionRequests,
             credential, {useMasterKey: options?.useMasterKey});
-        const response = await this.restApi.post(BFastConfig.getInstance().databaseURL(this.appName), transactionRule, {
+        const response = await this.httpClientController.post(BFastConfig.getInstance().databaseURL(this.appName), transactionRule, {
             headers: {
                 'x-parse-application-id': credential.applicationId
             }

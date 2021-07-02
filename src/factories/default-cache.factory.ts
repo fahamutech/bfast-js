@@ -1,5 +1,5 @@
-import {CacheAdapter} from "../adapters/CacheAdapter";
-import {RequestOptions} from "../controllers/QueryController";
+import {CacheAdapter} from "../adapters/cache.adapter";
+import {RequestOptions} from "../controllers/query.controller";
 import {SecurityController} from "../controllers/SecurityController";
 import {isNode} from "../utils/bfast.util";
 

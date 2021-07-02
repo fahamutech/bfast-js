@@ -1,16 +1,17 @@
-import {QueryController, RequestOptions} from "./QueryController";
+import {QueryController, RequestOptions} from "./query.controller";
 import {BFastConfig} from "../conf";
-import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
-import {RulesController} from "./RulesController";
-import {SocketController} from "./SocketController";
+import {HttpClientAdapter} from "../adapters/http-client.adapter";
+import {RulesController} from "./rules.controller";
+import {SocketController} from "./socket.controller";
 import {DatabaseChangesModel} from "../models/DatabaseChangesModel";
-import {AuthController} from "./AuthController";
+import {AuthController} from "./auth.controller";
+import {HttpClientController} from "./http-client.controller";
 
 export class DatabaseController {
 
     constructor(private readonly domainName: string,
-                private readonly restAdapter: HttpClientAdapter,
-                private readonly authAdapter: AuthController,
+                private readonly httpClientController: HttpClientController,
+                private readonly authController: AuthController,
                 private readonly rulesController: RulesController,
                 private readonly appName: string) {
     }
@@ -18,7 +19,7 @@ export class DatabaseController {
     async save<T>(model: T | T[], options?: RequestOptions): Promise<T> {
         const credential = BFastConfig.getInstance().credential(this.appName);
         const createRule = await this.rulesController.createRule(this.domainName, model, credential, options);
-        const response = await this.restAdapter.post(
+        const response = await this.httpClientController.post(
             `${BFastConfig.getInstance().databaseURL(this.appName)}`, createRule, {
                 headers: {
                     'x-parse-application-id': credential.applicationId
@@ -41,7 +42,7 @@ export class DatabaseController {
     }
 
     query(): QueryController {
-        return new QueryController(this.domainName, this.restAdapter, this.rulesController, this.appName);
+        return new QueryController(this.domainName, this.httpClientController, this.rulesController, this.appName);
     }
 
     static _extractResultFromServer(data: any, rule: string, domain: string) {

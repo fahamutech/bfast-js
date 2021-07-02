@@ -1,10 +1,10 @@
-import {DatabaseController} from "./controllers/DatabaseController";
-import {CacheController} from "./controllers/CacheController";
+import {DatabaseController} from "./controllers/database.controller";
+import {CacheController} from "./controllers/cache.controller";
 import {BFastConfig} from "./conf";
-import {AxiosRestController} from "./controllers/AxiosRestController";
-import {AuthController} from "./controllers/AuthController";
-import {RulesController} from "./controllers/RulesController";
-import {TransactionController} from "./controllers/TransactionController";
+import {HttpClientController} from "./controllers/http-client.controller";
+import {AuthController} from "./controllers/auth.controller";
+import {RulesController} from "./controllers/rules.controller";
+import {TransactionController} from "./controllers/transaction.controller";
 
 export class BfastDatabase {
 
@@ -24,7 +24,7 @@ export class BfastDatabase {
             config.cacheCollectionName('cache', this.appName),
             config.cacheAdapter(this.appName)
         );
-        const restController = new AxiosRestController()
+        const restController = new HttpClientController()
         const authController = new AuthController(this.appName, restController, authCache, config.authAdapter(this.appName));
         const rulesController = new RulesController(authController)
         return new DatabaseController(
@@ -64,7 +64,7 @@ export class BfastDatabase {
             config.cacheCollectionName('cache', this.appName),
             config.cacheAdapter(this.appName)
         );
-        const restController = new AxiosRestController();
+        const restController = new HttpClientController();
         const authController = new AuthController(this.appName, restController, authCache, config.authAdapter(this.appName));
         const rulesController = new RulesController(authController);
         return new TransactionController(this.appName, restController, rulesController);

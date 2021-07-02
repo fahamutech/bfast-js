@@ -1,12 +1,13 @@
 import {BFastConfig} from "../conf";
-import {HttpClientAdapter, RestRequestConfig} from "../adapters/HttpClientAdapter";
-import {AuthController} from "./AuthController";
+import {HttpClientAdapter, RestRequestConfig} from "../adapters/http-client.adapter";
+import {AuthController} from "./auth.controller";
+import {HttpClientController} from "./http-client.controller";
 
 export class FunctionsController {
 
     constructor(private readonly functionPath: string,
-                private readonly restApi: HttpClientAdapter,
-                private readonly authAdapter: AuthController,
+                private readonly httpClientController: HttpClientController,
+                private readonly authController: AuthController,
                 private readonly appName = BFastConfig.DEFAULT_APP) {
     }
 
@@ -20,7 +21,7 @@ export class FunctionsController {
             }
             // const user = await this.authAdapter.currentUser();
             // postConfig.headers['authorization'] = `Bearer ${user?.sessionToken}`;
-            const value = await this.restApi.post(
+            const value = await this.httpClientController.post(
                 BFastConfig.getInstance().functionsURL(this.functionPath, this.appName) as string,
                 body ? body : {},
                 postConfig
@@ -38,7 +39,7 @@ export class FunctionsController {
         } else {
             Object.assign(deleteConfig, config);
         }
-        const response = await this.restApi.delete(
+        const response = await this.httpClientController.delete(
             BFastConfig.getInstance().functionsURL(this.functionPath, this.appName) as string,
             deleteConfig
         );
@@ -52,7 +53,7 @@ export class FunctionsController {
         } else {
             Object.assign(getConfig, config);
         }
-        const response = await this.restApi.get(
+        const response = await this.httpClientController.get(
             BFastConfig.getInstance().functionsURL(this.functionPath, this.appName) as string,
             getConfig
         );
@@ -66,7 +67,7 @@ export class FunctionsController {
         } else {
             Object.assign(putConfig, config);
         }
-        const response = await this.restApi.put(BFastConfig.getInstance().functionsURL(this.functionPath, this.appName) as string,
+        const response = await this.httpClientController.put(BFastConfig.getInstance().functionsURL(this.functionPath, this.appName) as string,
             body ? body : {},
             putConfig
         );

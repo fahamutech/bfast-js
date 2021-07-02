@@ -1,9 +1,9 @@
 import {AppCredentials, BFastConfig} from "./conf";
-import {StorageController} from "./controllers/StorageController";
-import {AuthController} from "./controllers/AuthController";
-import {CacheController} from "./controllers/CacheController";
-import {AxiosRestController} from "./controllers/AxiosRestController";
-import {RulesController} from "./controllers/RulesController";
+import {StorageController} from "./controllers/storage.controller";
+import {AuthController} from "./controllers/auth.controller";
+import {CacheController} from "./controllers/cache.controller";
+import {HttpClientController} from "./controllers/http-client.controller";
+import {RulesController} from "./controllers/rules.controller";
 import {BfastDatabase} from "./bfast.database";
 import {BfastFunctions} from "./bfast.functions";
 
@@ -14,7 +14,6 @@ import {BfastFunctions} from "./bfast.functions";
  */
 
 
-
 export class bfast {
 
     /**
@@ -23,9 +22,9 @@ export class bfast {
      * @param appName {string} application name for multiple apps access
      */
     static init(options: AppCredentials, appName: string = BFastConfig.DEFAULT_APP) {
-        options.cache = {
-            enable: false,
-        }
+        // options.cache = {
+        //     enable: true,
+        // }
         BFastConfig.getInstance().setCredential(options, appName);
     }
 
@@ -63,7 +62,7 @@ export class bfast {
         const config = BFastConfig.getInstance();
         const databaseName = (options && options.database)
             ? config.cacheDatabaseName(options.database, appName)
-            : config.cacheDatabaseName(config.DEFAULT_CACHE_DB_NAME(), appName);
+            : config.cacheDatabaseName(config.DEFAULT_CACHE_DB_NAME, appName);
         const collectionName = (options && options.collection)
             ? config.cacheCollectionName(options.collection, appName)
             : config.cacheCollectionName('cache', appName);
@@ -81,16 +80,19 @@ export class bfast {
      */
     static auth(appName = BFastConfig.DEFAULT_APP) {
         const config = BFastConfig.getInstance();
-        const axiosRestController = new AxiosRestController();
         const cacheController = new CacheController(
             appName,
-            config.cacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), appName),
+            config.cacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME, appName),
             config.cacheCollectionName('user', appName),
             config.cacheAdapter(appName)
         );
+        const httpClientController = new HttpClientController(
+            cacheController,
+            config.httpAdapter(appName)
+        );
         return new AuthController(
             appName,
-            axiosRestController,
+            httpClientController,
             cacheController,
             config.authAdapter(appName)
         );
@@ -111,16 +113,36 @@ export class bfast {
      */
     static storage(appName = BFastConfig.DEFAULT_APP): StorageController {
         const config = BFastConfig.getInstance();
-        const authCache = new CacheController(
+        const authCacheController = new CacheController(
             appName,
-            config.cacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), appName),
-            config.cacheCollectionName('cache', appName),
+            config.DEFAULT_CACHE_DB_NAME,
+            config.DEFAULT_CACHE_COLLECTION_USER,
             config.cacheAdapter(appName)
         );
-        const restController = new AxiosRestController()
-        const authController = new AuthController(appName, restController, authCache, config.authAdapter(appName));
+        const authController = new AuthController(
+            appName,
+            new HttpClientController(
+                authCacheController,
+                config.httpAdapter(appName)
+            ),
+            authCacheController,
+            config.authAdapter(appName)
+        );
         const rulesController = new RulesController(authController)
-        return new StorageController(new AxiosRestController(), authController, rulesController, appName);
+        return new StorageController(
+            new HttpClientController(
+                new CacheController(
+                    appName,
+                    config.DEFAULT_CACHE_DB_NAME,
+                    config.DEFAULT_CACHE_COLLECTION_STORAGE,
+                    config.cacheAdapter(appName)
+                ),
+                config.httpAdapter(appName)
+            ),
+            authController,
+            rulesController,
+            appName
+        );
     }
 
 }

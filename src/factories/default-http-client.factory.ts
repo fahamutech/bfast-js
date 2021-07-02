@@ -1,9 +1,9 @@
-import {HttpClientAdapter, RestRequestConfig, RestResponse} from "../adapters/HttpClientAdapter";
+import {HttpClientAdapter, RestRequestConfig, RestResponse} from "../adapters/http-client.adapter";
 
 // @ts-ignore
 import axios from "axios";
 
-export class AxiosRestController implements HttpClientAdapter {
+export class DefaultHttpClientFactory implements HttpClientAdapter {
 
     async delete<T = any, R = RestResponse<T>>(url: string, config?: RestRequestConfig): Promise<R> {
         return axios.delete(url, config as any);

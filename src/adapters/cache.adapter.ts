@@ -1,4 +1,4 @@
-import {RequestOptions} from "../controllers/QueryController";
+import {RequestOptions} from "../controllers/query.controller";
 
 export interface CacheAdapter {
     set<T>(identifier: string, data: T, database: string, collection: string, options?: { dtl?: number, secure?: boolean }): Promise<T>;

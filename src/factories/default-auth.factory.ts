@@ -1,10 +1,13 @@
 import {UserModel} from "../models/UserModel";
-import {AuthAdapter, AuthOptions} from "../adapters/AuthAdapter";
+import {AuthAdapter, AuthOptions} from "../adapters/auth.adapter";
 import {BFastConfig} from "../conf";
-import {AxiosRestController} from "../controllers/AxiosRestController";
+import {HttpClientController} from "../controllers/http-client.controller";
+import {AuthController} from "../controllers/auth.controller";
 
 export class DefaultAuthFactory implements AuthAdapter {
-    restApi = new AxiosRestController();
+
+    constructor(private readonly httpClientController: HttpClientController) {
+    }
 
     async authenticated<T extends UserModel>(userId: string, options?: AuthOptions): Promise<any> {
         return false;
@@ -24,7 +27,7 @@ export class DefaultAuthFactory implements AuthAdapter {
                 }
             }
         });
-        const response = await this.restApi.post<T>(BFastConfig.getInstance().databaseURL(appName), authRule, {
+        const response = await this.httpClientController.post<T>(BFastConfig.getInstance().databaseURL(appName), authRule, {
             headers: {
                 'x-parse-application-id': BFastConfig.getInstance().credential(appName).applicationId
             }
@@ -53,7 +56,7 @@ export class DefaultAuthFactory implements AuthAdapter {
                 }
             }
         });
-        const response = await this.restApi.post<T>(BFastConfig.getInstance().databaseURL(appName), authRule, {
+        const response = await this.httpClientController.post<T>(BFastConfig.getInstance().databaseURL(appName), authRule, {
             headers: {
                 'x-parse-application-id': BFastConfig.getInstance().credential(appName).applicationId
             }
@@ -81,7 +84,7 @@ export class DefaultAuthFactory implements AuthAdapter {
                 signUp: attrs
             }
         });
-        const response = await this.restApi.post<T>(BFastConfig.getInstance().databaseURL(appName), authRule, {
+        const response = await this.httpClientController.post<T>(BFastConfig.getInstance().databaseURL(appName), authRule, {
             headers: {
                 'x-parse-application-id': BFastConfig.getInstance().credential(appName).applicationId
             }

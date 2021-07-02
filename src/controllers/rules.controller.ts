@@ -2,11 +2,11 @@ import {AppCredentials} from "../conf";
 import {TransactionModel} from "../models/TransactionModel";
 import {QueryModel} from "../models/QueryModel";
 import {UpdateModel} from "../models/UpdateOperation";
-import {AuthController} from "./AuthController";
-import {RequestOptions} from "./QueryController";
+import {AuthController} from "./auth.controller";
+import {RequestOptions} from "./query.controller";
 
 export class RulesController {
-    constructor(private readonly authAdapter: AuthController) {
+    constructor(private readonly authController: AuthController) {
     }
 
     async createRule(domain: string, data: any, appCredential: AppCredentials, options?: RequestOptions): Promise<Object> {
@@ -182,7 +182,7 @@ export class RulesController {
     }
 
     async addToken(rule: any): Promise<any> {
-        const token = await this.authAdapter.getToken();
+        const token = await this.authController.getToken();
         Object.assign(rule, {
             token
         });

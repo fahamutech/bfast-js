@@ -1,8 +1,6 @@
 import io from 'socket.io-client';
 import {BFastConfig} from "../conf";
 
-// import Socket = SocketIOClient.Socket;
-
 export class SocketController {
     public readonly socket: any;
 
@@ -13,12 +11,11 @@ export class SocketController {
             : BFastConfig.getInstance().functionsURL(namespace, appName);
         this.socket = io(url, {
             autoConnect: false,
-            reconnection: true,             // whether to reconnect automatically
-            reconnectionAttempts: Infinity, // number of reconnection attempts before giving up
-            reconnectionDelay: 2000,        // how long to initially wait before attempting a new reconnection
-            reconnectionDelayMax: 5000,     // maximum amount of time to wait between reconnection attempts. Each attempt increases the reconnection delay by 2x along with a randomization factor
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 2000,
+            reconnectionDelayMax: 5000,
             randomizationFactor: 0.5,
-            // secure: true,
             transports: ['websocket']
         });
         if (onConnect) this.socket.on('connect', onConnect);

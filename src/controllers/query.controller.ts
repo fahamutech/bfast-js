@@ -1,10 +1,11 @@
-import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
+import {HttpClientAdapter} from "../adapters/http-client.adapter";
 import {BFastConfig} from "../conf";
-import {RulesController} from "./RulesController";
-import {SocketController} from "./SocketController";
-import {DatabaseChangesController, DatabaseController} from "./DatabaseController";
+import {RulesController} from "./rules.controller";
+import {SocketController} from "./socket.controller";
+import {DatabaseChangesController, DatabaseController} from "./database.controller";
 import {QueryModel} from "../models/QueryModel";
-import {UpdateController} from "./UpdateController";
+import {UpdateController} from "./update.controller";
+import {HttpClientController} from "./http-client.controller";
 
 export enum QueryOrder {
     ASCENDING = 1,
@@ -23,7 +24,7 @@ export class QueryController {
     }
 
     constructor(private readonly domain: string,
-                private readonly restAdapter: HttpClientAdapter,
+                private readonly httpClientController: HttpClientController,
                 private readonly rulesController: RulesController,
                 private readonly appName: string) {
     }
@@ -175,7 +176,7 @@ export class QueryController {
     async delete<T>(options?: RequestOptions): Promise<T> {
         const credential = BFastConfig.getInstance().credential(this.appName);
         const deleteRule = await this.rulesController.deleteRule(this.domain, this.buildQuery(), credential, options);
-        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), deleteRule, {
+        const response = await this.httpClientController.post(BFastConfig.getInstance().databaseURL(this.appName), deleteRule, {
             headers: {
                 'x-parse-application-id': credential.applicationId
             }
@@ -188,7 +189,7 @@ export class QueryController {
             this.domain,
             this.buildQuery(),
             this.appName,
-            this.restAdapter,
+            this.httpClientController,
             this.rulesController
         );
     }
@@ -237,7 +238,7 @@ export class QueryController {
     }
 
     async queryRuleRequest(queryRule: any): Promise<any> {
-        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), queryRule);
+        const response = await this.httpClientController.post(BFastConfig.getInstance().databaseURL(this.appName), queryRule);
         const data = response.data;
         if (data && data[`query${this.domain}`] !== undefined) {
             return data[`query${this.domain}`];
@@ -255,7 +256,7 @@ export class QueryController {
     }
 
     async aggregateRuleRequest(pipelineRule: any): Promise<any> {
-        const response = await this.restAdapter.post(BFastConfig.getInstance().databaseURL(this.appName), pipelineRule);
+        const response = await this.httpClientController.post(BFastConfig.getInstance().databaseURL(this.appName), pipelineRule);
         const data = response.data;
         if (data && data[`aggregate${this.domain}`]) {
             return data[`aggregate${this.domain}`];

@@ -1,35 +1,20 @@
-import {AuthAdapter} from "./adapters/AuthAdapter";
-import {CacheAdapter} from "./adapters/CacheAdapter";
-import {HttpClientAdapter} from "./adapters/HttpClientAdapter";
-import {DefaultCacheFactory} from "./factories/cache";
-import {DefaultAuthFactory} from "./factories/auth";
+import {AuthAdapter} from "./adapters/auth.adapter";
+import {CacheAdapter} from "./adapters/cache.adapter";
+import {HttpClientAdapter} from "./adapters/http-client.adapter";
+import {DefaultCacheFactory} from "./factories/default-cache.factory";
+import {DefaultAuthFactory} from "./factories/default-auth.factory";
 import {SecurityController} from "./controllers/SecurityController";
+import {DefaultHttpClientFactory} from "./factories/default-http-client.factory";
+import {HttpClientController} from "./controllers/http-client.controller";
+import {CacheController} from "./controllers/cache.controller";
 
 export class BFastConfig {
     static DEFAULT_APP = 'DEFAULT';
-    private _DEFAULT_DOMAINS_CACHE_DB_NAME = '__domain';
-
-    DEFAULT_DOMAINS_CACHE_DB_NAME() {
-        return this._DEFAULT_DOMAINS_CACHE_DB_NAME;
-    }
-
-    private _DEFAULT_AUTH_CACHE_DB_NAME = '__auth';
-
-    DEFAULT_AUTH_CACHE_DB_NAME() {
-        return this._DEFAULT_AUTH_CACHE_DB_NAME;
-    }
-
-    private _DEFAULT_CACHE_DB_NAME = '__cache';
-
-    DEFAULT_CACHE_DB_NAME() {
-        return this._DEFAULT_CACHE_DB_NAME;
-    }
-
-    private _DEFAULT_CACHE_TTL_COLLECTION_NAME = '__cache_ttl';
-
-    DEFAULT_CACHE_TTL_COLLECTION_NAME() {
-        return this._DEFAULT_CACHE_TTL_COLLECTION_NAME;
-    }
+    DEFAULT_CACHE_DB_NAME = 'bfast';
+    DEFAULT_CACHE_COLLECTION_USER = '_User';
+    DEFAULT_CACHE_COLLECTION_STORAGE = '_Storage';
+    DEFAULT_CACHE_COLLECTION_NAME = '_Cache';
+    DEFAULT_CACHE_TTL_COLLECTION_NAME = '_Cache_Ttl';
 
     private credentials: { [key: string]: AppCredentials } = {};
 
@@ -95,9 +80,9 @@ export class BFastConfig {
 
     cacheCollectionName(name: string, appName: string): string {
         if (name && name !== '') {
-            return `${name}/${appName}`;
+            return name.trim();
         } else {
-            return `cache/${appName}`;
+            return 'cache';
         }
     }
 
@@ -106,7 +91,17 @@ export class BFastConfig {
         if (adapters && adapters.auth && typeof adapters.auth === 'function') {
             return adapters.auth();
         } else {
-            return new DefaultAuthFactory();
+            return new DefaultAuthFactory(
+                new HttpClientController(
+                    new CacheController(
+                        appName,
+                        this.DEFAULT_CACHE_DB_NAME,
+                        this.DEFAULT_CACHE_COLLECTION_USER,
+                        this.cacheAdapter(appName)
+                    ),
+                    this.httpAdapter(appName)
+                )
+            );
         }
     }
 
@@ -116,16 +111,20 @@ export class BFastConfig {
         if (adapters && adapters.cache && typeof adapters.cache === "function") {
             return adapters.cache();
         } else {
-            return new DefaultCacheFactory(new SecurityController(credentials.projectId ? credentials.projectId : '_@bfast@_'));
+            return new DefaultCacheFactory(
+                new SecurityController(
+                    credentials.projectId ? credentials.projectId : 'bfast'
+                )
+            );
         }
     }
 
-    httpAdapter(appName: string): HttpClientAdapter | null {
+    httpAdapter(appName: string): HttpClientAdapter {
         const adapters = this.credential(appName)?.adapters;
         if (adapters && adapters.http && typeof adapters.http === "function") {
             return adapters.http();
         } else {
-            return null;
+            return new DefaultHttpClientFactory();
         }
     }
 }

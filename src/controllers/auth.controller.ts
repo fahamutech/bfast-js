@@ -1,15 +1,15 @@
-import {HttpClientAdapter} from "../adapters/HttpClientAdapter";
-import {AuthAdapter, AuthOptions} from "../adapters/AuthAdapter";
+import {AuthAdapter, AuthOptions} from "../adapters/auth.adapter";
 import {UserModel} from "../models/UserModel";
-import {CacheController} from "./CacheController";
+import {CacheController} from "./cache.controller";
+import {HttpClientController} from "./http-client.controller";
 
 export class AuthController {
 
-    userCacheColl = '_current_user_';
+    currentUserIdentifier = '_current_user_';
 
     constructor(
         private readonly appName: string,
-        private readonly restApi: HttpClientAdapter,
+        private readonly httpClientController: HttpClientController,
         private readonly cacheController: CacheController,
         private readonly authAdapter: AuthAdapter
     ) {
@@ -21,7 +21,7 @@ export class AuthController {
 
     async currentUser<T extends UserModel>(): Promise<T | null> {
         try {
-            const user: any = await this.cacheController.get<T>(this.userCacheColl, {secure: true});
+            const user: any = await this.cacheController.get<T>(this.currentUserIdentifier, {secure: true});
             if (!user) {
                 return null;
             } else if (typeof user === "string") {
@@ -70,6 +70,8 @@ export class AuthController {
         if (!password) {
             throw {message: "Password required"}
         }
+        username = username.trim();
+        password = password.trim();
         const user: any = await this.authAdapter.logIn(username, password, this.appName, options);
         await this.setCurrentUser(user, dtl);
         return user;
@@ -94,6 +96,8 @@ export class AuthController {
         if (!password) {
             throw {message: "Password required"}
         }
+        username = username.trim();
+        password = password.trim();
         const user: any = await this.authAdapter.signUp(username, password, attrs, this.appName, options);
         await this.setCurrentUser(user, dtl);
         return user;
@@ -110,7 +114,7 @@ export class AuthController {
         // if (typeof user !== "object") {
         //     throw "user parameter require a map";
         // }
-        await this.cacheController.set(this.userCacheColl, user, {
+        await this.cacheController.set(this.currentUserIdentifier, user, {
             secure: true
         });
         return user;

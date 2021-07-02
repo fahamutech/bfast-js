@@ -1,11 +1,16 @@
-import {CacheAdapter} from "../adapters/CacheAdapter";
+import {CacheAdapter} from "../adapters/cache.adapter";
+import {BFastConfig} from "../conf";
 
 export class CacheController {
 
     constructor(private readonly appName: string,
                 private readonly database: string,
-                private readonly  collection: string,
+                private readonly collection: string,
                 private readonly cacheAdapter: CacheAdapter) {
+        if (database && !database.startsWith('bfast/')) {
+            this.database = BFastConfig.getInstance().cacheDatabaseName(database, appName);
+        }
+        this.collection = BFastConfig.getInstance().cacheCollectionName(collection, appName);
     }
 
     async keys(): Promise<string[] | undefined> {

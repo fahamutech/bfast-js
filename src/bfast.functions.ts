@@ -1,9 +1,9 @@
-import {FunctionsController} from "./controllers/FunctionsController";
-import {AxiosRestController} from "./controllers/AxiosRestController";
-import {AuthController} from "./controllers/AuthController";
-import {CacheController} from "./controllers/CacheController";
+import {FunctionsController} from "./controllers/functions.controller";
+import {HttpClientController} from "./controllers/http-client.controller";
+import {AuthController} from "./controllers/auth.controller";
+import {CacheController} from "./controllers/cache.controller";
 import {BFastConfig} from "./conf";
-import {SocketController} from "./controllers/SocketController";
+import {SocketController} from "./controllers/socket.controller";
 import {HttpRequestModel} from "./models/HttpRequestModel";
 import {EventResponseModel, HttpResponseModel} from "./models/HttpResponseModel";
 import {HttpNextModel} from "./models/HttpNextModel";
@@ -20,7 +20,7 @@ export class BfastFunctions {
      */
     request(path: string): FunctionsController {
         const config = BFastConfig.getInstance();
-        const _restController = new AxiosRestController();
+        const _restController = new HttpClientController();
         return new FunctionsController(
             path,
             _restController,
