@@ -37,9 +37,11 @@ class HttpClientMock {
      * }>}
      */
     async post(url, data, config) {
-        console.log(url);
         console.log(data);
         console.log(config);
+        return {
+            data: [{id: '123'}]
+        }
     }
 
     async put(url, data, config) {
