@@ -1,0 +1,77 @@
+Arguments: 
+  /usr/bin/node /usr/bin/yarn install
+
+PATH: 
+  /usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+
+Yarn version: 
+  1.22.10
+
+Node version: 
+  14.17.2
+
+Platform: 
+  linux x64
+
+Trace: 
+  Error: Failed to replace env in config: ${NPM_TOKEN}
+      at /usr/lib/node_modules/yarn/lib/cli.js:98430:13
+      at String.replace (<anonymous>)
+      at envReplace (/usr/lib/node_modules/yarn/lib/cli.js:98425:16)
+      at Function.normalizeConfig (/usr/lib/node_modules/yarn/lib/cli.js:31887:69)
+      at NpmRegistry.<anonymous> (/usr/lib/node_modules/yarn/lib/cli.js:31917:34)
+      at Generator.next (<anonymous>)
+      at step (/usr/lib/node_modules/yarn/lib/cli.js:310:30)
+      at /usr/lib/node_modules/yarn/lib/cli.js:321:13
+
+npm manifest: 
+  {
+    "name": "bfastjs",
+    "version": "4.2.9",
+    "description": "javascript client sdk for bfast::cloud project",
+    "repository": "https://github.com/fahamutech/bfast-js",
+    "main": "dist/bfast.js",
+    "maintainers": [
+      "Fahamu Tech"
+    ],
+    "types": "dist/bfast.d.ts",
+    "scripts": {
+      "test": "mocha ./specs",
+      "build": "npm run build:web && npm run build:node",
+      "build:web": "npx gulp updateNode && npx webpack --config webpack.config.js",
+      "publish:web": "npx gulp updateNode && npm run build:web && npm publish",
+      "build:node": "npx gulp updateNode && cd node && webpack --config webpack-node.config.js",
+      "publish:node": "npx gulp updateNode && npm run build:node && npm publish ./node",
+      "publish:all": "npm run publish:web && npm run publish:node"
+    },
+    "author": "Fahamu Tech",
+    "license": "ISC",
+    "dependencies": {
+      "axios": "^0.21.1",
+      "browser-or-node": "^1.3.0",
+      "bufferutil": "^4.0.3",
+      "form-data": "^4.0.0",
+      "localforage": "^1.9.0",
+      "rxjs": "^7.1.0",
+      "socket.io-client": "^3.1.3",
+      "utf-8-validate": "^5.0.5"
+    },
+    "devDependencies": {
+      "@types/browser-or-node": "^1.3.0",
+      "@types/node": "^14.14.31",
+      "@types/socket.io": "^1.4.42",
+      "@types/socket.io-client": "^1.4.35",
+      "gulp": "^4.0.2",
+      "mocha": "^8.4.0",
+      "ts-loader": "^9.2.2",
+      "typescript": "^4.3.2",
+      "webpack": "^5.38.1",
+      "webpack-cli": "^4.7.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
