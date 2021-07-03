@@ -14,11 +14,13 @@ export class HttpClientController {
             token = user.token;
         }
         token = token ? token : '';
-        return Object.assign(config ? config : {headers: {}}, {
+        const _configs = Object.assign(config ? config : {headers: {}}, {
             headers: {
                 'x-bfast-token': token.toString().trim()
             }
         });
+        console.log(_configs);
+        return  _configs;
     }
 
     async delete<T = any, R = RestResponse<T>>(url: string, config?: RestRequestConfig): Promise<R> {
