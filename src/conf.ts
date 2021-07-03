@@ -13,6 +13,7 @@ export class BFastConfig {
     DEFAULT_CACHE_DB_NAME = 'bfast';
     DEFAULT_CACHE_COLLECTION_USER = '_User';
     DEFAULT_CACHE_COLLECTION_STORAGE = '_Storage';
+    DEFAULT_CACHE_COLLECTION_REST = '_Rest';
     DEFAULT_CACHE_COLLECTION_NAME = '_Cache';
     DEFAULT_CACHE_TTL_COLLECTION_NAME = '_Cache_Ttl';
 
@@ -137,9 +138,9 @@ export interface AppCredentials {
     appPassword?: string;
     cache?: CacheConfigOptions;
     adapters?: {
-        auth?: () => AuthAdapter,
-        cache?: () => CacheAdapter,
-        http?: () => HttpClientAdapter
+        auth?: (config?: BFastConfig) => AuthAdapter,
+        cache?: (config?: BFastConfig) => CacheAdapter,
+        http?: (config?: BFastConfig) => HttpClientAdapter
     }
 }
 

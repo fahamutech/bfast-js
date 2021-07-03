@@ -20,11 +20,19 @@ export class BfastDatabase {
         const config = BFastConfig.getInstance();
         const authCache = new CacheController(
             this.appName,
-            config.cacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), this.appName),
-            config.cacheCollectionName('cache', this.appName),
+            config.DEFAULT_CACHE_DB_NAME,
+            config.DEFAULT_CACHE_COLLECTION_USER,
             config.cacheAdapter(this.appName)
         );
-        const restController = new HttpClientController()
+        const restController = new HttpClientController(
+            new CacheController(
+                this.appName,
+                config.DEFAULT_CACHE_DB_NAME,
+                config.DEFAULT_CACHE_COLLECTION_REST,
+                config.cacheAdapter(this.appName)
+            ),
+            config.httpAdapter(this.appName)
+        )
         const authController = new AuthController(this.appName, restController, authCache, config.authAdapter(this.appName));
         const rulesController = new RulesController(authController)
         return new DatabaseController(
@@ -58,14 +66,22 @@ export class BfastDatabase {
      */
     transaction(): TransactionController {
         const config = BFastConfig.getInstance();
-        const authCache = new CacheController(
+        const authCacheController = new CacheController(
             this.appName,
-            config.cacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), this.appName),
-            config.cacheCollectionName('cache', this.appName),
+            config.DEFAULT_CACHE_DB_NAME,
+            config.DEFAULT_CACHE_COLLECTION_USER,
             config.cacheAdapter(this.appName)
         );
-        const restController = new HttpClientController();
-        const authController = new AuthController(this.appName, restController, authCache, config.authAdapter(this.appName));
+        const restController = new HttpClientController(
+            new CacheController(
+                this.appName,
+                config.DEFAULT_CACHE_DB_NAME,
+                config.DEFAULT_CACHE_COLLECTION_REST,
+                config.cacheAdapter(this.appName)
+            ),
+            config.httpAdapter(this.appName)
+        );
+        const authController = new AuthController(this.appName, restController, authCacheController, config.authAdapter(this.appName));
         const rulesController = new RulesController(authController);
         return new TransactionController(this.appName, restController, rulesController);
     }

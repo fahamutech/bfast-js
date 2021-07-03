@@ -82,7 +82,7 @@ export class bfast {
         const config = BFastConfig.getInstance();
         const cacheController = new CacheController(
             appName,
-            config.cacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME, appName),
+            config.cacheDatabaseName(BFastConfig.getInstance().DEFAULT_CACHE_DB_NAME, appName),
             config.cacheCollectionName('user', appName),
             config.cacheAdapter(appName)
         );

@@ -20,7 +20,15 @@ export class BfastFunctions {
      */
     request(path: string): FunctionsController {
         const config = BFastConfig.getInstance();
-        const _restController = new HttpClientController();
+        const _restController = new HttpClientController(
+            new CacheController(
+                this.appName,
+                config.DEFAULT_CACHE_DB_NAME,
+                config.DEFAULT_CACHE_COLLECTION_REST,
+                config.cacheAdapter(this.appName)
+            ),
+            config.httpAdapter(this.appName)
+        );
         return new FunctionsController(
             path,
             _restController,
@@ -29,8 +37,8 @@ export class BfastFunctions {
                 _restController,
                 new CacheController(
                     this.appName,
-                    config.cacheDatabaseName(BFastConfig.getInstance().DEFAULT_AUTH_CACHE_DB_NAME(), this.appName),
-                    config.cacheCollectionName(`cache`, this.appName),
+                    config.DEFAULT_CACHE_DB_NAME,
+                    config.DEFAULT_CACHE_COLLECTION_USER,
                     config.cacheAdapter(this.appName)
                 ),
                 config.authAdapter(this.appName)
