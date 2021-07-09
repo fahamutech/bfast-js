@@ -1,11 +1,10 @@
-import {HttpClientAdapter} from "../adapters/http-client.adapter";
-import {BFastConfig} from "../conf";
-import {RulesController} from "./rules.controller";
-import {SocketController} from "./socket.controller";
-import {DatabaseChangesController, DatabaseController} from "./database.controller";
-import {QueryModel} from "../models/QueryModel";
-import {UpdateController} from "./update.controller";
-import {HttpClientController} from "./http-client.controller";
+import { BFastConfig } from "../conf";
+import { RulesController } from "./rules.controller";
+import { SocketController } from "./socket.controller";
+import { DatabaseChangesController, DatabaseController } from "./database.controller";
+import { QueryModel } from "../models/QueryModel";
+import { UpdateController } from "./update.controller";
+import { HttpClientController } from "./http-client.controller";
 
 export enum QueryOrder {
     ASCENDING = 1,
@@ -19,14 +18,14 @@ export class QueryController {
         return: [],
         skip: 0,
         size: 100,
-        orderBy: [{'createdAt': -1}],
+        orderBy: [{ 'createdAt': -1 }],
         count: false,
     }
 
     constructor(private readonly domain: string,
-                private readonly httpClientController: HttpClientController,
-                private readonly rulesController: RulesController,
-                private readonly appName: string) {
+        private readonly httpClientController: HttpClientController,
+        private readonly rulesController: RulesController,
+        private readonly appName: string) {
     }
 
     byId(id: string): QueryController {
@@ -176,11 +175,19 @@ export class QueryController {
     async delete<T>(options?: RequestOptions): Promise<T> {
         const credential = BFastConfig.getInstance().credential(this.appName);
         const deleteRule = await this.rulesController.deleteRule(this.domain, this.buildQuery(), credential, options);
-        const response = await this.httpClientController.post(BFastConfig.getInstance().databaseURL(this.appName), deleteRule, {
-            headers: {
-                'x-parse-application-id': credential.applicationId
-            }
-        });
+        const response = await this.httpClientController.post(
+            BFastConfig.getInstance().databaseURL(this.appName),
+            deleteRule,
+            {
+                headers: {
+                    'x-bfast-application-id': credential.applicationId
+                }
+            },
+            {
+                context: this.domain,
+                rule: `delete${this.domain}`,
+                type: 'daas'
+            });
         return DatabaseController._extractResultFromServer(response.data, 'delete', this.domain);
     }
 
@@ -194,7 +201,7 @@ export class QueryController {
         );
     }
 
-    changes(onConnect?: () => void, onDisconnect?: () => void, options: RequestOptions = {useMasterKey: false}): DatabaseChangesController {
+    changes(onConnect?: () => void, onDisconnect?: () => void, options: RequestOptions = { useMasterKey: false }): DatabaseChangesController {
         const applicationId = BFastConfig.getInstance().credential(this.appName).applicationId;
         const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
         const masterKey = BFastConfig.getInstance().credential(this.appName).appPassword;
@@ -217,7 +224,7 @@ export class QueryController {
                     masterKey: options.useMasterKey === true ? masterKey : null
                 },
                 body: {
-                    domain: this.domain, pipeline: match ? [{$match: match}] : []
+                    domain: this.domain, pipeline: match ? [{ $match: match }] : []
                 }
             });
         }, onDisconnect);
@@ -238,13 +245,21 @@ export class QueryController {
     }
 
     async queryRuleRequest(queryRule: any): Promise<any> {
-        const response = await this.httpClientController.post(BFastConfig.getInstance().databaseURL(this.appName), queryRule);
+        const response = await this.httpClientController.post(
+            BFastConfig.getInstance().databaseURL(this.appName),
+            queryRule,
+            {},
+            {
+                context: this.domain,
+                rule: `query${this.domain}`,
+                type: 'daas',
+            });
         const data = response.data;
         if (data && data[`query${this.domain}`] !== undefined) {
             return data[`query${this.domain}`];
         } else {
             const errors = data.errors;
-            let queryError: any = {message: "Query not succeed"};
+            let queryError: any = { message: "Query not succeed" };
             Object.keys(errors && typeof errors === "object" ? errors : {}).forEach(value => {
                 if (value.includes('query')) {
                     queryError = errors[value];
@@ -256,13 +271,22 @@ export class QueryController {
     }
 
     async aggregateRuleRequest(pipelineRule: any): Promise<any> {
-        const response = await this.httpClientController.post(BFastConfig.getInstance().databaseURL(this.appName), pipelineRule);
+        const response = await this.httpClientController.post(
+            BFastConfig.getInstance().databaseURL(this.appName),
+            pipelineRule,
+            {},
+            {
+                context: this.domain,
+                rule: `aggregate${this.domain}`,
+                type: 'daas'
+            }
+        );
         const data = response.data;
         if (data && data[`aggregate${this.domain}`]) {
             return data[`aggregate${this.domain}`];
         } else {
             const errors = data.errors;
-            let aggregateError: any = {message: "Aggregation not succeed"};
+            let aggregateError: any = { message: "Aggregation not succeed" };
             Object.keys(errors).forEach(value => {
                 if (value.includes('aggregate')) {
                     aggregateError = errors[value];

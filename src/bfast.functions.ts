@@ -1,6 +1,5 @@
 import {FunctionsController} from "./controllers/functions.controller";
 import {HttpClientController} from "./controllers/http-client.controller";
-import {AuthController} from "./controllers/auth.controller";
 import {CacheController} from "./controllers/cache.controller";
 import {BFastConfig} from "./conf";
 import {SocketController} from "./controllers/socket.controller";
@@ -21,28 +20,12 @@ export class BfastFunctions {
     request(path: string): FunctionsController {
         const config = BFastConfig.getInstance();
         const _restController = new HttpClientController(
-            new CacheController(
-                this.appName,
-                config.DEFAULT_CACHE_DB_NAME,
-                config.DEFAULT_CACHE_COLLECTION_REST,
-                config.cacheAdapter(this.appName)
-            ),
+            this.appName,
             config.httpAdapter(this.appName)
         );
         return new FunctionsController(
             path,
             _restController,
-            new AuthController(
-                this.appName,
-                _restController,
-                new CacheController(
-                    this.appName,
-                    config.DEFAULT_CACHE_DB_NAME,
-                    config.DEFAULT_CACHE_COLLECTION_USER,
-                    config.cacheAdapter(this.appName)
-                ),
-                config.authAdapter(this.appName)
-            ),
             this.appName
         );
     }

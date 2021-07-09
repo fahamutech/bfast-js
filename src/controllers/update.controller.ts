@@ -1,11 +1,10 @@
-import {UpdateModel} from "../models/UpdateOperation";
-import {BFastConfig} from "../conf";
-import {DatabaseController} from "./database.controller";
-import {RulesController} from "./rules.controller";
-import {QueryModel} from "../models/QueryModel";
-import {HttpClientAdapter} from "../adapters/http-client.adapter";
-import {RequestOptions} from "./query.controller";
-import {HttpClientController} from "./http-client.controller";
+import { UpdateModel } from "../models/UpdateOperation";
+import { BFastConfig } from "../conf";
+import { DatabaseController } from "./database.controller";
+import { RulesController } from "./rules.controller";
+import { QueryModel } from "../models/QueryModel";
+import { RequestOptions } from "./query.controller";
+import { HttpClientController } from "./http-client.controller";
 
 export class UpdateController {
     private updateModel: UpdateModel = {
@@ -21,10 +20,10 @@ export class UpdateController {
     private _upsert = false;
 
     constructor(private readonly domain: string,
-                private readonly queryModel: QueryModel,
-                private readonly appName: string,
-                private readonly httpClientController: HttpClientController,
-                private readonly rulesController: RulesController) {
+        private readonly queryModel: QueryModel,
+        private readonly appName: string,
+        private readonly httpClientController: HttpClientController,
+        private readonly rulesController: RulesController) {
     }
 
 
@@ -117,8 +116,24 @@ export class UpdateController {
                 console.log(__23);
             }
         });
-        const updateRule = await this.rulesController.updateRule(this.domain, this.queryModel, this.build(), this._upsert, credential, options);
-        const response = await this.httpClientController.post(BFastConfig.getInstance().databaseURL(this.appName), updateRule);
+        const updateRule = await this.rulesController.updateRule(
+            this.domain,
+            this.queryModel,
+            this.build(),
+            this._upsert,
+            credential,
+            options
+        );
+        const response = await this.httpClientController.post(
+            BFastConfig.getInstance().databaseURL(this.appName),
+            updateRule,
+            {},
+            {
+                context: this.domain,
+                rule: `update${this.domain}`,
+                type: 'daas'
+            }
+        );
         return DatabaseController._extractResultFromServer(response.data, 'update', this.domain);
     }
 }

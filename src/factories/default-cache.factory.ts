@@ -1,6 +1,6 @@
 import {CacheAdapter} from "../adapters/cache.adapter";
 import {RequestOptions} from "../controllers/query.controller";
-import {SecurityController} from "../controllers/SecurityController";
+import {SecurityController} from "../controllers/security.controller";
 import {isNode} from "../utils/bfast.util";
 
 const localForage = require('localforage');

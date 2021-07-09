@@ -1,27 +1,24 @@
 import {AuthAdapter, AuthOptions} from "../adapters/auth.adapter";
+import bfast from "../bfast";
 import {UserModel} from "../models/UserModel";
 import {CacheController} from "./cache.controller";
-import {HttpClientController} from "./http-client.controller";
 
 export class AuthController {
 
-    currentUserIdentifier = '_current_user_';
-
     constructor(
         private readonly appName: string,
-        private readonly httpClientController: HttpClientController,
         private readonly cacheController: CacheController,
         private readonly authAdapter: AuthAdapter
     ) {
     }
 
-    async authenticated<T extends UserModel>(userId: string, options?: AuthOptions): Promise<any> {
+    async authenticated(userId: string, options?: AuthOptions): Promise<any> {
         return this.authAdapter.authenticated(userId, options);
     }
 
-    async currentUser<T extends UserModel>(): Promise<T | null> {
+    async currentUser(): Promise<any> {
         try {
-            const user: any = await this.cacheController.get<T>(this.currentUserIdentifier, {secure: true});
+            const user: any = await this.cacheController.get(bfast.utils.CURRENT_USER_IDENTIFIER, {secure: true});
             if (!user) {
                 return null;
             } else if (typeof user === "string") {
@@ -63,7 +60,7 @@ export class AuthController {
         }
     }
 
-    async logIn<T extends UserModel>(username: string, password: string, dtl = 6, options?: AuthOptions): Promise<T> {
+    async logIn(username: string, password: string, dtl = 6, options?: AuthOptions): Promise<any> {
         if (!username) {
             throw {message: "Username required"};
         }
@@ -89,7 +86,7 @@ export class AuthController {
         return this.authAdapter.requestPasswordReset(email, this.appName, options);
     }
 
-    async signUp<T extends UserModel>(username: string, password: string, attrs: { [key: string]: any } = {}, dtl = 6, options?: AuthOptions): Promise<T> {
+    async signUp(username: string, password: string, attrs: { [key: string]: any } = {}, dtl = 6, options?: AuthOptions): Promise<any> {
         if (!username) {
             throw {message: "Username required"};
         }
@@ -103,7 +100,7 @@ export class AuthController {
         return user;
     }
 
-    async updateUser<T extends UserModel>(userId: string, attrs: { [key: string]: any } = {}, options?: AuthOptions): Promise<any> {
+    async updateUser(userId: string, attrs: { [key: string]: any } = {}, options?: AuthOptions): Promise<any> {
         if (!userId) {
             throw {message: "Please provide id of user to be updated"};
         }
@@ -111,10 +108,7 @@ export class AuthController {
     }
 
     async setCurrentUser(user: { [key: string]: any } | null, dtl = 6): Promise<any> {
-        // if (typeof user !== "object") {
-        //     throw "user parameter require a map";
-        // }
-        await this.cacheController.set(this.currentUserIdentifier, user, {
+        await this.cacheController.set(bfast.utils.CURRENT_USER_IDENTIFIER, user, {
             secure: true
         });
         return user;

@@ -1,13 +1,11 @@
 import {BFastConfig} from "../conf";
-import {HttpClientAdapter, RestRequestConfig} from "../adapters/http-client.adapter";
-import {AuthController} from "./auth.controller";
+import {RestRequestConfig} from "../adapters/http-client.adapter";
 import {HttpClientController} from "./http-client.controller";
 
 export class FunctionsController {
 
     constructor(private readonly functionPath: string,
                 private readonly httpClientController: HttpClientController,
-                private readonly authController: AuthController,
                 private readonly appName = BFastConfig.DEFAULT_APP) {
     }
 
@@ -24,7 +22,12 @@ export class FunctionsController {
             const value = await this.httpClientController.post(
                 BFastConfig.getInstance().functionsURL(this.functionPath, this.appName) as string,
                 body ? body : {},
-                postConfig
+                postConfig,
+                {
+                    context: '_Rest',
+                    rule: 'functions',
+                    type: 'faas'
+                }
             );
             return value.data;
         } else {
@@ -41,7 +44,12 @@ export class FunctionsController {
         }
         const response = await this.httpClientController.delete(
             BFastConfig.getInstance().functionsURL(this.functionPath, this.appName) as string,
-            deleteConfig
+            deleteConfig,
+            {
+                context: '_Rest',
+                rule: 'functions',
+                type: 'faas'
+            }
         );
         return response.data;
     }
@@ -55,7 +63,12 @@ export class FunctionsController {
         }
         const response = await this.httpClientController.get(
             BFastConfig.getInstance().functionsURL(this.functionPath, this.appName) as string,
-            getConfig
+            getConfig,
+            {
+                context: '_Rest',
+                rule: 'functions',
+                type: 'faas'
+            }
         );
         return response.data;
     }
@@ -67,9 +80,15 @@ export class FunctionsController {
         } else {
             Object.assign(putConfig, config);
         }
-        const response = await this.httpClientController.put(BFastConfig.getInstance().functionsURL(this.functionPath, this.appName) as string,
+        const response = await this.httpClientController.put(
+            BFastConfig.getInstance().functionsURL(this.functionPath, this.appName) as string,
             body ? body : {},
-            putConfig
+            putConfig,
+            {
+                context: '_Rest',
+                rule: 'functions',
+                type: 'faas'
+            }
         );
         return response.data;
     }

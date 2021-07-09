@@ -3,19 +3,19 @@ import {CacheAdapter} from "./adapters/cache.adapter";
 import {HttpClientAdapter} from "./adapters/http-client.adapter";
 import {DefaultCacheFactory} from "./factories/default-cache.factory";
 import {DefaultAuthFactory} from "./factories/default-auth.factory";
-import {SecurityController} from "./controllers/SecurityController";
+import {SecurityController} from "./controllers/security.controller";
 import {DefaultHttpClientFactory} from "./factories/default-http-client.factory";
 import {HttpClientController} from "./controllers/http-client.controller";
-import {CacheController} from "./controllers/cache.controller";
 
 export class BFastConfig {
     static DEFAULT_APP = 'DEFAULT';
-    DEFAULT_CACHE_DB_NAME = 'bfast';
+    DEFAULT_CACHE_DB_BFAST = '_BFast';
+    DEFAULT_CACHE_DB_AUTH = '_Auth';
     DEFAULT_CACHE_COLLECTION_USER = '_User';
     DEFAULT_CACHE_COLLECTION_STORAGE = '_Storage';
     DEFAULT_CACHE_COLLECTION_REST = '_Rest';
-    DEFAULT_CACHE_COLLECTION_NAME = '_Cache';
-    DEFAULT_CACHE_TTL_COLLECTION_NAME = '_Cache_Ttl';
+    DEFAULT_CACHE_COLLECTION_CACHE = '_Cache';
+    DEFAULT_CACHE_COLLECTION_TTL = '_Cache_Ttl';
 
     private credentials: { [key: string]: AppCredentials } = {};
 
@@ -73,9 +73,9 @@ export class BFastConfig {
 
     cacheDatabaseName(name: string, appName: string): string {
         if (name && name !== '') {
-            return `bfast/${this.credential(appName).projectId}/${appName}/${name}`;
+            return `bfast/${this.credential(appName).projectId}/${name}`;
         } else {
-            return `bfast/${this.credential(appName).projectId}/${appName}`;
+            return `bfast/${this.credential(appName).projectId}/cache`;
         }
     }
 
@@ -83,7 +83,7 @@ export class BFastConfig {
         if (name && name !== '') {
             return name.trim();
         } else {
-            return 'cache';
+            return this.DEFAULT_CACHE_COLLECTION_CACHE;
         }
     }
 
@@ -94,12 +94,7 @@ export class BFastConfig {
         } else {
             return new DefaultAuthFactory(
                 new HttpClientController(
-                    new CacheController(
-                        appName,
-                        this.DEFAULT_CACHE_DB_NAME,
-                        this.DEFAULT_CACHE_COLLECTION_USER,
-                        this.cacheAdapter(appName)
-                    ),
+                    appName,
                     this.httpAdapter(appName)
                 )
             );

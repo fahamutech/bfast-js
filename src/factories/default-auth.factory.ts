@@ -1,8 +1,7 @@
-import {UserModel} from "../models/UserModel";
-import {AuthAdapter, AuthOptions} from "../adapters/auth.adapter";
-import {BFastConfig} from "../conf";
-import {HttpClientController} from "../controllers/http-client.controller";
-import {AuthController} from "../controllers/auth.controller";
+import { UserModel } from "../models/UserModel";
+import { AuthAdapter, AuthOptions } from "../adapters/auth.adapter";
+import { BFastConfig } from "../conf";
+import { HttpClientController } from "../controllers/http-client.controller";
 
 export class DefaultAuthFactory implements AuthAdapter {
 
@@ -27,16 +26,25 @@ export class DefaultAuthFactory implements AuthAdapter {
                 }
             }
         });
-        const response = await this.httpClientController.post<T>(BFastConfig.getInstance().databaseURL(appName), authRule, {
-            headers: {
-                'x-parse-application-id': BFastConfig.getInstance().credential(appName).applicationId
+        const response = await this.httpClientController.post<T>(
+            BFastConfig.getInstance().databaseURL(appName),
+            authRule,
+            {
+                headers: {
+                    'x-bfast-application-id': BFastConfig.getInstance().credential(appName).applicationId
+                }
+            },
+            {
+                context: '_User',
+                type: 'daas',
+                rule: 'auth'
             }
-        });
+        );
         const data = response.data;
         if (data && data.auth && data.auth.signIn) {
             return data.auth.signIn;
         } else {
-            throw {message: data.errors && data.errors['auth.sigIn'] ? data.errors['auth.sigIn'].message : 'Username/Password is not valid'};
+            throw { message: data.errors && data.errors['auth.sigIn'] ? data.errors['auth.sigIn'].message : 'Username/Password is not valid' };
         }
     }
 
@@ -56,16 +64,24 @@ export class DefaultAuthFactory implements AuthAdapter {
                 }
             }
         });
-        const response = await this.httpClientController.post<T>(BFastConfig.getInstance().databaseURL(appName), authRule, {
-            headers: {
-                'x-parse-application-id': BFastConfig.getInstance().credential(appName).applicationId
-            }
-        });
+        const response = await this.httpClientController.post<T>(
+            BFastConfig.getInstance().databaseURL(appName),
+            authRule,
+            {
+                headers: {
+                    'x-bfast-application-id': BFastConfig.getInstance().credential(appName).applicationId
+                }
+            },
+            {
+                context: '_User',
+                type: 'daas',
+                rule: 'auth'
+            });
         const data = response.data;
         if (data && data.auth && data.auth.reset) {
             return data.auth.reset;
         } else {
-            throw {message: data.errors && data.errors.auth && data.errors['auth.reset'] ? data.errors['auth.reset'].message : 'Fails to reset password'};
+            throw { message: data.errors && data.errors.auth && data.errors['auth.reset'] ? data.errors['auth.reset'].message : 'Fails to reset password' };
         }
     }
 
@@ -84,11 +100,18 @@ export class DefaultAuthFactory implements AuthAdapter {
                 signUp: attrs
             }
         });
-        const response = await this.httpClientController.post<T>(BFastConfig.getInstance().databaseURL(appName), authRule, {
-            headers: {
-                'x-parse-application-id': BFastConfig.getInstance().credential(appName).applicationId
-            }
-        });
+        const response = await this.httpClientController.post<T>(
+            BFastConfig.getInstance().databaseURL(appName), authRule,
+            {
+                headers: {
+                    'x-parse-application-id': BFastConfig.getInstance().credential(appName).applicationId
+                }
+            },
+            {
+                context: '_User',
+                type: 'daas',
+                rule: 'auth'
+            });
         const data = response.data;
         if (data && data.auth && data.auth.signUp) {
             return data.auth.signUp;
@@ -97,12 +120,12 @@ export class DefaultAuthFactory implements AuthAdapter {
             if (message.toString().includes('E11000')) {
                 message = 'Username/Email already exist'
             }
-            throw {message: message};
+            throw { message: message };
         }
     }
 
     updateUser<T extends UserModel>(id: string, attrs: object, options?: AuthOptions): Promise<any> {
-        throw {message: "Not supported, use _User collection in your secure env with masterKey to update user details"};
+        throw { message: "Not supported, use _User collection in your secure env with masterKey to update user details" };
         // const user = await this.currentUser();
         // if (user && user.token) {
         //     const postHeaders = this._geHeadersWithToken(user, options);

@@ -1,17 +1,19 @@
+import { HttpRequestInfoModel } from "../models/http-request-info.model"
+
 export interface HttpClientAdapter {
-    get<T = any, R = RestResponse<T>>(url: string, config?: RestRequestConfig): Promise<R>;
+    get<T = any, R = RestResponse<T>>(url: string, config: RestRequestConfig, info: HttpRequestInfoModel): Promise<R>;
 
-    delete<T = any, R = RestResponse<T>>(url: string, config?: RestRequestConfig): Promise<R>;
+    delete<T = any, R = RestResponse<T>>(url: string, config: RestRequestConfig, info: HttpRequestInfoModel): Promise<R>;
 
-    head<T = any, R = RestResponse<T>>(url: string, config?: RestRequestConfig): Promise<R>;
+    head<T = any, R = RestResponse<T>>(url: string, config: RestRequestConfig, info: HttpRequestInfoModel): Promise<R>;
 
-    options<T = any, R = RestResponse<T>>(url: string, config?: RestRequestConfig): Promise<R>;
+    options<T = any, R = RestResponse<T>>(url: string, config: RestRequestConfig, info: HttpRequestInfoModel): Promise<R>;
 
-    post<T = any, R = RestResponse<T>>(url: string, data?: any, config?: RestRequestConfig): Promise<R>;
+    post<T = any, R = RestResponse<T>>(url: string, data: any, config: RestRequestConfig, info: HttpRequestInfoModel): Promise<R>;
 
-    put<T = any, R = RestResponse<T>>(url: string, data?: any, config?: RestRequestConfig): Promise<R>;
+    put<T = any, R = RestResponse<T>>(url: string, data: any, config: RestRequestConfig, info: HttpRequestInfoModel): Promise<R>;
 
-    patch<T = any, R = RestResponse<T>>(url: string, data?: any, config?: RestRequestConfig): Promise<R>;
+    patch<T = any, R = RestResponse<T>>(url: string, data: any, config: RestRequestConfig, info: HttpRequestInfoModel): Promise<R>;
 }
 
 export interface RestResponse<T = any> {

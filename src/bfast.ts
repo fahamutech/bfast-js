@@ -22,9 +22,6 @@ export class bfast {
      * @param appName {string} application name for multiple apps access
      */
     static init(options: AppCredentials, appName: string = BFastConfig.DEFAULT_APP) {
-        // options.cache = {
-        //     enable: true,
-        // }
         BFastConfig.getInstance().setCredential(options, appName);
     }
 
@@ -61,11 +58,11 @@ export class bfast {
     static cache(options?: { database: string, collection: string }, appName = BFastConfig.DEFAULT_APP): CacheController {
         const config = BFastConfig.getInstance();
         const databaseName = (options && options.database)
-            ? config.cacheDatabaseName(options.database, appName)
-            : config.cacheDatabaseName(config.DEFAULT_CACHE_DB_NAME, appName);
+            ? options.database
+            : config.DEFAULT_CACHE_DB_BFAST;
         const collectionName = (options && options.collection)
-            ? config.cacheCollectionName(options.collection, appName)
-            : config.cacheCollectionName('cache', appName);
+            ? options.collection
+            : config.DEFAULT_CACHE_COLLECTION_CACHE;
         return new CacheController(
             appName,
             databaseName,
@@ -82,17 +79,12 @@ export class bfast {
         const config = BFastConfig.getInstance();
         const cacheController = new CacheController(
             appName,
-            config.cacheDatabaseName(BFastConfig.getInstance().DEFAULT_CACHE_DB_NAME, appName),
-            config.cacheCollectionName('user', appName),
+            config.DEFAULT_CACHE_DB_AUTH,
+            config.DEFAULT_CACHE_COLLECTION_USER,
             config.cacheAdapter(appName)
-        );
-        const httpClientController = new HttpClientController(
-            cacheController,
-            config.httpAdapter(appName)
         );
         return new AuthController(
             appName,
-            httpClientController,
             cacheController,
             config.authAdapter(appName)
         );
@@ -105,6 +97,7 @@ export class bfast {
         USER_DOMAIN_NAME: '_User',
         POLICY_DOMAIN_NAME: '_Policy',
         TOKEN_DOMAIN_NAME: '_Token',
+        CURRENT_USER_IDENTIFIER: '_current_user_'
     }
 
     /**
@@ -115,28 +108,19 @@ export class bfast {
         const config = BFastConfig.getInstance();
         const authCacheController = new CacheController(
             appName,
-            config.DEFAULT_CACHE_DB_NAME,
+            config.DEFAULT_CACHE_DB_BFAST,
             config.DEFAULT_CACHE_COLLECTION_USER,
             config.cacheAdapter(appName)
         );
         const authController = new AuthController(
             appName,
-            new HttpClientController(
-                authCacheController,
-                config.httpAdapter(appName)
-            ),
             authCacheController,
             config.authAdapter(appName)
         );
         const rulesController = new RulesController(authController)
         return new StorageController(
             new HttpClientController(
-                new CacheController(
-                    appName,
-                    config.DEFAULT_CACHE_DB_NAME,
-                    config.DEFAULT_CACHE_COLLECTION_STORAGE,
-                    config.cacheAdapter(appName)
-                ),
+                appName,
                 config.httpAdapter(appName)
             ),
             authController,

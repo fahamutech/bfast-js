@@ -1,17 +1,17 @@
-import {TransactionModel} from "../models/TransactionModel";
-import {BFastConfig} from "../conf";
-import {RulesController} from "./rules.controller";
-import {QueryModel} from "../models/QueryModel";
-import {UpdateModel} from "../models/UpdateOperation";
-import {HttpClientController} from "./http-client.controller";
+import { TransactionModel } from "../models/TransactionModel";
+import { BFastConfig } from "../conf";
+import { RulesController } from "./rules.controller";
+import { QueryModel } from "../models/QueryModel";
+import { UpdateModel } from "../models/UpdateOperation";
+import { HttpClientController } from "./http-client.controller";
 
 export class TransactionController {
 
     private transactionRequests: TransactionModel[];
 
     constructor(private readonly appName: string,
-                private readonly httpClientController: HttpClientController,
-                private readonly rulesController: RulesController) {
+        private readonly httpClientController: HttpClientController,
+        private readonly rulesController: RulesController) {
         this.transactionRequests = [];
     }
 
@@ -30,12 +30,20 @@ export class TransactionController {
         }
         const credential = BFastConfig.getInstance().credential(this.appName);
         const transactionRule = await this.rulesController.transaction(this.transactionRequests,
-            credential, {useMasterKey: options?.useMasterKey});
-        const response = await this.httpClientController.post(BFastConfig.getInstance().databaseURL(this.appName), transactionRule, {
-            headers: {
-                'x-parse-application-id': credential.applicationId
-            }
-        });
+            credential, { useMasterKey: options?.useMasterKey });
+        const response = await this.httpClientController.post(
+            BFastConfig.getInstance().databaseURL(this.appName),
+            transactionRule,
+            {
+                headers: {
+                    'x-parse-application-id': credential.applicationId
+                }
+            },
+            {
+                context: 'transaction',
+                rule: 'transaction',
+                type: 'daas',
+            });
         this.transactionRequests.splice(0);
         if (options && options.after) {
             options.after().catch(_ => {
@@ -83,7 +91,7 @@ export class TransactionController {
             if (data && data.errors && data.errors['transaction']) {
                 throw data.errors['transaction'];
             } else {
-                throw {message: 'Server general failure', errors: data.errors};
+                throw { message: 'Server general failure', errors: data.errors };
             }
         }
     }

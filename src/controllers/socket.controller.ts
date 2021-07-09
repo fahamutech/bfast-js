@@ -1,3 +1,5 @@
+
+//@ts-ignore
 import io from 'socket.io-client';
 import {BFastConfig} from "../conf";
 
