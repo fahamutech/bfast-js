@@ -5,12 +5,14 @@ import { SocketController } from "./socket.controller";
 import { DatabaseChangesModel } from "../models/DatabaseChangesModel";
 import { HttpClientController } from "./http-client.controller";
 import { throws } from "assert";
+import { AuthController } from "./auth.controller";
 
 export class DatabaseController {
 
     constructor(private readonly domainName: string,
         private readonly httpClientController: HttpClientController,
         private readonly rulesController: RulesController,
+        private readonly authController: AuthController,
         private readonly appName: string) {
     }
 
@@ -28,7 +30,8 @@ export class DatabaseController {
             {
                 context: this.domainName,
                 rule: `create${this.domainName}`,
-                type: 'daas'
+                type: 'daas',
+                token: await this.authController.getToken()
             }
         );
         return DatabaseController._extractResultFromServer(response.data, 'create', this.domainName);
@@ -48,7 +51,12 @@ export class DatabaseController {
     }
 
     query(): QueryController {
-        return new QueryController(this.domainName, this.httpClientController, this.rulesController, this.appName);
+        return new QueryController(
+            this.domainName,
+            this.httpClientController,
+            this.rulesController,
+            this.authController,
+            this.appName);
     }
 
     static _extractResultFromServer(data: any, rule: string, domain: string) {

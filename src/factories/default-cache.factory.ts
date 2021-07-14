@@ -1,13 +1,12 @@
 import {CacheAdapter} from "../adapters/cache.adapter";
 import {RequestOptions} from "../controllers/query.controller";
-import {SecurityController} from "../controllers/security.controller";
 import {isNode} from "../utils/bfast.util";
 
 const localForage = require('localforage');
 
 export class DefaultCacheFactory implements CacheAdapter {
 
-    constructor(private readonly securityController: SecurityController) {
+    constructor() {
     }
 
     private static _getCacheDatabase(database: string, collection: string): any {

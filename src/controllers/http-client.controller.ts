@@ -1,5 +1,4 @@
 import { HttpClientAdapter, RestRequestConfig, RestResponse } from "../adapters/http-client.adapter";
-import bfast from "../bfast";
 import { HttpRequestInfoModel } from "../models/http-request-info.model";
 
 export class HttpClientController {
@@ -11,13 +10,8 @@ export class HttpClientController {
 
     async addTokenToHeaders(
         config: RestRequestConfig,
-        user: { token?: string } = {}
+        token: string | null,
     ): Promise<RestRequestConfig> {
-        let token;
-        user = (user && user.token) ? user : await bfast.auth(this.appName).currentUser();
-        if (user && typeof user === 'object' && user.token) {
-            token = user.token;
-        }
         token = token ? token : '';
         return Object.assign(config ? config : { headers: {} }, {
             headers: {
@@ -31,7 +25,7 @@ export class HttpClientController {
         config: RestRequestConfig,
         requestInfoModel: HttpRequestInfoModel
     ): Promise<R> {
-        config = await this.addTokenToHeaders(config);
+        config = await this.addTokenToHeaders(config, requestInfoModel.token);
         return this.httpClientAdapter.delete(url, config as any, requestInfoModel);
     }
 
@@ -39,7 +33,7 @@ export class HttpClientController {
         url: string,
         config: RestRequestConfig,
         requestInfoModel: HttpRequestInfoModel): Promise<R> {
-        config = await this.addTokenToHeaders(config);
+        config = await this.addTokenToHeaders(config, requestInfoModel.token);
         return this.httpClientAdapter.get(url, config as any, requestInfoModel);
     }
 
@@ -47,7 +41,7 @@ export class HttpClientController {
         url: string,
         config: RestRequestConfig,
         requestInfoModel: HttpRequestInfoModel): Promise<R> {
-        config = await this.addTokenToHeaders(config);
+        config = await this.addTokenToHeaders(config, requestInfoModel.token);
         return this.httpClientAdapter.head(url, config as any, requestInfoModel);
     }
 
@@ -56,7 +50,7 @@ export class HttpClientController {
         config: RestRequestConfig,
         requestInfoModel: HttpRequestInfoModel
     ): Promise<R> {
-        config = await this.addTokenToHeaders(config);
+        config = await this.addTokenToHeaders(config, requestInfoModel.token);
         return this.httpClientAdapter.options(url, config as any, requestInfoModel);
     }
 
@@ -66,7 +60,7 @@ export class HttpClientController {
         config: RestRequestConfig,
         requestInfoModel: HttpRequestInfoModel
     ): Promise<R> {
-        config = await this.addTokenToHeaders(config);
+        config = await this.addTokenToHeaders(config, requestInfoModel.token);
         return this.httpClientAdapter.patch(url, data, config as any, requestInfoModel);
     }
 
@@ -76,7 +70,7 @@ export class HttpClientController {
         config: RestRequestConfig,
         requestInfoModel: HttpRequestInfoModel
     ): Promise<R> {
-        config = await this.addTokenToHeaders(config);
+        config = await this.addTokenToHeaders(config, requestInfoModel.token);
         return this.httpClientAdapter.post(url, data, config as any, requestInfoModel);
     }
 
@@ -86,7 +80,7 @@ export class HttpClientController {
         config: RestRequestConfig,
         requestInfoModel: HttpRequestInfoModel
     ): Promise<R> {
-        config = await this.addTokenToHeaders(config);
+        config = await this.addTokenToHeaders(config, requestInfoModel.token);
         return this.httpClientAdapter.put(url, data, config as any, requestInfoModel);
     }
 

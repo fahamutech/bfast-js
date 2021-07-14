@@ -5,6 +5,7 @@ import { DatabaseChangesController, DatabaseController } from "./database.contro
 import { QueryModel } from "../models/QueryModel";
 import { UpdateController } from "./update.controller";
 import { HttpClientController } from "./http-client.controller";
+import { AuthController } from "./auth.controller";
 
 export enum QueryOrder {
     ASCENDING = 1,
@@ -25,6 +26,7 @@ export class QueryController {
     constructor(private readonly domain: string,
         private readonly httpClientController: HttpClientController,
         private readonly rulesController: RulesController,
+        private readonly authController: AuthController,
         private readonly appName: string) {
     }
 
@@ -186,7 +188,8 @@ export class QueryController {
             {
                 context: this.domain,
                 rule: `delete${this.domain}`,
-                type: 'daas'
+                type: 'daas',
+                token: await this.authController.getToken()
             });
         return DatabaseController._extractResultFromServer(response.data, 'delete', this.domain);
     }
@@ -197,7 +200,8 @@ export class QueryController {
             this.buildQuery(),
             this.appName,
             this.httpClientController,
-            this.rulesController
+            this.rulesController,
+            this.authController
         );
     }
 
@@ -253,6 +257,7 @@ export class QueryController {
                 context: this.domain,
                 rule: `query${this.domain}`,
                 type: 'daas',
+                token: await this.authController.getToken()
             });
         const data = response.data;
         if (data && data[`query${this.domain}`] !== undefined) {
@@ -278,7 +283,8 @@ export class QueryController {
             {
                 context: this.domain,
                 rule: `aggregate${this.domain}`,
-                type: 'daas'
+                type: 'daas',
+                token: await this.authController.getToken()
             }
         );
         const data = response.data;

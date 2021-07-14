@@ -9,8 +9,7 @@ export class AuthController {
         private readonly appName: string,
         private readonly cacheController: CacheController,
         private readonly authAdapter: AuthAdapter
-    ) {
-    }
+    ) {}
 
     async authenticated(userId: string, options?: AuthOptions): Promise<any> {
         return this.authAdapter.authenticated(userId, options);

@@ -4,6 +4,7 @@ import { RulesController } from "./rules.controller";
 import { QueryModel } from "../models/QueryModel";
 import { UpdateModel } from "../models/UpdateOperation";
 import { HttpClientController } from "./http-client.controller";
+import { AuthController } from "./auth.controller";
 
 export class TransactionController {
 
@@ -11,7 +12,8 @@ export class TransactionController {
 
     constructor(private readonly appName: string,
         private readonly httpClientController: HttpClientController,
-        private readonly rulesController: RulesController) {
+        private readonly rulesController: RulesController,
+        private readonly authController: AuthController) {
         this.transactionRequests = [];
     }
 
@@ -43,6 +45,7 @@ export class TransactionController {
                 context: 'transaction',
                 rule: 'transaction',
                 type: 'daas',
+                token: await this.authController.getToken()
             });
         this.transactionRequests.splice(0);
         if (options && options.after) {

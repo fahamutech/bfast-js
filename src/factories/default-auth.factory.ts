@@ -9,7 +9,7 @@ export class DefaultAuthFactory implements AuthAdapter {
     }
 
     async authenticated<T extends UserModel>(userId: string, options?: AuthOptions): Promise<any> {
-        return false;
+        return undefined;
     }
 
 
@@ -37,7 +37,8 @@ export class DefaultAuthFactory implements AuthAdapter {
             {
                 context: '_User',
                 type: 'daas',
-                rule: 'auth'
+                rule: 'auth',
+                token: null,
             }
         );
         const data = response.data;
@@ -75,7 +76,8 @@ export class DefaultAuthFactory implements AuthAdapter {
             {
                 context: '_User',
                 type: 'daas',
-                rule: 'auth'
+                rule: 'auth',
+                token: null
             });
         const data = response.data;
         if (data && data.auth && data.auth.reset) {
@@ -110,7 +112,8 @@ export class DefaultAuthFactory implements AuthAdapter {
             {
                 context: '_User',
                 type: 'daas',
-                rule: 'auth'
+                rule: 'auth',
+                token: null,
             });
         const data = response.data;
         if (data && data.auth && data.auth.signUp) {

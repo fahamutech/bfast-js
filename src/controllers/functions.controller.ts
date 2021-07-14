@@ -1,11 +1,13 @@
 import {BFastConfig} from "../conf";
 import {RestRequestConfig} from "../adapters/http-client.adapter";
 import {HttpClientController} from "./http-client.controller";
+import { AuthController } from "./auth.controller";
 
 export class FunctionsController {
 
     constructor(private readonly functionPath: string,
                 private readonly httpClientController: HttpClientController,
+                private readonly authController: AuthController,
                 private readonly appName = BFastConfig.DEFAULT_APP) {
     }
 
@@ -26,7 +28,8 @@ export class FunctionsController {
                 {
                     context: '_Rest',
                     rule: 'functions',
-                    type: 'faas'
+                    type: 'faas',
+                    token: await this.authController.getToken()
                 }
             );
             return value.data;
@@ -48,7 +51,8 @@ export class FunctionsController {
             {
                 context: '_Rest',
                 rule: 'functions',
-                type: 'faas'
+                type: 'faas',
+                token: await this.authController.getToken()
             }
         );
         return response.data;
@@ -67,7 +71,8 @@ export class FunctionsController {
             {
                 context: '_Rest',
                 rule: 'functions',
-                type: 'faas'
+                type: 'faas',
+                token: await this.authController.getToken()
             }
         );
         return response.data;
@@ -87,7 +92,8 @@ export class FunctionsController {
             {
                 context: '_Rest',
                 rule: 'functions',
-                type: 'faas'
+                type: 'faas',
+                token: await this.authController.getToken()
             }
         );
         return response.data;

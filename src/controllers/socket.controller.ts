@@ -6,7 +6,10 @@ import {BFastConfig} from "../conf";
 export class SocketController {
     public readonly socket: any;
 
-    constructor(private readonly eventName: string, appName = BFastConfig.DEFAULT_APP, onConnect?: Function, onDisconnect?: Function) {
+    constructor(private readonly eventName: string,
+         appName = BFastConfig.DEFAULT_APP, 
+         onConnect?: Function,
+         onDisconnect?: Function) {
         const namespace = String(eventName)[0] === '/' ? eventName : '/' + eventName;
         const url = namespace === '/v2/__changes__'
             ? BFastConfig.getInstance().databaseURL(appName, namespace)

@@ -5,6 +5,7 @@ import { RulesController } from "./rules.controller";
 import { QueryModel } from "../models/QueryModel";
 import { RequestOptions } from "./query.controller";
 import { HttpClientController } from "./http-client.controller";
+import { AuthController } from "./auth.controller";
 
 export class UpdateController {
     private updateModel: UpdateModel = {
@@ -23,7 +24,8 @@ export class UpdateController {
         private readonly queryModel: QueryModel,
         private readonly appName: string,
         private readonly httpClientController: HttpClientController,
-        private readonly rulesController: RulesController) {
+        private readonly rulesController: RulesController,
+        private readonly authController: AuthController) {
     }
 
 
@@ -131,7 +133,8 @@ export class UpdateController {
             {
                 context: this.domain,
                 rule: `update${this.domain}`,
-                type: 'daas'
+                type: 'daas',
+                token: await this.authController.getToken()
             }
         );
         return DatabaseController._extractResultFromServer(response.data, 'update', this.domain);

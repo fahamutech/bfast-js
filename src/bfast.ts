@@ -39,7 +39,20 @@ export class bfast {
      * @return BfastDatabase - Controller for perming database operations
      */
     static database(appName: string = BFastConfig.DEFAULT_APP): BfastDatabase {
-        return new BfastDatabase(appName);
+        const config = BFastConfig.getInstance();
+        const authCache = new CacheController(
+            appName,
+            config.DEFAULT_CACHE_DB_BFAST,
+            config.DEFAULT_CACHE_COLLECTION_USER,
+            config.cacheAdapter(appName)
+        );
+        const restController = new HttpClientController(
+            appName,
+            config.httpAdapter(appName)
+        )
+        const authController = new AuthController(appName, authCache, config.authAdapter(appName));
+        const rulesController = new RulesController(authController)
+        return new BfastDatabase(appName, restController, rulesController, authController);
     }
 
     /**
@@ -47,7 +60,23 @@ export class bfast {
      * @param appName other app/project name to work with
      */
     static functions(appName = BFastConfig.DEFAULT_APP): BfastFunctions {
-        return new BfastFunctions(appName);
+        const config = BFastConfig.getInstance();
+        const authCache = new CacheController(
+            appName,
+            config.DEFAULT_CACHE_DB_BFAST,
+            config.DEFAULT_CACHE_COLLECTION_USER,
+            config.cacheAdapter(appName)
+        );
+        const restController = new HttpClientController(
+            appName,
+            config.httpAdapter(appName)
+        )
+        const authController = new AuthController(
+            appName,
+            authCache,
+            config.authAdapter(appName)
+        );
+        return new BfastFunctions(appName, authController,restController);
     }
 
     /**
@@ -57,6 +86,7 @@ export class bfast {
      */
     static cache(options?: { database: string, collection: string }, appName = BFastConfig.DEFAULT_APP): CacheController {
         const config = BFastConfig.getInstance();
+
         const databaseName = (options && options.database)
             ? options.database
             : config.DEFAULT_CACHE_DB_BFAST;
@@ -79,7 +109,7 @@ export class bfast {
         const config = BFastConfig.getInstance();
         const cacheController = new CacheController(
             appName,
-            config.DEFAULT_CACHE_DB_AUTH,
+            config.DEFAULT_CACHE_DB_BFAST,
             config.DEFAULT_CACHE_COLLECTION_USER,
             config.cacheAdapter(appName)
         );
@@ -125,6 +155,7 @@ export class bfast {
             ),
             authController,
             rulesController,
+            authController,
             appName
         );
     }

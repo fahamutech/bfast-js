@@ -44,4 +44,12 @@ export class CacheController {
         return this.cacheAdapter.remove(identifier, this.database, this.collection, true);
     }
 
+    // async getDatabases(){
+    //     const databases = await this.cacheAdapter.databases();
+    // }
+
+    // async getCollections(database: string){
+    //     return this.cacheAdapter.collections(database);
+    // }
+
 }

@@ -1,16 +1,17 @@
 import {FunctionsController} from "./controllers/functions.controller";
 import {HttpClientController} from "./controllers/http-client.controller";
-import {CacheController} from "./controllers/cache.controller";
-import {BFastConfig} from "./conf";
 import {SocketController} from "./controllers/socket.controller";
 import {HttpRequestModel} from "./models/HttpRequestModel";
 import {EventResponseModel, HttpResponseModel} from "./models/HttpResponseModel";
 import {HttpNextModel} from "./models/HttpNextModel";
 // @ts-ignore
 import * as device from "browser-or-node";
+import { AuthController } from "./controllers/auth.controller";
 
 export class BfastFunctions {
-    constructor(private readonly appName: string) {
+    constructor(private readonly appName: string,
+        private readonly authController: AuthController,
+        private readonly httpClientController: HttpClientController,) {
     }
 
     /**
@@ -18,14 +19,10 @@ export class BfastFunctions {
      * @param path {string} function name
      */
     request(path: string): FunctionsController {
-        const config = BFastConfig.getInstance();
-        const _restController = new HttpClientController(
-            this.appName,
-            config.httpAdapter(this.appName)
-        );
         return new FunctionsController(
             path,
-            _restController,
+            this.httpClientController,
+            this.authController,
             this.appName
         );
     }

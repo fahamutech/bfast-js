@@ -9,6 +9,14 @@
 <body>
     <script src="../dist/bfast.js"></script>
     <script>
+        class CA{
+            get(identifier, database, collection){
+                console.log(identifier);
+                console.log(database);
+                console.log(collection);
+                return {token: 'abc'}
+            }
+        }
         class HA{
             constructor(c){
                 // console.log(c, '******config*******');
@@ -33,12 +41,22 @@
         }
        
         bfast.init({
-            applicationId: 'smartstock_lb',
-            projectId: 'smartstock',
+            applicationId: 'dworkder',
+            projectId: 'dworkder',
             adapters: {
-                // http: (_c) => new HA(_c)
+                http: (_c) => new HA(_c),
+                // cache: (_)=> new CA()
             }
         });
+        bfast.init({
+            applicationId: 'aas',
+            projectId: 'aas',
+            adapters: {
+               http:  'DEFAULT',
+            //    auth: 'DEFAULT',
+               cache: 'DEFAULT'
+            }
+        }, 't');
     </script>
 </body>
 

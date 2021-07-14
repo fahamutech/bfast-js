@@ -15,6 +15,7 @@ export class StorageController {
     constructor(private readonly httpClientController: HttpClientController,
         private readonly auth: AuthController,
         private readonly rulesController: RulesController,
+        private readonly authController: AuthController,
         private readonly appName = BFastConfig.DEFAULT_APP) {
     }
 
@@ -57,7 +58,8 @@ export class StorageController {
             {
                 context: '_Storage',
                 rule: 'storage',
-                type: 'daas'
+                type: 'daas',
+                token: await this.authController.getToken()
             });
         const data = response.data;
         if (data && data.files && data.files.list && Array.isArray(data.files.list)) {
@@ -92,7 +94,8 @@ export class StorageController {
             {
                 context: '_Storage',
                 rule: 'storage',
-                type: 'daas'
+                type: 'daas',
+                token: await this.authController.getToken()
             }
         );
     }

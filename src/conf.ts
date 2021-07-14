@@ -1,16 +1,14 @@
-import {AuthAdapter} from "./adapters/auth.adapter";
-import {CacheAdapter} from "./adapters/cache.adapter";
-import {HttpClientAdapter} from "./adapters/http-client.adapter";
-import {DefaultCacheFactory} from "./factories/default-cache.factory";
-import {DefaultAuthFactory} from "./factories/default-auth.factory";
-import {SecurityController} from "./controllers/security.controller";
-import {DefaultHttpClientFactory} from "./factories/default-http-client.factory";
-import {HttpClientController} from "./controllers/http-client.controller";
+import { AuthAdapter } from "./adapters/auth.adapter";
+import { CacheAdapter } from "./adapters/cache.adapter";
+import { HttpClientAdapter } from "./adapters/http-client.adapter";
+import { DefaultCacheFactory } from "./factories/default-cache.factory";
+import { DefaultAuthFactory } from "./factories/default-auth.factory";
+import { DefaultHttpClientFactory } from "./factories/default-http-client.factory";
+import { HttpClientController } from "./controllers/http-client.controller";
 
 export class BFastConfig {
     static DEFAULT_APP = 'DEFAULT';
     DEFAULT_CACHE_DB_BFAST = '_BFast';
-    DEFAULT_CACHE_DB_AUTH = '_Auth';
     DEFAULT_CACHE_COLLECTION_USER = '_User';
     DEFAULT_CACHE_COLLECTION_STORAGE = '_Storage';
     DEFAULT_CACHE_COLLECTION_REST = '_Rest';
@@ -72,10 +70,35 @@ export class BFastConfig {
     };
 
     cacheDatabaseName(name: string, appName: string): string {
+        const adapters = this.credential(appName)?.adapters;
+        let projectId = this.credential(appName).projectId;
+        if (adapters
+            && adapters.cache
+            && typeof adapters.cache === 'string'
+            && this.credential(adapters.cache)
+            && this.credential(adapters.cache).projectId) {
+            projectId = this.credential(adapters.cache).projectId;
+            appName = adapters.cache;
+            }
+        // } else if (adapters
+        //     && adapters.auth
+        //     && typeof adapters.auth === 'string'
+        //     && this.credential(adapters.auth)
+        //     && this.credential(adapters.auth).projectId) {
+        //     projectId = this.credential(adapters.auth).projectId;
+        //     appName = adapters.auth;
+        // } else if (adapters
+        //     && adapters.http
+        //     && typeof adapters.http === 'string'
+        //     && this.credential(adapters.http)
+        //     && this.credential(adapters.http).projectId) {
+        //     projectId = this.credential(adapters.http).projectId;
+        //     appName = adapters.http;
+        // }
         if (name && name !== '') {
-            return `bfast/${this.credential(appName).projectId}/${name}`;
+            return `bfast_${projectId}_${appName}-app_${name}`;
         } else {
-            return `bfast/${this.credential(appName).projectId}/cache`;
+            return `bfast_${projectId}_${appName}-app_cache`;
         }
     }
 
@@ -91,6 +114,16 @@ export class BFastConfig {
         const adapters = this.credential(appName)?.adapters;
         if (adapters && adapters.auth && typeof adapters.auth === 'function') {
             return adapters.auth();
+        } else if (
+            adapters && adapters.auth
+            && typeof adapters.auth === 'string'
+            && this.credential(adapters.auth)
+            && this.credential(adapters.auth).adapters
+            && this.credential(adapters.auth).adapters?.auth
+            && typeof this.credential(adapters.auth).adapters?.auth === "function") {
+            const _adapters = this.credential(adapters.auth)?.adapters;
+            // @ts-ignore
+            return _adapters.auth();
         } else {
             return new DefaultAuthFactory(
                 new HttpClientController(
@@ -106,12 +139,18 @@ export class BFastConfig {
         const adapters = credentials?.adapters;
         if (adapters && adapters.cache && typeof adapters.cache === "function") {
             return adapters.cache();
+        } else if (
+            adapters && adapters.cache
+            && typeof adapters.cache === 'string'
+            && this.credential(adapters.cache)
+            && this.credential(adapters.cache).adapters
+            && this.credential(adapters.cache).adapters?.cache
+            && typeof this.credential(adapters.cache).adapters?.cache === "function") {
+            const _adapters = this.credential(adapters.cache)?.adapters;
+            // @ts-ignore
+            return _adapters.cache();
         } else {
-            return new DefaultCacheFactory(
-                new SecurityController(
-                    credentials.projectId ? credentials.projectId : 'bfast'
-                )
-            );
+            return new DefaultCacheFactory();
         }
     }
 
@@ -119,6 +158,16 @@ export class BFastConfig {
         const adapters = this.credential(appName)?.adapters;
         if (adapters && adapters.http && typeof adapters.http === "function") {
             return adapters.http();
+        } else if (
+            adapters && adapters.http
+            && typeof adapters.http === 'string'
+            && this.credential(adapters.http)
+            && this.credential(adapters.http).adapters
+            && this.credential(adapters.http).adapters?.http
+            && typeof this.credential(adapters.http).adapters?.http === "function") {
+            const _adapters = this.credential(adapters.http)?.adapters;
+            // @ts-ignore
+            return _adapters.http();
         } else {
             return new DefaultHttpClientFactory();
         }
@@ -133,9 +182,9 @@ export interface AppCredentials {
     appPassword?: string;
     cache?: CacheConfigOptions;
     adapters?: {
-        auth?: (config?: BFastConfig) => AuthAdapter,
-        cache?: (config?: BFastConfig) => CacheAdapter,
-        http?: (config?: BFastConfig) => HttpClientAdapter
+        auth?: string | ((config?: BFastConfig) => AuthAdapter),
+        cache?: string | ((config?: BFastConfig) => CacheAdapter),
+        http?: string | ((config?: BFastConfig) => HttpClientAdapter)
     }
 }
 
