@@ -7,11 +7,39 @@ import {HttpNextModel} from "./models/HttpNextModel";
 // @ts-ignore
 import * as device from "browser-or-node";
 import { AuthController } from "./controllers/auth.controller";
+import { BFastConfig } from "./conf";
+import { CacheController } from "./controllers/cache.controller";
 
 export class BfastFunctions {
     constructor(private readonly appName: string,
-        private readonly authController: AuthController,
-        private readonly httpClientController: HttpClientController,) {
+        private authController: AuthController,
+        private httpClientController: HttpClientController) {
+            this.init();
+    }
+
+    private init(){
+        const config = BFastConfig.getInstance();
+        const authCache = new CacheController(
+            this.appName,
+            config.DEFAULT_CACHE_DB_BFAST,
+            config.DEFAULT_CACHE_COLLECTION_USER,
+            config.cacheAdapter(this.appName)
+        );
+        const restController = new HttpClientController(
+            this.appName,
+            config.httpAdapter(this.appName)
+        )
+        const authController = new AuthController(
+            this.appName,
+            authCache,
+            config.authAdapter(this.appName)
+        );
+        if(!this.authController){
+            this.authController = authController;
+        }
+        if(!this.httpClientController){
+            this.httpClientController = restController;
+        }
     }
 
     /**

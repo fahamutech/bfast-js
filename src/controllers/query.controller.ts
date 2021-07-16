@@ -6,6 +6,7 @@ import { QueryModel } from "../models/QueryModel";
 import { UpdateController } from "./update.controller";
 import { HttpClientController } from "./http-client.controller";
 import { AuthController } from "./auth.controller";
+import { AggregateModel } from "../models/aggregate.model";
 
 export enum QueryOrder {
     ASCENDING = 1,
@@ -18,7 +19,8 @@ export class QueryController {
         filter: {},
         return: [],
         skip: 0,
-        size: 100,
+        // size: 100,
+        hashes: [],
         orderBy: [{ 'createdAt': -1 }],
         count: false,
     }
@@ -63,6 +65,13 @@ export class QueryController {
             [field]: {
                 $eq: value
             }
+        });
+        return this;
+    }
+
+    hashes(localDataHashes: string[]): QueryController {
+        Object.assign(this.query, {
+            hashes: localDataHashes
         });
         return this;
     }
@@ -235,10 +244,23 @@ export class QueryController {
         return new DatabaseChangesController(socketController);
     }
 
-    // ********* need improvement ************ //
-    async aggregate<V = any>(pipeline: any[], options: RequestOptions): Promise<V> {
-        const aggregateRule = await this.rulesController.aggregateRule(this.domain, pipeline,
-            BFastConfig.getInstance().credential(this.appName), options);
+    /**
+     * 
+     * @param pipeline 
+     * @param options 
+     * @returns 
+     * @deprecated use bfast.database().table().aggregate()
+     */
+    async aggregate<V = any>(
+        pipeline: any[] | AggregateModel,
+        options?: RequestOptions
+    ): Promise<V> {
+        const aggregateRule = await this.rulesController.aggregateRule(
+            this.domain,
+            pipeline,
+            BFastConfig.getInstance().credential(this.appName),
+            options
+        );
         return this.aggregateRuleRequest(aggregateRule);
     }
 

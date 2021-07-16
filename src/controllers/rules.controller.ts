@@ -4,6 +4,7 @@ import {QueryModel} from "../models/QueryModel";
 import {UpdateModel} from "../models/UpdateOperation";
 import {AuthController} from "./auth.controller";
 import {RequestOptions} from "./query.controller";
+import { AggregateModel } from "../models/aggregate.model";
 
 export class RulesController {
     constructor(private readonly authController: AuthController) {
@@ -94,7 +95,12 @@ export class RulesController {
         return this.addToken(updateRule);
     }
 
-    async aggregateRule(domain: string, pipeline: any[], appCredentials: AppCredentials, options?: RequestOptions): Promise<Object> {
+    async aggregateRule(
+        domain: string,
+        pipeline: any[] | AggregateModel,
+        appCredentials: AppCredentials,
+        options?: RequestOptions
+    ): Promise<Object> {
         const aggregateRule = {};
         if (options && options?.useMasterKey === true) {
             Object.assign(aggregateRule, {
@@ -182,10 +188,10 @@ export class RulesController {
     }
 
     async addToken(rule: any): Promise<any> {
-        const token = await this.authController.getToken();
-        Object.assign(rule, {
-            token
-        });
+        // const token = await this.authController.getToken();
+        // Object.assign(rule, {
+        //     token
+        // });
         return rule;
     }
 }

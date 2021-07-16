@@ -60,23 +60,8 @@ export class bfast {
      * @param appName other app/project name to work with
      */
     static functions(appName = BFastConfig.DEFAULT_APP): BfastFunctions {
-        const config = BFastConfig.getInstance();
-        const authCache = new CacheController(
-            appName,
-            config.DEFAULT_CACHE_DB_BFAST,
-            config.DEFAULT_CACHE_COLLECTION_USER,
-            config.cacheAdapter(appName)
-        );
-        const restController = new HttpClientController(
-            appName,
-            config.httpAdapter(appName)
-        )
-        const authController = new AuthController(
-            appName,
-            authCache,
-            config.authAdapter(appName)
-        );
-        return new BfastFunctions(appName, authController,restController);
+        // @ts-ignore
+        return new BfastFunctions(appName, null, null);
     }
 
     /**

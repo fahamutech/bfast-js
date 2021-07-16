@@ -10,4 +10,5 @@ export interface QueryModel {
     id?: string;
     update?: any,
     upsert?: boolean
+    hashes?: string[]
 }

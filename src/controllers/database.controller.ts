@@ -6,6 +6,7 @@ import { DatabaseChangesModel } from "../models/DatabaseChangesModel";
 import { HttpClientController } from "./http-client.controller";
 import { throws } from "assert";
 import { AuthController } from "./auth.controller";
+import { AggregateController } from "./aggregate.controller";
 
 export class DatabaseController {
 
@@ -37,17 +38,24 @@ export class DatabaseController {
         return DatabaseController._extractResultFromServer(response.data, 'create', this.domainName);
     }
 
-    async getAll<T>(pagination?: { size: number, skip: number }, options?: RequestOptions): Promise<T[]> {
+    async getAll<T>(query?: { size?: number, skip?: number, hashes?: string[]}, options?: RequestOptions): Promise<T[]> {
         try {
-            const totalCount = pagination ? pagination.size : await this.query().count(true).find(options);
-            return await this.query().skip(pagination ? pagination.skip : 0).size(totalCount as number).find(options);
+            const totalCount = query && query.size ? query.size : await this.query().count(true).find(options);
+            return await this.query()
+            .skip(query && query.skip ? query.skip : 0)
+            .size(totalCount as number)
+            .hashes(query && query.hashes?query.hashes: [])
+            .find(options);
         } catch (e) {
             throw { message: DatabaseController._getErrorMessage(e ? e : 'unknown error') };
         }
     }
 
-    async get<T>(id: string, options?: RequestOptions): Promise<T> {
-        return this.query().byId(id).find<T>(options);
+    async get<T>(id: string, hash?: string, options?: RequestOptions): Promise<T> {
+        return this.query()
+        .byId(id)
+        .hashes([hash?hash: ''])
+        .find<T>(options);
     }
 
     query(): QueryController {
@@ -57,6 +65,16 @@ export class DatabaseController {
             this.rulesController,
             this.authController,
             this.appName);
+    }
+
+    aggregate(): AggregateController{
+        return new AggregateController(
+            this.domainName,
+            this.httpClientController,
+            this.rulesController,
+            this.authController,
+            this.appName
+        );
     }
 
     static _extractResultFromServer(data: any, rule: string, domain: string) {

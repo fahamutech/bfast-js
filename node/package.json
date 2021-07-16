@@ -1,1 +1,1 @@
-{"name":"bfastnode","version":"4.5.0","description":"nodejs client sdk for bfast::cloud project","repository":"https://github.com/fahamutech/bfast-js","main":"dist/bfast.js","maintainers":["Fahamu Tech"],"types":"dist/bfast.d.ts","scripts":{},"author":"Fahamu Tech","license":"ISC"}
+{"name":"bfastnode","version":"4.5.1","description":"nodejs client sdk for bfast::cloud project","repository":"https://github.com/fahamutech/bfast-js","main":"dist/bfast.js","maintainers":["Fahamu Tech"],"types":"dist/bfast.d.ts","scripts":{},"author":"Fahamu Tech","license":"ISC"}
