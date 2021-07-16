@@ -14,7 +14,6 @@ export class BfastFunctions {
     constructor(private readonly appName: string,
         private authController: AuthController,
         private httpClientController: HttpClientController) {
-            this.init();
     }
 
     private init(){
@@ -47,6 +46,7 @@ export class BfastFunctions {
      * @param path {string} function name
      */
     request(path: string): FunctionsController {
+        this.init();
         return new FunctionsController(
             path,
             this.httpClientController,
