@@ -15,7 +15,7 @@ export class CacheController {
 
     async keys(): Promise<string[]> {
         const keys = await this.cacheAdapter.keys(this.database, this.collection);
-        return keys && Array.isArray(keys)?keys: [];
+        return keys && Array.isArray(keys) ? keys : [];
     }
 
     async clearAll(): Promise<boolean> {
@@ -27,11 +27,10 @@ export class CacheController {
     }
 
     async getAll(): Promise<Array<any>> {
-        const keys = await this.keys();
-        return Promise.all(keys.map(k=>this.get(k)));
+        return this.cacheAdapter.getAll(this.database, this.collection);
     }
 
-    async query(filter: (element: {[key:string]: any}[])=>any): Promise<any>{
+    async query(filter: (element: { [key: string]: any }[]) => any): Promise<any> {
         const all = await this.getAll();
         return filter(all);
     }
@@ -43,13 +42,4 @@ export class CacheController {
     async remove(identifier: string, force = true): Promise<boolean> {
         return this.cacheAdapter.remove(identifier, this.database, this.collection, true);
     }
-
-    // async getDatabases(){
-    //     const databases = await this.cacheAdapter.databases();
-    // }
-
-    // async getCollections(database: string){
-    //     return this.cacheAdapter.collections(database);
-    // }
-
 }

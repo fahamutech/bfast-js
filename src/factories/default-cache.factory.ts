@@ -9,6 +9,17 @@ export class DefaultCacheFactory implements CacheAdapter {
     constructor() {
     }
 
+    async getAll(database: string, collection: string): Promise<any[]> {
+        if (isNode()) {
+            return [];
+        }
+        const all: any[] = [];
+        await DefaultCacheFactory._getCacheDatabase(database, collection)?.iterate((value: any, _: string) => {
+            all.push(value);
+        });
+        return  all;
+    }
+
     private static _getCacheDatabase(database: string, collection: string): any {
         if (isNode()) {
             return undefined;
@@ -55,11 +66,6 @@ export class DefaultCacheFactory implements CacheAdapter {
         return DefaultCacheFactory._getCacheDatabase(database, collection).setItem(identifier, data);
     }
 
-    // private static _getDayToLeave(days: number) {
-    //     const date = new Date();
-    //     return date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    // }
-
     async remove(identifier: string, database: string, collection: string, force = true): Promise<boolean> {
         if (isNode()) {
             return true;
@@ -69,9 +75,6 @@ export class DefaultCacheFactory implements CacheAdapter {
         //     await DefaultCacheFactory._getCacheDatabase(database, '_ttl')?.removeItem(identifier);
         await DefaultCacheFactory._getCacheDatabase(database, collection)?.removeItem(identifier);
         return true;
-        // } else {
-        //     return false;
-        // }
     }
 
     cacheEnabled(appName: string, options?: RequestOptions): boolean {
