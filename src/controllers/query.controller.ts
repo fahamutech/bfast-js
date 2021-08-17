@@ -214,7 +214,11 @@ export class QueryController {
         );
     }
 
-    changes(onConnect?: () => void, onDisconnect?: () => void, options: RequestOptions = { useMasterKey: false }): DatabaseChangesController {
+    changes(
+        onConnect?: () => void,
+        onDisconnect?: () => void,
+        options: RequestOptions = { useMasterKey: false }
+    ): DatabaseChangesController {
         const applicationId = BFastConfig.getInstance().credential(this.appName).applicationId;
         const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
         const masterKey = BFastConfig.getInstance().credential(this.appName).appPassword;

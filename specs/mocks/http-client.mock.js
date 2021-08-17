@@ -37,11 +37,13 @@ class HttpClientMock {
      * }>}
      */
     async post(url, data, config) {
-        console.log(data);
-        console.log(config);
-        return {
-            data: [{id: '123'}]
+        if (!data){
+            throw {message: 'data to save required'}
         }
+        if (!data.applicationId){
+            throw {message: 'application id required'};
+        }
+
     }
 
     async put(url, data, config) {
@@ -51,6 +53,7 @@ class HttpClientMock {
     async patch(url, data, config) {
 
     }
+    
 }
 
 module.exports = {

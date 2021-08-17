@@ -1,20 +1,19 @@
-import { QueryController, RequestOptions } from "./query.controller";
-import { BFastConfig } from "../conf";
-import { RulesController } from "./rules.controller";
-import { SocketController } from "./socket.controller";
-import { DatabaseChangesModel } from "../models/DatabaseChangesModel";
-import { HttpClientController } from "./http-client.controller";
-import { throws } from "assert";
-import { AuthController } from "./auth.controller";
-import { AggregateController } from "./aggregate.controller";
+import {QueryController, RequestOptions} from "./query.controller";
+import {BFastConfig} from "../conf";
+import {RulesController} from "./rules.controller";
+import {SocketController} from "./socket.controller";
+import {DatabaseChangesModel} from "../models/DatabaseChangesModel";
+import {HttpClientController} from "./http-client.controller";
+import {AuthController} from "./auth.controller";
+import {AggregateController} from "./aggregate.controller";
 
 export class DatabaseController {
 
     constructor(private readonly domainName: string,
-        private readonly httpClientController: HttpClientController,
-        private readonly rulesController: RulesController,
-        private readonly authController: AuthController,
-        private readonly appName: string) {
+                private readonly httpClientController: HttpClientController,
+                private readonly rulesController: RulesController,
+                private readonly authController: AuthController,
+                private readonly appName: string) {
     }
 
     async save<T>(model: T | T[], options?: RequestOptions): Promise<T> {
@@ -38,24 +37,24 @@ export class DatabaseController {
         return DatabaseController._extractResultFromServer(response.data, 'create', this.domainName);
     }
 
-    async getAll<T>(query?: { size?: number, skip?: number, hashes?: string[]}, options?: RequestOptions): Promise<T[]> {
+    async getAll<T>(query?: { size?: number, skip?: number, hashes?: string[] }, options?: RequestOptions): Promise<T[]> {
         try {
             const totalCount = query && query.size ? query.size : await this.query().count(true).find(options);
             return await this.query()
-            .skip(query && query.skip ? query.skip : 0)
-            .size(totalCount as number)
-            .hashes(query && query.hashes?query.hashes: [])
-            .find(options);
+                .skip(query && query.skip ? query.skip : 0)
+                .size(totalCount as number)
+                .hashes(query && query.hashes ? query.hashes : [])
+                .find(options);
         } catch (e) {
-            throw { message: DatabaseController._getErrorMessage(e ? e : 'unknown error') };
+            throw {message: DatabaseController._getErrorMessage(e ? e : 'unknown error')};
         }
     }
 
     async get<T>(id: string, hash?: string, options?: RequestOptions): Promise<T> {
         return this.query()
-        .byId(id)
-        .hashes([hash?hash: ''])
-        .find<T>(options);
+            .byId(id)
+            .hashes([hash ? hash : ''])
+            .find<T>(options);
     }
 
     query(): QueryController {
@@ -67,7 +66,7 @@ export class DatabaseController {
             this.appName);
     }
 
-    aggregate(): AggregateController{
+    aggregate(): AggregateController {
         return new AggregateController(
             this.domainName,
             this.httpClientController,
@@ -84,7 +83,7 @@ export class DatabaseController {
             if (data && data.errors && data.errors[`${rule}.${domain}`]) {
                 throw data.errors[`${rule}.${domain}`];
             } else {
-                throw { message: 'Server general failure', errors: data.errors };
+                throw {message: 'Server general failure', errors: data.errors};
             }
         }
     }
