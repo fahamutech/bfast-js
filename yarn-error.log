@@ -1,25 +1,25 @@
 Arguments: 
-  /usr/bin/node /usr/lib/node_modules/yarn/bin/yarn.js install
+  /usr/bin/node /usr/lib/node_modules/yarn/bin/yarn.js config list --json
 
 PATH: 
   /usr/local/sbin:/usr/local/bin:/usr/local/games:/usr/sbin:/usr/bin:/usr/games:/sbin:/bin
 
 Yarn version: 
-  1.22.10
+  1.22.11
 
 Node version: 
-  14.17.2
+  16.6.1
 
 Platform: 
   linux x64
 
 Trace: 
   Error: Failed to replace env in config: ${NPM_TOKEN}
-      at /usr/lib/node_modules/yarn/lib/cli.js:98430:13
+      at /usr/lib/node_modules/yarn/lib/cli.js:98884:13
       at String.replace (<anonymous>)
-      at envReplace (/usr/lib/node_modules/yarn/lib/cli.js:98425:16)
-      at Function.normalizeConfig (/usr/lib/node_modules/yarn/lib/cli.js:31887:69)
-      at NpmRegistry.<anonymous> (/usr/lib/node_modules/yarn/lib/cli.js:31917:34)
+      at envReplace (/usr/lib/node_modules/yarn/lib/cli.js:98879:16)
+      at Function.normalizeConfig (/usr/lib/node_modules/yarn/lib/cli.js:31891:69)
+      at NpmRegistry.<anonymous> (/usr/lib/node_modules/yarn/lib/cli.js:31921:34)
       at Generator.next (<anonymous>)
       at step (/usr/lib/node_modules/yarn/lib/cli.js:310:30)
       at /usr/lib/node_modules/yarn/lib/cli.js:321:13
@@ -27,7 +27,7 @@ Trace:
 npm manifest: 
   {
     "name": "bfastjs",
-    "version": "4.5.2",
+    "version": "4.5.3",
     "description": "javascript client sdk for bfast::cloud project",
     "repository": "https://github.com/fahamutech/bfast-js",
     "main": "dist/bfast.js",
@@ -41,7 +41,7 @@ npm manifest:
       "build:web": "npx gulp updateNode && npx webpack --config webpack.config.js",
       "build:web:mjs": "npx gulp updateNode && npx tsc --build tsconfig.mjs.json",
       "publish:web": "npx gulp updateNode && npm run build:web && npm publish",
-      "build:node": "npx gulp updateNode && cd node && webpack --config webpack-node.config.js",
+      "build:node": "npx gulp updateNode && cd node && webpack --config webpack.node.config.js",
       "publish:node": "npx gulp updateNode && npm run build:node && npm publish ./node",
       "publish:all": "npm run publish:web && npm run publish:node"
     },
@@ -52,7 +52,7 @@ npm manifest:
       "browser-or-node": "^1.3.0",
       "bufferutil": "~4.0.3",
       "form-data": "~4.0.0",
-      "idb": "~6.1.2",
+      "localforage": "~1.9.0",
       "socket.io-client": "~4.1.3",
       "utf-8-validate": "~5.0.5"
     },
@@ -484,7 +484,7 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/atob/-/atob-2.1.2.tgz#6d9517eb9e030d2436666651e86bd9f6f13533c9"
     integrity sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==
   
-  axios@^0.21.1:
+  axios@~0.21.1:
     version "0.21.1"
     resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.1.tgz#22563481962f4d6bde9a76d516ef0e5d3c09b2b8"
     integrity sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA==
@@ -613,7 +613,7 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/buffer-from/-/buffer-from-1.1.1.tgz#32713bc028f75c02fdb710d7c7bcec1f2c6070ef"
     integrity sha512-MQcXEUbCKtEo7bhqEs6560Hyd4XaovZlO/k9V3hjVUF/zwW7KBVdSK4gIt/bzwS9MbR5qob+F5jusZsb0YQK2A==
   
-  bufferutil@^4.0.3:
+  bufferutil@~4.0.3:
     version "4.0.3"
     resolved "https://registry.yarnpkg.com/bufferutil/-/bufferutil-4.0.3.tgz#66724b756bed23cd7c28c4d306d7994f9943cc6b"
     integrity sha512-yEYTwGndELGvfXsImMBLop58eaGW+YdONi1fNjTINSY98tmMmFijBG6WXgdkfuLNt4imzQNtIE+eBp1PVpMCSw==
@@ -1009,7 +1009,7 @@ Lockfile:
     dependencies:
       once "^1.4.0"
   
-  engine.io-client@~5.1.1:
+  engine.io-client@~5.1.2:
     version "5.1.2"
     resolved "https://registry.yarnpkg.com/engine.io-client/-/engine.io-client-5.1.2.tgz#27108da9b39ae03262443d945caf2caa3655c4cb"
     integrity sha512-blRrgXIE0A/eurWXRzvfCLG7uUFJqfTGFsyJzXSK71srMMGJ2VraBLg8Mdw28uUxSpVicepBN9X7asqpD1mZcQ==
@@ -1350,7 +1350,7 @@ Lockfile:
     dependencies:
       for-in "^1.0.1"
   
-  form-data@^4.0.0:
+  form-data@~4.0.0:
     version "4.0.0"
     resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.0.tgz#93919daeaf361ee529584b9b31664dc12c9fa452"
     integrity sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==
@@ -2045,7 +2045,7 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/loader-runner/-/loader-runner-4.2.0.tgz#d7022380d66d14c5fb1d496b89864ebcfd478384"
     integrity sha512-92+huvxMvYlMzMt0iIOukcwYBFpkYJdpl2xsZ7LrlayO7E8SOv+JJUEK17B/dJIHAOLMfh2dZZ/Y18WgmGtYNw==
   
-  localforage@^1.9.0:
+  localforage@~1.9.0:
     version "1.9.0"
     resolved "https://registry.yarnpkg.com/localforage/-/localforage-1.9.0.tgz#f3e4d32a8300b362b4634cc4e066d9d00d2f09d1"
     integrity sha512-rR1oyNrKulpe+VM9cYmcFn6tsHuokyVHFaCM3+osEmxaHTbEk8oQu6eGDfS6DQLWi/N67XRmB8ECG37OES368g==
@@ -2895,16 +2895,16 @@ Lockfile:
       source-map-resolve "^0.5.0"
       use "^3.1.0"
   
-  socket.io-client@^4.1.2:
-    version "4.1.2"
-    resolved "https://registry.yarnpkg.com/socket.io-client/-/socket.io-client-4.1.2.tgz#95ad7113318ea01fba0860237b96d71e1b1fd2eb"
-    integrity sha512-RDpWJP4DQT1XeexmeDyDkm0vrFc0+bUsHDKiVGaNISJvJonhQQOMqV9Vwfg0ZpPJ27LCdan7iqTI92FRSOkFWQ==
+  socket.io-client@~4.1.3:
+    version "4.1.3"
+    resolved "https://registry.yarnpkg.com/socket.io-client/-/socket.io-client-4.1.3.tgz#236daa642a9f229932e00b7221e843bf74232a62"
+    integrity sha512-hISFn6PDpgDifVUiNklLHVPTMv1LAk8poHArfIUdXa+gKgbr0MZbAlquDFqCqsF30yBqa+jg42wgos2FK50BHA==
     dependencies:
       "@types/component-emitter" "^1.2.10"
       backo2 "~1.0.2"
       component-emitter "~1.3.0"
       debug "~4.3.1"
-      engine.io-client "~5.1.1"
+      engine.io-client "~5.1.2"
       parseuri "0.0.6"
       socket.io-parser "~4.0.4"
   
@@ -3313,7 +3313,7 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/use/-/use-3.1.1.tgz#d50c8cac79a19fbc20f2911f56eb973f4e10070f"
     integrity sha512-cwESVXlO3url9YWlFW/TA9cshCEhtu7IKJ/p5soJ/gGpj7vbvFrAY/eIioQ6Dw23KjZhYgiIo8HOs1nQ2vr/oQ==
   
-  utf-8-validate@^5.0.5:
+  utf-8-validate@~5.0.5:
     version "5.0.5"
     resolved "https://registry.yarnpkg.com/utf-8-validate/-/utf-8-validate-5.0.5.tgz#dd32c2e82c72002dc9f02eb67ba6761f43456ca1"
     integrity sha512-+pnxRYsS/axEpkrrEpzYfNZGXp0IjC/9RIxwM5gntY4Koi8SHmUGSfxfWqxZdRxrtaoVstuOzUp/rbs3JSPELQ==

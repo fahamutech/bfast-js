@@ -1,0 +1,23 @@
+name: npm-publish-web-beta
+on:
+  push:
+    branches:
+      - beta
+jobs:
+  npm-publish:
+    name: npm-publish-web-beta
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@master
+      - name: Set up Node.js
+        uses: actions/setup-node@master
+        with:
+          node-version: 14.x
+      - name: Publish if version has been updated
+        run: |
+          npm install
+          npm run publish:web:beta
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
