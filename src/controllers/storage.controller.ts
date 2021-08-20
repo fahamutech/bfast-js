@@ -1,26 +1,25 @@
-import { AppCredentials, BFastConfig } from "../conf";
-// @ts-ignore
-import * as device from "browser-or-node";
-// @ts-ignore
-import FormDataNode from 'form-data';
-import { RulesController } from "./rules.controller";
-import { AuthController } from "./auth.controller";
-import { FileOptions, RequestOptions } from "./query.controller";
-import { FileModel } from "../models/file.model";
-import { Readable } from 'stream';
-import { HttpClientController } from "./http-client.controller";
+import {AppCredentials, BFastConfig} from "../conf";
+import {RulesController} from "./rules.controller";
+import {AuthController} from "./auth.controller";
+import {FileOptions, RequestOptions} from "./query.controller";
+import {FileModel} from "../models/file.model";
+import {Readable} from 'stream';
+import {HttpClientController} from "./http-client.controller";
+import {isNode} from "../utils/platform.util";
+import {FormData} from '../factories/form-data.factory';
+import {FormDataEncoder} from "../factories/form-data-encoder.factory";
 
 export class StorageController {
 
     constructor(private readonly httpClientController: HttpClientController,
-        private readonly auth: AuthController,
-        private readonly rulesController: RulesController,
-        private readonly authController: AuthController,
-        private readonly appName = BFastConfig.DEFAULT_APP) {
+                private readonly auth: AuthController,
+                private readonly rulesController: RulesController,
+                private readonly authController: AuthController,
+                private readonly appName = BFastConfig.DEFAULT_APP) {
     }
 
     async save(file: FileModel, uploadProgress: (progress: any) => void, options?: FileOptions): Promise<string> {
-        if (device.isNode) {
+        if (isNode) {
             if (file && file.filename && file.data && file.data instanceof Readable) {
                 return this._handleFileUploadInNode(file, uploadProgress, BFastConfig.getInstance().credential(this.appName), options);
             } else {
@@ -41,7 +40,7 @@ export class StorageController {
     }
 
     async delete(filename: string, options?: RequestOptions): Promise<string> {
-        const filesRule = await this.rulesController.storage("delete", { filename }, BFastConfig.getInstance().credential(this.appName), options);
+        const filesRule = await this.rulesController.storage("delete", {filename}, BFastConfig.getInstance().credential(this.appName), options);
         return this._handleFileRuleRequest(filesRule, 'delete');
     }
 
@@ -101,7 +100,7 @@ export class StorageController {
     }
 
     private async _handleFileUploadInNode(file: FileModel, uploadProgress: (progress: any) => void,
-        appCredentials: AppCredentials, options: FileOptions = {}): Promise<string> {
+                                          appCredentials: AppCredentials, options: FileOptions = {}): Promise<string> {
         const headers = {}
         if (options && options?.useMasterKey === true) {
             Object.assign(headers, {
@@ -109,22 +108,29 @@ export class StorageController {
             });
         }
         const token = await this.auth.getToken();
-        const formData = new FormDataNode();
+        const formData = new FormData();
         formData.append('file', file.data, file.filename);
+        // @ts-ignore
+        const encoder = new FormDataEncoder(formData);
         Object.assign(headers, {
             'Authorization': `Bearer ${token}`,
-            ...formData.getHeaders()
+            ...encoder.headers
         });
         options.pn = file.pn;
         options.filename = file.filename;
         const response = await this._fileUploadRequest(
-            formData, headers, appCredentials.applicationId, uploadProgress, options)
+            Readable.from(encoder),
+            headers,
+            appCredentials.applicationId,
+            uploadProgress,
+            options
+        );
         let databaseUrl = BFastConfig.getInstance().databaseURL(this.appName);
         return databaseUrl + response.data.urls[0];
     }
 
     private async _handleFileUploadInWeb(file: FileModel, uploadProgress: (progress: any) => void,
-        appCredentials: AppCredentials, options: FileOptions = {}): Promise<string> {
+                                         appCredentials: AppCredentials, options: FileOptions = {}): Promise<string> {
         const headers = {}
         if (options && options?.useMasterKey === true) {
             Object.assign(headers, {

@@ -1,31 +1,25 @@
-import { UpdateModel } from "../models/UpdateOperation";
-import { BFastConfig } from "../conf";
-import { DatabaseController } from "./database.controller";
-import { RulesController } from "./rules.controller";
-import { QueryModel } from "../models/QueryModel";
-import { RequestOptions } from "./query.controller";
-import { HttpClientController } from "./http-client.controller";
-import { AuthController } from "./auth.controller";
+import {UpdateModel} from "../models/UpdateOperation";
+import {BFastConfig} from "../conf";
+import {RulesController} from "./rules.controller";
+import {QueryModel} from "../models/QueryModel";
+import {RequestOptions} from "./query.controller";
+import {HttpClientController} from "./http-client.controller";
+import {AuthController} from "./auth.controller";
+import {extractResultFromServer} from "../utils/data.util";
 
 export class UpdateController {
     private updateModel: UpdateModel = {
         $set: {},
-        $inc: {},
-        $currentDate: {},
-        $min: {},
-        $max: {},
-        $mul: {},
-        $rename: {},
-        $unset: {}
+        $inc: {}
     };
     private _upsert = false;
 
     constructor(private readonly domain: string,
-        private readonly queryModel: QueryModel,
-        private readonly appName: string,
-        private readonly httpClientController: HttpClientController,
-        private readonly rulesController: RulesController,
-        private readonly authController: AuthController) {
+                private readonly queryModel: QueryModel,
+                private readonly appName: string,
+                private readonly httpClientController: HttpClientController,
+                private readonly rulesController: RulesController,
+                private readonly authController: AuthController) {
     }
 
 
@@ -55,49 +49,6 @@ export class UpdateController {
 
     decrement(field: string, amount: number = 1): UpdateController {
         return this.increment(field, -amount);
-    }
-
-    currentDate(field: string): UpdateController {
-        Object.assign(this.updateModel.$currentDate, {
-            [field]: true
-        });
-        return this;
-    }
-
-    minimum(field: string, value: any): UpdateController {
-        Object.assign(this.updateModel.$min, {
-            [field]: value
-        });
-        return this;
-    }
-
-    maximum(field: string, value: any): UpdateController {
-        Object.assign(this.updateModel.$max, {
-            [field]: value
-        });
-        return this;
-    }
-
-
-    multiply(field: string, quantity: number): UpdateController {
-        Object.assign(this.updateModel.$mul, {
-            [field]: quantity
-        });
-        return this;
-    }
-
-    renameField(field: string, value: string): UpdateController {
-        Object.assign(this.updateModel.$rename, {
-            [field]: value
-        });
-        return this;
-    }
-
-    removeField(field: string): UpdateController {
-        Object.assign(this.updateModel.$unset, {
-            [field]: ''
-        });
-        return this;
     }
 
     private build(): UpdateModel {
@@ -137,6 +88,6 @@ export class UpdateController {
                 token: await this.authController.getToken()
             }
         );
-        return DatabaseController._extractResultFromServer(response.data, 'update', this.domain);
+        return extractResultFromServer(response.data, 'update', this.domain);
     }
 }

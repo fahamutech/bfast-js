@@ -1,7 +1,7 @@
 import {AuthAdapter, AuthOptions} from "../adapters/auth.adapter";
-import bfast from "../bfast";
 import {UserModel} from "../models/UserModel";
 import {CacheController} from "./cache.controller";
+import {ConstantUtil} from "../utils/constant.util";
 
 export class AuthController {
 
@@ -9,7 +9,8 @@ export class AuthController {
         private readonly appName: string,
         private readonly cacheController: CacheController,
         private readonly authAdapter: AuthAdapter
-    ) {}
+    ) {
+    }
 
     async authenticated(userId: string, options?: AuthOptions): Promise<any> {
         return this.authAdapter.authenticated(userId, options);
@@ -17,7 +18,7 @@ export class AuthController {
 
     async currentUser(): Promise<any> {
         try {
-            const user: any = await this.cacheController.get(bfast.utils.CURRENT_USER_IDENTIFIER, {secure: true});
+            const user: any = await this.cacheController.get(ConstantUtil.CURRENT_USER_IDENTIFIER, {secure: true});
             if (!user) {
                 return null;
             } else if (typeof user === "string") {
@@ -107,7 +108,7 @@ export class AuthController {
     }
 
     async setCurrentUser(user: { [key: string]: any } | null, dtl = 6): Promise<any> {
-        await this.cacheController.set(bfast.utils.CURRENT_USER_IDENTIFIER, user, {
+        await this.cacheController.set(ConstantUtil.CURRENT_USER_IDENTIFIER, user, {
             secure: true
         });
         return user;

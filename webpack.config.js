@@ -2,18 +2,36 @@ const path = require('path');
 
 const clientConfig = {
     target: ["web"],
-    entry: './src/bfast.ts',
+    entry: './src/index.ts',
     mode: 'production',
+    module: {
+        rules: [
+            {
+                test: /\.tsx?$/,
+                use: [
+                    {
+                        loader: 'ts-loader',
+                        options: {configFile: "tsconfig.json"}
+                    }
+                ],
+                exclude: /node_modules/,
+            },
+        ]
+    },
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
         fallback: {
-            "stream": false
+            "stream": false,
+            "util": false
         }
     },
     output: {
-        filename: 'bfast.js',
+        filename: 'bfast.browser.js',
+        library: {
+            name: 'bfast',
+            type: 'this',
+        },
         path: path.resolve(__dirname, './dist'),
-        globalObject: 'this',
         libraryTarget: "umd"
     }
 };

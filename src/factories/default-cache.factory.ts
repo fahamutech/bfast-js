@@ -1,8 +1,9 @@
 import {CacheAdapter} from "../adapters/cache.adapter";
 import {RequestOptions} from "../controllers/query.controller";
-import {isNode} from "../utils/bfast.util";
+import {isNode} from "../utils/platform.util";
 
-const localForage = require('localforage');
+// @ts-ignore
+import localForage from "localforage";
 
 export class DefaultCacheFactory implements CacheAdapter {
 
@@ -10,18 +11,18 @@ export class DefaultCacheFactory implements CacheAdapter {
     }
 
     async getAll(database: string, collection: string): Promise<any[]> {
-        if (isNode()) {
+        if (isNode) {
             return [];
         }
         const all: any[] = [];
         await DefaultCacheFactory._getCacheDatabase(database, collection)?.iterate((value: any, _: string) => {
             all.push(value);
         });
-        return  all;
+        return all;
     }
 
     private static _getCacheDatabase(database: string, collection: string): any {
-        if (isNode()) {
+        if (isNode) {
             return undefined;
         }
         return localForage.createInstance({
@@ -31,14 +32,14 @@ export class DefaultCacheFactory implements CacheAdapter {
     }
 
     async keys(database: string, collection: string): Promise<string[] | undefined> {
-        if (isNode()) {
+        if (isNode) {
             return [];
         }
         return DefaultCacheFactory._getCacheDatabase(database, collection)?.keys();
     }
 
     async clearAll(database: string, collection: string): Promise<boolean> {
-        if (isNode()) {
+        if (isNode) {
             return true;
         }
         await DefaultCacheFactory._getCacheDatabase(database, collection)?.clear();
@@ -46,7 +47,7 @@ export class DefaultCacheFactory implements CacheAdapter {
     }
 
     async get<T extends any>(identifier: string, database: string, collection: string, options: { secure?: boolean } = {secure: false}): Promise<T> {
-        if (isNode()) {
+        if (isNode) {
             return null as any;
         }
         // if (options.secure === true) {
@@ -57,7 +58,7 @@ export class DefaultCacheFactory implements CacheAdapter {
     }
 
     async set<T>(identifier: string, data: T, database: string, collection: string, options: { dtl?: number, secure?: boolean } = {secure: false}): Promise<T> {
-        if (isNode()) {
+        if (isNode) {
             return null as any;
         }
         // if (options.secure === true) {
@@ -67,7 +68,7 @@ export class DefaultCacheFactory implements CacheAdapter {
     }
 
     async remove(identifier: string, database: string, collection: string, force = true): Promise<boolean> {
-        if (isNode()) {
+        if (isNode) {
             return true;
         }
         // const dayToLeave = await DefaultCacheFactory._getCacheDatabase(database, '_ttl').getItem(identifier as any);
@@ -78,7 +79,7 @@ export class DefaultCacheFactory implements CacheAdapter {
     }
 
     cacheEnabled(appName: string, options?: RequestOptions): boolean {
-        if (isNode()) {
+        if (isNode) {
             return false;
         }
         // if (options && options.cacheEnable !== undefined && options.cacheEnable !== null) {

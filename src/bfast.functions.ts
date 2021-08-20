@@ -4,11 +4,13 @@ import {SocketController} from "./controllers/socket.controller";
 import {HttpRequestModel} from "./models/HttpRequestModel";
 import {EventResponseModel, HttpResponseModel} from "./models/HttpResponseModel";
 import {HttpNextModel} from "./models/HttpNextModel";
-// @ts-ignore
-import * as device from "browser-or-node";
 import { AuthController } from "./controllers/auth.controller";
 import { BFastConfig } from "./conf";
 import { CacheController } from "./controllers/cache.controller";
+import {isNode} from "./utils/platform.util";
+import {cacheAdapter} from "./factories/cache-adapter.factory";
+import {httpAdapter} from "./factories/http-adapter.factory";
+import {authAdapter} from "./factories/auth-adapter.factory";
 
 export class BfastFunctions {
     constructor(private readonly appName: string,
@@ -22,16 +24,16 @@ export class BfastFunctions {
             this.appName,
             config.DEFAULT_CACHE_DB_BFAST,
             config.DEFAULT_CACHE_COLLECTION_USER,
-            config.cacheAdapter(this.appName)
+            cacheAdapter(config,this.appName)
         );
         const restController = new HttpClientController(
             this.appName,
-            config.httpAdapter(this.appName)
+            httpAdapter(config,this.appName)
         )
         const authController = new AuthController(
             this.appName,
             authCache,
-            config.authAdapter(this.appName)
+            authAdapter(config,this.appName)
         );
         if(!this.authController){
             this.authController = authController;
@@ -68,7 +70,7 @@ export class BfastFunctions {
     onHttpRequest(path: string,
                   handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
                       | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
-        if (device.isNode) {
+        if (isNode) {
             return {
                 method: null,
                 path: path,
@@ -82,7 +84,7 @@ export class BfastFunctions {
     onPostHttpRequest(path: string,
                       handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
                           | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
-        if (device.isNode) {
+        if (isNode) {
             return {
                 method: 'POST',
                 path: path,
@@ -96,7 +98,7 @@ export class BfastFunctions {
     onPutHttpRequest(path: string,
                      handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
                          | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
-        if (device.isNode) {
+        if (isNode) {
             return {
                 method: 'PUT',
                 path: path,
@@ -110,7 +112,7 @@ export class BfastFunctions {
     onDeleteHttpRequest(path: string,
                         handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
                             | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
-        if (device.isNode) {
+        if (isNode) {
             return {
                 method: 'DELETE',
                 path: path,
@@ -124,7 +126,7 @@ export class BfastFunctions {
     onGetHttpRequest(path: string,
                      handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
                          | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
-        if (device.isNode) {
+        if (isNode) {
             return {
                 method: 'GET',
                 path: path,
@@ -136,7 +138,7 @@ export class BfastFunctions {
     }
 
     onEvent(path: string, handler: (request: { auth?: any, body?: any }, response: EventResponseModel) => any) {
-        if (device.isNode) {
+        if (isNode) {
             return {
                 name: path,
                 onEvent: handler
@@ -148,7 +150,7 @@ export class BfastFunctions {
 
     onGuard(path: string, handler: ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)[]
         | ((request: HttpRequestModel, response: HttpResponseModel, next?: HttpNextModel) => any)) {
-        if (device.isNode) {
+        if (isNode) {
             return {
                 path: path,
                 onGuard: handler
@@ -173,7 +175,7 @@ export class BfastFunctions {
         Object.assign(schedule, defaultRule);
         // @ts-ignore
         const rule: any = Object.keys(schedule).map(x => schedule[x]).join(' ');
-        if (device.isNode) {
+        if (isNode) {
             return {
                 onJob: handler,
                 rule: rule,
