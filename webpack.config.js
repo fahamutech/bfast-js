@@ -19,7 +19,7 @@ const clientConfig = {
         ]
     },
     resolve: {
-        extensions: ['.tsx', '.ts', '.js'],
+        extensions: ['.ts', '.js'],
         fallback: {
             "stream": false,
             "util": false

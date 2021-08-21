@@ -6,7 +6,7 @@ import { UpdateModel } from "../models/UpdateOperation";
 import { HttpClientController } from "./http-client.controller";
 import { AuthController } from "./auth.controller";
 
-export class TransactionController {
+export class BulkController {
 
     private transactionRequests: TransactionModel[];
 
@@ -31,7 +31,7 @@ export class TransactionController {
             }
         }
         const credential = BFastConfig.getInstance().credential(this.appName);
-        const transactionRule = await this.rulesController.transaction(this.transactionRequests,
+        const transactionRule = await this.rulesController.bulk(this.transactionRequests,
             credential, { useMasterKey: options?.useMasterKey });
         const response = await this.httpClientController.post(
             BFastConfig.getInstance().databaseURL(this.appName),
@@ -42,8 +42,8 @@ export class TransactionController {
                 }
             },
             {
-                context: 'transaction',
-                rule: 'transaction',
+                context: 'bulk',
+                rule: 'bulk',
                 type: 'daas',
                 token: await this.authController.getToken()
             });
@@ -52,10 +52,10 @@ export class TransactionController {
             options.after().catch(_ => {
             });
         }
-        return TransactionController._extractResultFromServer(response.data);
+        return BulkController._extractResultFromServer(response.data);
     }
 
-    create(domain: string, data: any | any[]): TransactionController {
+    create(domain: string, data: any | any[]): BulkController {
         this.transactionRequests.push({
             data,
             action: "create",
@@ -64,7 +64,7 @@ export class TransactionController {
         return this;
     }
 
-    delete(domain: string, payload: { query: QueryModel }): TransactionController {
+    delete(domain: string, payload: { query: QueryModel }): BulkController {
         this.transactionRequests.push({
             domain,
             action: "delete",
@@ -78,7 +78,7 @@ export class TransactionController {
         payload:
             { query: QueryModel, update: UpdateModel }
             | { query: QueryModel, update: UpdateModel }[]
-    ): TransactionController {
+    ): BulkController {
         this.transactionRequests.push({
             domain,
             action: "update",
@@ -88,13 +88,15 @@ export class TransactionController {
     }
 
     static _extractResultFromServer(data: any) {
-        if (data && data['transaction']) {
-            return data['transaction'];
+        // console.log(data);
+        if (data && data.hasOwnProperty('transaction')) {
+            delete data['transaction'].commit?.errors;
+            return data.transaction.commit;
         } else {
-            if (data && data.errors && data.errors['transaction']) {
+            if (data && data.errors && data.errors.hasOwnProperty('transaction')) {
                 throw data.errors['transaction'];
             } else {
-                throw { message: 'Server general failure', errors: data.errors };
+                throw { message: 'Fail to process a result', errors: data.errors };
             }
         }
     }

@@ -6,8 +6,9 @@ import {FileModel} from "../models/file.model";
 import {Readable} from 'stream';
 import {HttpClientController} from "./http-client.controller";
 import {isNode} from "../utils/platform.util";
-import {FormData} from '../factories/form-data.factory';
-import {FormDataEncoder} from "../factories/form-data-encoder.factory";
+// @ts-ignore
+import * as FormData from 'form-data'
+import {getConfig} from "../bfast";
 
 export class StorageController {
 
@@ -20,10 +21,15 @@ export class StorageController {
 
     async save(file: FileModel, uploadProgress: (progress: any) => void, options?: FileOptions): Promise<string> {
         if (isNode) {
-            if (file && file.filename && file.data && file.data instanceof Readable) {
-                return this._handleFileUploadInNode(file, uploadProgress, BFastConfig.getInstance().credential(this.appName), options);
-            } else {
-                throw new Error('file object to save is invalid, data and filename is required field');
+            try{
+                if (file && file.filename && file.data && file.data instanceof Readable) {
+                    return this._handleFileUploadInNode(file, uploadProgress, BFastConfig.getInstance().credential(this.appName), options);
+                } else {
+                    throw new Error('file object to save is invalid, data and filename is required field');
+                }
+            }catch (e){
+                console.log(e);
+                throw e;
             }
         } else {
             if (file && file.data && file.data instanceof File && file.filename) {
@@ -37,6 +43,11 @@ export class StorageController {
     async list(query: { keyword?: string, size?: number, skip?: number, after?: string } = {}, options?: RequestOptions): Promise<any[]> {
         const filesRule = await this.rulesController.storage("list", query, BFastConfig.getInstance().credential(this.appName), options);
         return this._handleFileRuleRequest(filesRule, 'list');
+    }
+
+    getUrl(filename: string){
+        const config = getConfig(this.appName);
+        return `${config.databaseURL}/storage/${config.applicationId}/file/${filename}`;
     }
 
     async delete(filename: string, options?: RequestOptions): Promise<string> {
@@ -109,17 +120,17 @@ export class StorageController {
         }
         const token = await this.auth.getToken();
         const formData = new FormData();
-        formData.append('file', file.data, file.filename);
-        // @ts-ignore
-        const encoder = new FormDataEncoder(formData);
+        formData.append('file', file.data, {
+            filename: file.filename
+        });
         Object.assign(headers, {
             'Authorization': `Bearer ${token}`,
-            ...encoder.headers
+            ...formData.getHeaders()
         });
         options.pn = file.pn;
         options.filename = file.filename;
         const response = await this._fileUploadRequest(
-            Readable.from(encoder),
+            formData,
             headers,
             appCredentials.applicationId,
             uploadProgress,

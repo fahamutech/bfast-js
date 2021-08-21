@@ -21,3 +21,30 @@ module.exports.changes = webService.realtime(myConfig).changes;
 for (const fR of Object.keys(webService.storage())) {
     module.exports[fR] = webService.storage()[fR];
 }
+
+module.exports.fp = bfast.functions().onPostHttpRequest(
+    '/fp',
+    (request, response) => {
+        response.send('fp');
+    }
+);
+module.exports.fg = bfast.functions().onGetHttpRequest(
+    '/fg',
+    (request, response) => {
+        response.send('fg');
+    }
+);
+
+module.exports.fd = bfast.functions().onDeleteHttpRequest(
+    '/fd',
+    (request, response) => {
+        response.send('fd');
+    }
+);
+
+module.exports.fput = bfast.functions().onPutHttpRequest(
+    '/fpt',
+    (request, response) => {
+        response.send('fpt');
+    }
+);

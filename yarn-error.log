@@ -63,7 +63,7 @@ npm manifest:
       "@babel/preset-env": "^7.15.0",
       "@babel/preset-typescript": "^7.15.0",
       "@types/node": "^14.14.31",
-      "bfast-database-core": "~1.0.0-beta.4",
+      "bfast-database-core": "~1.0.0-beta.5",
       "bfast-function": "~1.13.0",
       "chai": "^4.3.4",
       "mocha": "~9.0.3",
@@ -2099,10 +2099,10 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/bcryptjs/-/bcryptjs-2.4.3.tgz#9ab5627b93e60621ff7cdac5da9733027df1d0cb"
     integrity sha1-mrVie5PmBiH/fNrF2pczAn3x0Ms=
   
-  bfast-database-core@~1.0.0-beta.4:
-    version "1.0.0-beta.4"
-    resolved "https://registry.yarnpkg.com/bfast-database-core/-/bfast-database-core-1.0.0-beta.4.tgz#04e4711bcae5bf6081c03d9f26f43abdbf78d4bb"
-    integrity sha512-9RYWXUgCXpd4o+TiO7m8HbByNMzEHnAeoLzKKysF+KanNWQHpk6Se404tsIKTY1AF1M71zTupi8vqG3Zoajjzg==
+  bfast-database-core@~1.0.0-beta.5:
+    version "1.0.0-beta.5"
+    resolved "https://registry.yarnpkg.com/bfast-database-core/-/bfast-database-core-1.0.0-beta.5.tgz#936826a039e34eab4e4aeb3aa8d0f08d4afd027e"
+    integrity sha512-jBPwm+WjQc73kE+4EyKBmxHkDS89+Iw1FCkVw8q1NWFEyqaeD+bO8WgvonsAU+mg26VWQrbE8rzpvFfHXa/5DA==
     dependencies:
       base64url "~3.0.1"
       bcryptjs "~2.4.3"
