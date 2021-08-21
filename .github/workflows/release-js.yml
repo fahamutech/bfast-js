@@ -1,11 +1,11 @@
-name: npm-publish
+name: npm-publish-latest
 on:
   push:
     branches:
       - master
 jobs:
   npm-publish:
-    name: npm-publish-web
+    name: npm-publish-latest
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -13,12 +13,19 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@master
         with:
-          node-version: 12.x
+          node-version: 14.x
+      - name: Create mongo Docker container
+        id: build_mongo_docker
+        uses: DigiPie/mongo-action@v1.0.1
+        with:
+          image-version: latest
+          port: 27017
       - name: Publish if version has been updated
         run: |
-          npm install
-          npm run publish:web
-         # npm publish dist/bfast
+          npm install -g yarn
+          yarn test
+          yarn build
+          npm publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

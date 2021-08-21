@@ -47,7 +47,7 @@ export class StorageController {
 
     getUrl(filename: string){
         const config = getConfig(this.appName);
-        return `${config.databaseURL}/storage/${config.applicationId}/file/${filename}`;
+        return `${config.databaseURL(this.appName)}/storage/${config.credential(this.appName).applicationId}/file/${filename}`;
     }
 
     async delete(filename: string, options?: RequestOptions): Promise<string> {

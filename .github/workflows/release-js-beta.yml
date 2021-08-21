@@ -1,11 +1,11 @@
-name: npm-publish-web-beta
+name: npm-publish-beta
 on:
   push:
     branches:
       - beta
 jobs:
   npm-publish:
-    name: npm-publish-web-beta
+    name: npm-publish-beta
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -14,10 +14,18 @@ jobs:
         uses: actions/setup-node@master
         with:
           node-version: 14.x
+      - name: Create mongo Docker container
+        id: build_mongo_docker
+        uses: DigiPie/mongo-action@v1.0.1
+        with:
+          image-version: latest
+          port: 27017
       - name: Publish if version has been updated
         run: |
-          npm install
-          npm run publish:web:beta
+          npm install -g yarn
+          yarn test
+          yarn build
+          npm publish --tag beta
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

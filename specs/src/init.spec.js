@@ -8,7 +8,7 @@ describe('init', function () {
             projectId: 'joshua',
             appPassword: 'joshua'
         });
-        const configs = getConfig('DEFAULT');
+        const configs = getConfig('DEFAULT').credential('DEFAULT');
         should().exist(configs);
         expect(configs).eql({
             applicationId: 'joshua',
@@ -22,7 +22,7 @@ describe('init', function () {
             projectId: 'ethan',
             appPassword: 'ethan'
         },'joshua');
-        const configs = getConfig('joshua');
+        const configs = getConfig('joshua').credential('joshua');
         should().exist(configs);
         expect(configs).eql({
             applicationId: 'ethan',

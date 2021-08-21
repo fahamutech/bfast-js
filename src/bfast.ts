@@ -29,8 +29,8 @@ export function init(options: AppCredentials, appName: string = BFastConfig.DEFA
  * get configuration  of a specific app
  * @param appName
  */
-export function getConfig(appName = BFastConfig.DEFAULT_APP): AppCredentials {
-    return BFastConfig.getInstance().credential(appName);
+export function getConfig(appName = BFastConfig.DEFAULT_APP): BFastConfig {
+    return BFastConfig.getInstance();
 }
 
 /**
