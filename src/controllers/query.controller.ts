@@ -60,6 +60,7 @@ export class QueryController {
     // }
 
     equalTo(field: string, value: any): QueryController {
+
         Object.assign(this.query.filter, {
             [field]: value
         });
@@ -84,9 +85,9 @@ export class QueryController {
     }
 
     greaterThan(field: string, value: any): QueryController {
-        console.log(`return it > ${QueryController.parseFnValue(value)};`)
+
         Object.assign(this.query.filter, {
-            [field]:  {
+            [field]: {
                 $fn: `return it > ${QueryController.parseFnValue(value)};`
             }
         });
@@ -94,6 +95,7 @@ export class QueryController {
     }
 
     greaterThanOrEqual(field: string, value: any): QueryController {
+
         Object.assign(this.query.filter, {
             [field]: {
                 $fn: `return it >= ${QueryController.parseFnValue(value)};`
@@ -103,8 +105,9 @@ export class QueryController {
     }
 
     includesIn(field: string, value: any[]): QueryController {
+
         Object.assign(this.query.filter, {
-            [field]:  {
+            [field]: {
                 $fn: `return ${QueryController.parseFnValue(value)}.includes(it);`
             }
         });
@@ -112,6 +115,7 @@ export class QueryController {
     }
 
     notIncludesIn(field: string, value: any[]): QueryController {
+
         Object.assign(this.query.filter, {
             [field]: {
                 $fn: `return !${QueryController.parseFnValue(value)}.includes(it);`
@@ -121,6 +125,7 @@ export class QueryController {
     }
 
     lessThan(field: string, value: any): QueryController {
+
         Object.assign(this.query.filter, {
             [field]: {
                 $fn: `return it < ${QueryController.parseFnValue(value)};`
@@ -130,44 +135,47 @@ export class QueryController {
     }
 
     lessThanOrEqual(field: string, value: any): QueryController {
+
         Object.assign(this.query.filter, {
             [field]: {
-               $fn: `return it <= ${QueryController.parseFnValue(value)};`
+                $fn: `return it <= ${QueryController.parseFnValue(value)};`
             }
         });
         return this;
     }
 
-    exists(field: string, value = true): QueryController {
+    exists(field: string): QueryController {
+
         Object.assign(this.query.filter, {
             [field]: {
-                $fn: `return !(it.toString() !== 'null' || it.toString() !== 'undefined');`
+                $fn: `return it?true:false;`
             }
         });
         return this;
     }
 
     searchByRegex(field: string, regex: string, flags = 'ig'): QueryController {
+
         Object.assign(this.query.filter, {
             [field]: {
-               $fn: `return it?.toString()?.search(new RegExp(${regex}, ${flags})) >= 0;`
+                $fn: `return it?.toString()?.search(new RegExp(${QueryController.parseFnValue(regex)}, ${QueryController.parseFnValue(flags)})) >= 0;`
             }
         });
         return this;
     }
 
-    fullTextSearch(field: string, text: string, flags = 'ig'): QueryController {
-        Object.assign(this.query.filter, {
-            [field]: {
-                $fn: `return it?.toString()?.match(new RegExp(${text}, ${flags})) !== null;`
-            }
-        });
-        return this;
-    }
+    // fullTextSearch(field: string, text: string, flags = 'ig'): QueryController {
+    //     Object.assign(this.query.filter, {
+    //         [field]: {
+    //             $fn: `return it?.toString()?.match(new RegExp(${text}, ${flags})) !== null;`
+    //         }
+    //     });
+    //     return this;
+    // }
 
-    raw(query: any): QueryController {
-        Object.assign(this.query.filter, query);
-        return this;
+    async raw(query: any, options?: RequestOptions): Promise<any[]> {
+        this.query.filter = query;
+        return this.find(options);
     }
 
     private buildQuery(): QueryModel {
@@ -273,7 +281,7 @@ export class QueryController {
         }
     }
 
-    private static parseFnValue(value: any){
+    private static parseFnValue(value: any) {
         let parsed = ''
         switch (typeof value) {
             case "string":

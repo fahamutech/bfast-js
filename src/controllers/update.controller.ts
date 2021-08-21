@@ -88,6 +88,7 @@ export class UpdateController {
                 token: await this.authController.getToken()
             }
         );
+        // console.log(response.data);
         return extractResultFromServer(response.data, 'update', this.domain);
     }
 }
