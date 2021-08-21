@@ -23,6 +23,7 @@ jobs:
       - name: Publish if version has been updated
         run: |
           npm install -g yarn
+          yarn install
           yarn test
           yarn build
           npm publish --tag beta
