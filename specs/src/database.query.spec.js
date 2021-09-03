@@ -518,6 +518,22 @@ describe('query', function () {
         });
 
         describe('or operation query', function () {
+            before(async function () {
+                await database().table('test')
+                    .save({
+                        id: 'ff',
+                        createdAt: 'leo',
+                        updatedAt: 'leo',
+                        name: 'tt project',
+                        pid: 'tt',
+                        members: [
+                            {email: 'e@e.e'}
+                        ],
+                        users: {
+                            email: 'e@e.e'
+                        }
+                    });
+            });
             it('should return result', async function () {
                 const r = await database().table('test')
                     .query()
@@ -548,6 +564,66 @@ describe('query', function () {
                     ]);
                 should().exist(r);
                 expect(r).eql([]);
+            });
+            it('should return result for complex embedded doc', async function () {
+                const r = await database().table('test')
+                    .query()
+                    .raw({
+                        pid: 'tt',
+                        users: {
+                            email: 'e@e.e'
+                        },
+                        members: {
+                            email: 'e@e.e'
+                        }
+                    });
+                should().exist(r);
+                expect(r).eql([{
+                    id: 'ff',
+                    createdAt: 'leo',
+                    updatedAt: 'leo',
+                    name: 'tt project',
+                    pid: 'tt',
+                    members: [
+                        {email: 'e@e.e'}
+                    ],
+                    users: {
+                        email: 'e@e.e'
+                    },
+                    createdBy: null
+                }]);
+            });
+            it('should return result for complex embedded doc target array field', async function () {
+                const r = await database().table('test')
+                    .query()
+                    .raw([
+                        {
+                            pid: 'ttpp',
+                            users: {
+                                email: 'e@e.e'
+                            }
+                        },
+                        {
+                            members: {
+                                email: 'e@e.e'
+                            }
+                        }
+                    ]);
+                should().exist(r);
+                expect(r).eql([{
+                    id: 'ff',
+                    createdAt: 'leo',
+                    updatedAt: 'leo',
+                    name: 'tt project',
+                    pid: 'tt',
+                    members: [
+                        {email: 'e@e.e'}
+                    ],
+                    users: {
+                        email: 'e@e.e'
+                    },
+                    createdBy: null
+                }]);
             });
         });
     });

@@ -1,6 +1,7 @@
 const {expect, should} = require('chai')
 const {init, database} = require('../../dist/bfast.node');
 const {config, serverUrl} = require("../test.config");
+const {sales} = require('../sales');
 
 describe('save', function () {
     before(function () {
@@ -128,5 +129,10 @@ describe('save', function () {
         } catch (e) {
             should().exist(e);
         }
+    });
+    it('should save large data with many nodes', async function(){
+        const s = await database().table('sales').save(sales);
+        should().exist(s);
+        expect(s).length(sales.length);
     });
 });
