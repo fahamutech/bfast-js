@@ -1,11 +1,11 @@
-name: npm-publish-latest
+name: npm-publish-stable
 on:
   push:
     branches:
       - master
 jobs:
   npm-publish:
-    name: npm-publish-latest
+    name: npm-publish-stable
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -23,6 +23,7 @@ jobs:
       - name: Publish if version has been updated
         run: |
           npm install -g yarn
+          yarn install
           yarn test
           yarn build
           npm publish

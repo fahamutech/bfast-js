@@ -22,7 +22,7 @@ export class SocketController {
             reconnectionDelay: 2000,
             reconnectionDelayMax: 5000,
             randomizationFactor: 0.5,
-            // transports: ['websocket']
+            transports: ['websocket']
         });
         if (onConnect) this.socket.on('connect', onConnect);
         if (onDisconnect) this.socket.on('disconnect', onDisconnect);
