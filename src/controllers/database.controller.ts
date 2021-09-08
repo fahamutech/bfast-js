@@ -1,11 +1,9 @@
 import {QueryController, RequestOptions} from "./query.controller";
 import {BFastConfig} from "../conf";
 import {RulesController} from "./rules.controller";
-import {SocketController} from "./socket.controller";
-import {DatabaseChangesModel} from "../models/DatabaseChangesModel";
 import {HttpClientController} from "./http-client.controller";
 import {AuthController} from "./auth.controller";
-import {AggregateController} from "./aggregate.controller";
+import {extractResultFromServer} from "../utils/data.util";
 
 export class DatabaseController {
 
@@ -34,7 +32,7 @@ export class DatabaseController {
                 token: await this.authController.getToken()
             }
         );
-        return DatabaseController._extractResultFromServer(response.data, 'create', this.domainName);
+        return extractResultFromServer(response.data, 'create', this.domainName);
     }
 
     async getAll<T>(query?: { size?: number, skip?: number, hashes?: string[] }, options?: RequestOptions): Promise<T[]> {
@@ -66,50 +64,11 @@ export class DatabaseController {
             this.appName);
     }
 
-    aggregate(): AggregateController {
-        return new AggregateController(
-            this.domainName,
-            this.httpClientController,
-            this.rulesController,
-            this.authController,
-            this.appName
-        );
-    }
-
-    static _extractResultFromServer(data: any, rule: string, domain: string) {
-        if (data && data[`${rule}${domain}`]) {
-            return data[`${rule}${domain}`];
-        } else {
-            if (data && data.errors && data.errors[`${rule}.${domain}`]) {
-                throw data.errors[`${rule}.${domain}`];
-            } else {
-                throw {message: 'Server general failure', errors: data.errors};
-            }
-        }
-    }
-
     static _getErrorMessage(e: any) {
         if (e.message) {
             return e.message;
         } else {
             return (e && e.response && e.response.data) ? e.response.data : e.toString();
         }
-    }
-}
-
-export class DatabaseChangesController {
-    constructor(private socketController: SocketController) {
-    }
-
-    addListener(handler: (response: { body: DatabaseChangesModel }) => any) {
-        this.socketController.listener(handler);
-    }
-
-    close() {
-        this.socketController.close()
-    }
-
-    open() {
-        this.socketController.open()
     }
 }

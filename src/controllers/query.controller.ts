@@ -1,12 +1,12 @@
-import { BFastConfig } from "../conf";
-import { RulesController } from "./rules.controller";
-import { SocketController } from "./socket.controller";
-import { DatabaseChangesController, DatabaseController } from "./database.controller";
-import { QueryModel } from "../models/QueryModel";
-import { UpdateController } from "./update.controller";
-import { HttpClientController } from "./http-client.controller";
-import { AuthController } from "./auth.controller";
-import { AggregateModel } from "../models/aggregate.model";
+import {BFastConfig} from "../conf";
+import {RulesController} from "./rules.controller";
+import {SocketController} from "./socket.controller";
+import {QueryModel} from "../models/QueryModel";
+import {UpdateController} from "./update.controller";
+import {HttpClientController} from "./http-client.controller";
+import {AuthController} from "./auth.controller";
+import {DatabaseChangesController} from "./database-changes.controller";
+import {extractResultFromServer} from "../utils/data.util";
 
 export enum QueryOrder {
     ASCENDING = 1,
@@ -19,17 +19,16 @@ export class QueryController {
         filter: {},
         return: [],
         skip: 0,
-        // size: 100,
         hashes: [],
-        orderBy: [{ 'createdAt': -1 }],
+        orderBy: [{'createdAt': -1}],
         count: false,
     }
 
     constructor(private readonly domain: string,
-        private readonly httpClientController: HttpClientController,
-        private readonly rulesController: RulesController,
-        private readonly authController: AuthController,
-        private readonly appName: string) {
+                private readonly httpClientController: HttpClientController,
+                private readonly rulesController: RulesController,
+                private readonly authController: AuthController,
+                private readonly appName: string) {
     }
 
     byId(id: string): QueryController {
@@ -52,19 +51,18 @@ export class QueryController {
         return this;
     }
 
-    orderBy(field: string, order: QueryOrder): QueryController {
-        const orderBySet = new Set(this.query.orderBy).add({
-            [field]: order
-        });
-        this.query.orderBy = Array.from(orderBySet);
-        return this;
-    }
+    // orderBy(field: string, order: QueryOrder): QueryController {
+    //     const orderBySet = new Set(this.query.orderBy).add({
+    //         [field]: order
+    //     });
+    //     this.query.orderBy = Array.from(orderBySet);
+    //     return this;
+    // }
 
     equalTo(field: string, value: any): QueryController {
+
         Object.assign(this.query.filter, {
-            [field]: {
-                $eq: value
-            }
+            [field]: value
         });
         return this;
     }
@@ -77,106 +75,107 @@ export class QueryController {
     }
 
     notEqualTo(field: string, value: any): QueryController {
+
         Object.assign(this.query.filter, {
             [field]: {
-                $ne: value
+                $fn: `return it !== ${QueryController.parseFnValue(value)};`
             }
         });
         return this;
     }
 
     greaterThan(field: string, value: any): QueryController {
+
         Object.assign(this.query.filter, {
             [field]: {
-                $gt: value
+                $fn: `return it > ${QueryController.parseFnValue(value)};`
             }
         });
         return this;
     }
 
     greaterThanOrEqual(field: string, value: any): QueryController {
+
         Object.assign(this.query.filter, {
             [field]: {
-                $gte: value
+                $fn: `return it >= ${QueryController.parseFnValue(value)};`
             }
         });
         return this;
     }
 
     includesIn(field: string, value: any[]): QueryController {
+
         Object.assign(this.query.filter, {
             [field]: {
-                $in: value
+                $fn: `return ${QueryController.parseFnValue(value)}.includes(it);`
             }
         });
         return this;
     }
 
     notIncludesIn(field: string, value: any[]): QueryController {
+
         Object.assign(this.query.filter, {
             [field]: {
-                $nin: value
+                $fn: `return !${QueryController.parseFnValue(value)}.includes(it);`
             }
         });
         return this;
     }
 
     lessThan(field: string, value: any): QueryController {
+
         Object.assign(this.query.filter, {
             [field]: {
-                $lt: value
+                $fn: `return it < ${QueryController.parseFnValue(value)};`
             }
         });
         return this;
     }
 
     lessThanOrEqual(field: string, value: any): QueryController {
+
         Object.assign(this.query.filter, {
             [field]: {
-                $lte: value
+                $fn: `return it <= ${QueryController.parseFnValue(value)};`
             }
         });
         return this;
     }
 
-    exists(field: string, value = true): QueryController {
+    exists(field: string): QueryController {
+
         Object.assign(this.query.filter, {
             [field]: {
-                $exists: value
+                $fn: `return it?true:false;`
             }
         });
         return this;
     }
 
-    searchByRegex(field: string, regex: string): QueryController {
+    searchByRegex(field: string, regex: string, flags = 'ig'): QueryController {
+
         Object.assign(this.query.filter, {
             [field]: {
-                $regex: regex
+                $fn: `return it?.toString()?.search(new RegExp(${QueryController.parseFnValue(regex)}, ${QueryController.parseFnValue(flags)})) >= 0;`
             }
         });
         return this;
     }
 
-    fullTextSearch(field: string, text: {
-        search: string,
-        language?: string,
-        caseSensitive?: boolean,
-        diacriticSensitive?: boolean
-    }): QueryController {
-        Object.assign(this.query.filter, {
-            $text: {
-                $search: text.search,
-                $language: text.language,
-                $caseSensitive: text.caseSensitive,
-                $diacriticSensitive: text.diacriticSensitive
-            }
-        });
-        return this;
-    }
+    // fullTextSearch(field: string, text: string, flags = 'ig'): QueryController {
+    //     Object.assign(this.query.filter, {
+    //         [field]: {
+    //             $fn: `return it?.toString()?.match(new RegExp(${text}, ${flags})) !== null;`
+    //         }
+    //     });
+    //     return this;
+    // }
 
-    raw(query: any): QueryController {
-        Object.assign(this.query.filter, query);
-        return this;
+    async raw(query: any, options?: RequestOptions): Promise<any[]> {
+        this.query.filter = query;
+        return this.find(options);
     }
 
     private buildQuery(): QueryModel {
@@ -200,7 +199,7 @@ export class QueryController {
                 type: 'daas',
                 token: await this.authController.getToken()
             });
-        return DatabaseController._extractResultFromServer(response.data, 'delete', this.domain);
+        return extractResultFromServer(response.data, 'delete', this.domain);
     }
 
     updateBuilder(): UpdateController {
@@ -217,7 +216,7 @@ export class QueryController {
     changes(
         onConnect?: () => void,
         onDisconnect?: () => void,
-        options: RequestOptions = { useMasterKey: false }
+        options: RequestOptions = {useMasterKey: false}
     ): DatabaseChangesController {
         const applicationId = BFastConfig.getInstance().credential(this.appName).applicationId;
         const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
@@ -241,31 +240,11 @@ export class QueryController {
                     masterKey: options.useMasterKey === true ? masterKey : null
                 },
                 body: {
-                    domain: this.domain, pipeline: match ? [{ $match: match }] : []
+                    domain: this.domain, pipeline: []
                 }
             });
         }, onDisconnect);
         return new DatabaseChangesController(socketController);
-    }
-
-    /**
-     * 
-     * @param pipeline 
-     * @param options 
-     * @returns 
-     * @deprecated use bfast.database().table().aggregate()
-     */
-    async aggregate<V = any>(
-        pipeline: any[] | AggregateModel,
-        options?: RequestOptions
-    ): Promise<V> {
-        const aggregateRule = await this.rulesController.aggregateRule(
-            this.domain,
-            pipeline,
-            BFastConfig.getInstance().credential(this.appName),
-            options
-        );
-        return this.aggregateRuleRequest(aggregateRule);
     }
 
     async find<T>(options?: RequestOptions): Promise<T> {
@@ -284,13 +263,14 @@ export class QueryController {
                 rule: `query${this.domain}`,
                 type: 'daas',
                 token: await this.authController.getToken()
-            });
+            }
+        );
         const data = response.data;
         if (data && data[`query${this.domain}`] !== undefined) {
             return data[`query${this.domain}`];
         } else {
             const errors = data.errors;
-            let queryError: any = { message: "Query not succeed" };
+            let queryError: any = {message: "Query not succeed"};
             Object.keys(errors && typeof errors === "object" ? errors : {}).forEach(value => {
                 if (value.includes('query')) {
                     queryError = errors[value];
@@ -301,32 +281,22 @@ export class QueryController {
         }
     }
 
-    async aggregateRuleRequest(pipelineRule: any): Promise<any> {
-        const response = await this.httpClientController.post(
-            BFastConfig.getInstance().databaseURL(this.appName),
-            pipelineRule,
-            {},
-            {
-                context: this.domain,
-                rule: `aggregate${this.domain}`,
-                type: 'daas',
-                token: await this.authController.getToken()
-            }
-        );
-        const data = response.data;
-        if (data && data[`aggregate${this.domain}`]) {
-            return data[`aggregate${this.domain}`];
-        } else {
-            const errors = data.errors;
-            let aggregateError: any = { message: "Aggregation not succeed" };
-            Object.keys(errors).forEach(value => {
-                if (value.includes('aggregate')) {
-                    aggregateError = errors[value];
-                }
-            });
-            aggregateError['errors'] = errors;
-            throw aggregateError;
+    private static parseFnValue(value: any) {
+        let parsed = ''
+        switch (typeof value) {
+            case "string":
+                parsed = `'${value}'`;
+                break;
+            case "number":
+                parsed = `${value}`;
+                break;
+            case "object":
+                parsed = `JSON.parse('${JSON.stringify(value)}')`
+                break;
+            default:
+                return parsed;
         }
+        return parsed;
     }
 
 }

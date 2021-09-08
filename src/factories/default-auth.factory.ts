@@ -31,7 +31,6 @@ export class DefaultAuthFactory implements AuthAdapter {
             authRule,
             {
                 headers: {
-                    'x-bfast-application-id': BFastConfig.getInstance().credential(appName).applicationId
                 }
             },
             {
@@ -45,7 +44,7 @@ export class DefaultAuthFactory implements AuthAdapter {
         if (data && data.auth && data.auth.signIn) {
             return data.auth.signIn;
         } else {
-            throw { message: data.errors && data.errors['auth.sigIn'] ? data.errors['auth.sigIn'].message : 'Username/Password is not valid' };
+            throw { message: data.errors && data.errors['auth.signIn'] ? data.errors['auth.signIn'].message : 'Username/Password is not valid' };
         }
     }
 

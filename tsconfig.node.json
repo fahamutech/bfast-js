@@ -1,16 +1,13 @@
 {
+  "include": [
+    "./src/**.ts"
+  ],
   "compilerOptions": {
-    "outDir": "node/dist/",
+    "outDir": "dist/lib",
     "noImplicitAny": true,
-    "module": "CommonJS",
+    "module": "ES2020",
     "target": "es2015",
-    "lib": [
-      "es2017",
-      "es7",
-      "es6",
-      "dom"
-    ],
-    "jsx": "react",
+    "lib": ["es2017", "es7", "es6", "dom"],
     "allowJs": false,
     "declaration": true,
     "strict": true,
@@ -21,8 +18,6 @@
     "dist",
     "node",
     "web",
-    "specs",
-    "node",
-    ".github"
+    "specs"
   ]
 }

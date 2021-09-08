@@ -5,10 +5,12 @@ node
 tsconfig.json
 tsconfig.mjs.json
 tsconfig.json
-tsconfig-node.json
+tsconfig.node.json
+babel.config.json
+.mocharc.js
 webpack.config.js
 webpack.mjs.config.js
-webpack-node.config.js
+webpack.node.config.js
 package-lock.json
 node_modules
 .idea
@@ -21,3 +23,7 @@ gulpfile.js
 node
 /dist/node
 /src
+webpack.node.config.js
+node_modules
+# package.json
+yarn-error.log

@@ -95,24 +95,24 @@ export class RulesController {
         return this.addToken(updateRule);
     }
 
-    async aggregateRule(
-        domain: string,
-        pipeline: any[] | AggregateModel,
-        appCredentials: AppCredentials,
-        options?: RequestOptions
-    ): Promise<Object> {
-        const aggregateRule = {};
-        if (options && options?.useMasterKey === true) {
-            Object.assign(aggregateRule, {
-                'masterKey': appCredentials.appPassword
-            });
-        }
-        Object.assign(aggregateRule, {
-            applicationId: appCredentials.applicationId,
-            [`aggregate${domain}`]: pipeline
-        });
-        return this.addToken(aggregateRule);
-    }
+    // async aggregateRule(
+    //     domain: string,
+    //     pipeline: any[] | AggregateModel,
+    //     appCredentials: AppCredentials,
+    //     options?: RequestOptions
+    // ): Promise<Object> {
+    //     const aggregateRule = {};
+    //     if (options && options?.useMasterKey === true) {
+    //         Object.assign(aggregateRule, {
+    //             'masterKey': appCredentials.appPassword
+    //         });
+    //     }
+    //     Object.assign(aggregateRule, {
+    //         applicationId: appCredentials.applicationId,
+    //         [`aggregate${domain}`]: pipeline
+    //     });
+    //     return this.addToken(aggregateRule);
+    // }
 
     async queryRule(domain: string, queryModel: QueryModel, appCredentials: AppCredentials, options?: RequestOptions): Promise<Object> {
         const queryRule = {};
@@ -129,7 +129,7 @@ export class RulesController {
         return this.addToken(queryRule);
     }
 
-    async transaction(transactions: TransactionModel[], appCredentials: AppCredentials, options?: RequestOptions): Promise<Object> {
+    async bulk(transactions: TransactionModel[], appCredentials: AppCredentials, options?: RequestOptions): Promise<Object> {
         const transactionRule = {
             transaction: {
                 commit: {}

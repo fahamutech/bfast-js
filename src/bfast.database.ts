@@ -2,7 +2,7 @@ import {DatabaseController} from "./controllers/database.controller";
 import {HttpClientController} from "./controllers/http-client.controller";
 import {AuthController} from "./controllers/auth.controller";
 import {RulesController} from "./controllers/rules.controller";
-import {TransactionController} from "./controllers/transaction.controller";
+import {BulkController} from "./controllers/bulk.controller";
 
 export class BfastDatabase {
 
@@ -44,11 +44,11 @@ export class BfastDatabase {
     }
 
     /**
-     * perform transaction to remote database
-     * @return {TransactionController}
+     * perform bulk to remote database
+     * @return {BulkController}
      */
-    transaction(): TransactionController {
-        return new TransactionController(
+    bulk(): BulkController {
+        return new BulkController(
             this.appName, 
             this.httpClientController, 
             this.rulesController,

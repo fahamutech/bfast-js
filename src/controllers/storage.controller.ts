@@ -1,30 +1,35 @@
-import { AppCredentials, BFastConfig } from "../conf";
+import {AppCredentials, BFastConfig} from "../conf";
+import {RulesController} from "./rules.controller";
+import {AuthController} from "./auth.controller";
+import {FileOptions, RequestOptions} from "./query.controller";
+import {FileModel} from "../models/file.model";
+import {Readable} from 'stream';
+import {HttpClientController} from "./http-client.controller";
+import {isNode} from "../utils/platform.util";
 // @ts-ignore
-import * as device from "browser-or-node";
-// @ts-ignore
-import FormDataNode from 'form-data';
-import { RulesController } from "./rules.controller";
-import { AuthController } from "./auth.controller";
-import { FileOptions, RequestOptions } from "./query.controller";
-import { FileModel } from "../models/file.model";
-import { Readable } from 'stream';
-import { HttpClientController } from "./http-client.controller";
+import * as FormData from 'form-data'
+import {getConfig} from "../bfast";
 
 export class StorageController {
 
     constructor(private readonly httpClientController: HttpClientController,
-        private readonly auth: AuthController,
-        private readonly rulesController: RulesController,
-        private readonly authController: AuthController,
-        private readonly appName = BFastConfig.DEFAULT_APP) {
+                private readonly auth: AuthController,
+                private readonly rulesController: RulesController,
+                private readonly authController: AuthController,
+                private readonly appName = BFastConfig.DEFAULT_APP) {
     }
 
     async save(file: FileModel, uploadProgress: (progress: any) => void, options?: FileOptions): Promise<string> {
-        if (device.isNode) {
-            if (file && file.filename && file.data && file.data instanceof Readable) {
-                return this._handleFileUploadInNode(file, uploadProgress, BFastConfig.getInstance().credential(this.appName), options);
-            } else {
-                throw new Error('file object to save is invalid, data and filename is required field');
+        if (isNode) {
+            try{
+                if (file && file.filename && file.data && file.data instanceof Readable) {
+                    return this._handleFileUploadInNode(file, uploadProgress, BFastConfig.getInstance().credential(this.appName), options);
+                } else {
+                    throw new Error('file object to save is invalid, data and filename is required field');
+                }
+            }catch (e){
+                console.log(e);
+                throw e;
             }
         } else {
             if (file && file.data && file.data instanceof File && file.filename) {
@@ -40,8 +45,13 @@ export class StorageController {
         return this._handleFileRuleRequest(filesRule, 'list');
     }
 
+    getUrl(filename: string){
+        const config = getConfig(this.appName);
+        return `${config.databaseURL(this.appName)}/storage/${config.credential(this.appName).applicationId}/file/${filename}`;
+    }
+
     async delete(filename: string, options?: RequestOptions): Promise<string> {
-        const filesRule = await this.rulesController.storage("delete", { filename }, BFastConfig.getInstance().credential(this.appName), options);
+        const filesRule = await this.rulesController.storage("delete", {filename}, BFastConfig.getInstance().credential(this.appName), options);
         return this._handleFileRuleRequest(filesRule, 'delete');
     }
 
@@ -101,7 +111,7 @@ export class StorageController {
     }
 
     private async _handleFileUploadInNode(file: FileModel, uploadProgress: (progress: any) => void,
-        appCredentials: AppCredentials, options: FileOptions = {}): Promise<string> {
+                                          appCredentials: AppCredentials, options: FileOptions = {}): Promise<string> {
         const headers = {}
         if (options && options?.useMasterKey === true) {
             Object.assign(headers, {
@@ -109,8 +119,10 @@ export class StorageController {
             });
         }
         const token = await this.auth.getToken();
-        const formData = new FormDataNode();
-        formData.append('file', file.data, file.filename);
+        const formData = new FormData();
+        formData.append('file', file.data, {
+            filename: file.filename
+        });
         Object.assign(headers, {
             'Authorization': `Bearer ${token}`,
             ...formData.getHeaders()
@@ -118,13 +130,18 @@ export class StorageController {
         options.pn = file.pn;
         options.filename = file.filename;
         const response = await this._fileUploadRequest(
-            formData, headers, appCredentials.applicationId, uploadProgress, options)
+            formData,
+            headers,
+            appCredentials.applicationId,
+            uploadProgress,
+            options
+        );
         let databaseUrl = BFastConfig.getInstance().databaseURL(this.appName);
         return databaseUrl + response.data.urls[0];
     }
 
     private async _handleFileUploadInWeb(file: FileModel, uploadProgress: (progress: any) => void,
-        appCredentials: AppCredentials, options: FileOptions = {}): Promise<string> {
+                                         appCredentials: AppCredentials, options: FileOptions = {}): Promise<string> {
         const headers = {}
         if (options && options?.useMasterKey === true) {
             Object.assign(headers, {

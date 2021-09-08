@@ -1,8 +1,8 @@
 import {HttpClientAdapter, RestRequestConfig, RestResponse} from "../adapters/http-client.adapter";
+import { HttpRequestInfoModel } from "../models/http-request-info.model";
 
 // @ts-ignore
 import axios from "axios";
-import { HttpRequestInfoModel } from "../models/http-request-info.model";
 
 export class DefaultHttpClientFactory implements HttpClientAdapter {
 

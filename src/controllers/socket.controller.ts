@@ -1,15 +1,16 @@
+// import {Socket, Manager} from 'socket.io-client';
+import {BFastConfig} from "../conf";
 
 //@ts-ignore
-import io from 'socket.io-client';
-import {BFastConfig} from "../conf";
+import {io} from 'socket.io-client';
 
 export class SocketController {
     public readonly socket: any;
 
     constructor(private readonly eventName: string,
-         appName = BFastConfig.DEFAULT_APP, 
-         onConnect?: Function,
-         onDisconnect?: Function) {
+                appName = BFastConfig.DEFAULT_APP,
+                onConnect?: Function,
+                onDisconnect?: Function) {
         const namespace = String(eventName)[0] === '/' ? eventName : '/' + eventName;
         const url = namespace === '/v2/__changes__'
             ? BFastConfig.getInstance().databaseURL(appName, namespace)
