@@ -23,6 +23,10 @@ jobs:
       - name: Publish if version has been updated
         run: |
           npm install -g yarn
+          npm install -g ipfs
+          jsipfs init
+          jsipfs config --json Addresses.API '["/ip4/127.0.0.1/tcp/5001"]'
+          jsipfs daemon &
           yarn install
           yarn test
           yarn build
