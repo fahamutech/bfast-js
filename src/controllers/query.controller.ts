@@ -20,6 +20,7 @@ export class QueryController {
         return: [],
         skip: 0,
         hashes: [],
+        cids: false,
         orderBy: [{'createdAt': -1}],
         count: false,
     }
@@ -29,6 +30,11 @@ export class QueryController {
                 private readonly rulesController: RulesController,
                 private readonly authController: AuthController,
                 private readonly appName: string) {
+    }
+
+    cids(value: boolean) {
+        this.query.cids = value;
+        return this;
     }
 
     byId(id: string): QueryController {
@@ -50,14 +56,6 @@ export class QueryController {
         this.query.skip = skip;
         return this;
     }
-
-    // orderBy(field: string, order: QueryOrder): QueryController {
-    //     const orderBySet = new Set(this.query.orderBy).add({
-    //         [field]: order
-    //     });
-    //     this.query.orderBy = Array.from(orderBySet);
-    //     return this;
-    // }
 
     equalTo(field: string, value: any): QueryController {
 

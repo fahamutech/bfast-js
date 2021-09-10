@@ -268,13 +268,13 @@ describe('query', function () {
                     .updateBuilder()
                     .upsert(true)
                     .decrement('qty', 10)
-                    .set('id','josh')
+                    .set('id','joshxido')
                     .set('updatedAt','leo')
                     .update();
                 should().exist(r);
                 expect(r).eql({
                     qty: -10,
-                    id: 'josh',
+                    id: 'joshxido',
                     updatedAt: 'leo'
                 });
             });

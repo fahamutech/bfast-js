@@ -24,6 +24,13 @@ export class UpdateController {
 
 
     set(field: string, value: any): UpdateController {
+        if (field === 'id' || field === '_id') {
+            if (!this.queryModel.filter) {
+                this.queryModel.filter = {};
+            }
+            this.queryModel.filter.id = value;
+            return this;
+        }
         Object.assign(this.updateModel.$set, {
             [field]: value
         });
@@ -57,7 +64,6 @@ export class UpdateController {
 
     async update(options?: RequestOptions): Promise<any> {
         const credential = BFastConfig.getInstance().credential(this.appName);
-        // delete this.updateModel.upsert;
         Object.keys(this.updateModel).forEach(key => {
             try {
                 // @ts-ignore
@@ -88,7 +94,6 @@ export class UpdateController {
                 token: await this.authController.getToken()
             }
         );
-        // console.log(response.data);
         return extractResultFromServer(response.data, 'update', this.domain);
     }
 }

@@ -35,12 +35,13 @@ export class DatabaseController {
         return extractResultFromServer(response.data, 'create', this.domainName);
     }
 
-    async getAll<T>(query?: { size?: number, skip?: number, hashes?: string[] }, options?: RequestOptions): Promise<T[]> {
+    async getAll<T>(query?: { size?: number, skip?: number, hashes?: string[], cids?: boolean }, options?: RequestOptions): Promise<T[]> {
         try {
             const totalCount = query && query.size ? query.size : await this.query().count(true).find(options);
             return await this.query()
                 .skip(query && query.skip ? query.skip : 0)
                 .size(totalCount as number)
+                .cids(query && query.cids ? query.cids : false)
                 .hashes(query && query.hashes ? query.hashes : [])
                 .find(options);
         } catch (e) {

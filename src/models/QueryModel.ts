@@ -3,6 +3,7 @@ export interface QueryModel {
     size?: number;
     orderBy?: Array<object>;
     filter?: any;
+    cids?: boolean;
     return?: Array<string>;
     count?: boolean,
     last?: number,

@@ -1,8 +1,14 @@
 const {expect, should} = require('chai')
 const {init, database} = require('../../dist/bfast.node');
 const {config, serverUrl, mongoRepSet} = require("../test.config");
+const Hash = require('ipfs-only-hash');
+const {Buffer} = require("buffer");
 
 describe('query', function () {
+    const datas = [
+        {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+        {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+    ];
     before(async function () {
         await mongoRepSet().start();
         init({
@@ -11,10 +17,7 @@ describe('query', function () {
             databaseURL: serverUrl,
             functionsURL: serverUrl,
         });
-        await database().table('test').save([
-            {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo'},
-            {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo'},
-        ]);
+        await database().table('test').save(datas);
     });
     describe('find', function () {
         describe('getAll', function () {
@@ -626,5 +629,35 @@ describe('query', function () {
                 }]);
             });
         });
+
+        describe('cids', async function () {
+            let cids = [];
+            before(async function () {
+                let _datas = JSON.parse(JSON.stringify(datas));
+                _datas = _datas.map(async x => {
+                    x._id = x.id;
+                    delete x.id;
+                    delete x.return;
+                    return await Hash.of(JSON.stringify(x));
+                });
+                cids = await Promise.all(_datas);
+            })
+            it('should return all cids when told so in getAll', async function () {
+                const r = await database().table('test').getAll({
+                    cids: true
+                });
+                should().exist(r);
+                expect(r).to.include.members(cids);
+            });
+            it('should return all cids when told so in query mode', async function () {
+                const r = await database().table('test')
+                    .query()
+                    .cids(true)
+                    .find();
+                should().exist(r);
+                expect(r).to.include.members(cids);
+            });
+        });
+
     });
 });
