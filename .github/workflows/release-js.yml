@@ -6,7 +6,7 @@ on:
 jobs:
   npm-publish:
     name: npm-publish-stable
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@master
