@@ -9,54 +9,10 @@
 <body>
     <script src="../dist/bfast.browser.js"></script>
     <script>
-        class CA{
-            get(identifier, database, collection){
-                console.log(identifier);
-                console.log(database);
-                console.log(collection);
-                return {token: 'abc'}
-            }
-        }
-        class HA{
-            constructor(c){
-                // console.log(c, '******config*******');
-            }
-            async post(url,data,config,info){
-                console.log(url);
-                console.log(data);
-                console.log(config);
-                console.log(info)
-            //    const r1 = await bfast.functions().request(url).post(data, config);
-                const r1 = await fetch(url,{
-                    method: 'POST',
-                    body: JSON.stringify(data),
-                    headers: {
-                        'content-type': 'application/json',
-                        'x-bfast-token': config?.headers['x-bfast-token']
-                    }
-                }).then(r=>r.json());
-                console.log(r1);
-                return {data: r1};
-            }
-        }
-       
         bfast.init({
             applicationId: 'dworkder',
             projectId: 'dworkder',
-            adapters: {
-                http: (_c) => new HA(_c),
-                // cache: (_)=> new CA()
-            }
         });
-        bfast.init({
-            applicationId: 'aas',
-            projectId: 'aas',
-            adapters: {
-               http:  'DEFAULT',
-            //    auth: 'DEFAULT',
-               cache: 'DEFAULT'
-            }
-        }, 't');
     </script>
 </body>
 
