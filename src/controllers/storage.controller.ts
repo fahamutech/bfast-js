@@ -7,7 +7,7 @@ import {Readable} from 'stream';
 import {HttpClientController} from "./http-client.controller";
 import {isNode} from "../utils/platform.util";
 // @ts-ignore
-import * as FormData from 'form-data'
+import FormData from 'form-data'
 import {getConfig} from "../bfast";
 
 export class StorageController {
