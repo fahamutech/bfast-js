@@ -32,6 +32,32 @@ export class QueryController {
                 private readonly appName: string) {
     }
 
+    orderBy(field: string, value: 'asc' | 'desc' = 'asc', options?: RequestOptions) {
+        if (this?.query?.filter[field]?.$fn) {
+            Object.assign(this.query.filter[field], {
+                $orderBy: value
+            });
+        } else {
+            Object.assign(this.query.filter, {
+                [field]: {
+                    $fn: 'return true',
+                    $orderBy: value
+                }
+            });
+        }
+        if (typeof options?.limit === "number"){
+            Object.assign(this.query.filter[field], {
+                $limit: options.limit
+            });
+        }
+        if (typeof options?.skip === "number"){
+            Object.assign(this.query.filter[field], {
+                $skip: options.skip
+            });
+        }
+        return this.find(options);
+    }
+
     cids(value: boolean) {
         this.query.cids = value;
         return this;
@@ -58,7 +84,6 @@ export class QueryController {
     }
 
     equalTo(field: string, value: any): QueryController {
-
         Object.assign(this.query.filter, {
             [field]: value
         });
@@ -302,6 +327,9 @@ export class QueryController {
 export interface RequestOptions extends CacheOptions {
     useMasterKey?: boolean,
     returnFields?: string[],
+    // this is useful when perform orderBy operation
+    skip?: number,
+    limit?: number
 }
 
 export interface FileOptions extends RequestOptions {
