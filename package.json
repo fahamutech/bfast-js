@@ -1,6 +1,6 @@
 {
   "name": "bfast",
-  "version": "5.0.5",
+  "version": "5.1.0",
   "description": "javascript client sdk for bfast::cloud project",
   "repository": "https://github.com/fahamutech/bfast-js",
   "main": "dist/bfast.node.js",
@@ -33,15 +33,15 @@
   },
   "devDependencies": {
     "@types/node": "^14.14.31",
-    "bfast-database-core": "~1.0.1",
+    "bfast-database-core": "~1.2.0",
     "bfast-function": "~1.13.5",
     "chai": "^4.3.4",
     "ipfs-only-hash": "^4.0.0",
     "mocha": "~9.0.3",
-    "mongodb": "~4.1.0",
+    "mongodb": "~4.1.2",
     "ts-loader": "~9.2.5",
-    "typescript": "~4.3.5",
-    "webpack": "~5.50.0",
+    "typescript": "~4.4.3",
+    "webpack": "~5.53.0",
     "webpack-cli": "~4.8.0"
   }
 }

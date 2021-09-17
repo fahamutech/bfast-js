@@ -2,12 +2,11 @@ const {expect, should} = require('chai')
 const {init, database} = require('../../dist/bfast.node');
 const {config, serverUrl, mongoRepSet} = require("../test.config");
 const Hash = require('ipfs-only-hash');
-const {Buffer} = require("buffer");
 
 describe('query', function () {
     const datas = [
-        {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
         {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+        {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
     ];
     before(async function () {
         await mongoRepSet().start();
@@ -176,8 +175,8 @@ describe('query', function () {
                     .find();
                 should().exist(r);
                 expect(r).eql([
-                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                     {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                 ]);
             });
             it('should return no doc when query on non exist field', async function () {
@@ -207,8 +206,8 @@ describe('query', function () {
                     .find();
                 should().exist(r);
                 expect(r).eql([
-                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                     {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                 ]);
             });
             it('should return empty result for non match', async function () {
@@ -239,8 +238,8 @@ describe('query', function () {
                     .find();
                 should().exist(r);
                 expect(r).eql([
-                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                     {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                 ]);
             });
             it('should return empty result for non match', async function () {
@@ -271,8 +270,8 @@ describe('query', function () {
                     .find();
                 should().exist(r);
                 expect(r).eql([
-                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                     {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                 ]);
             });
             it('should return empty result for non match', async function () {
@@ -303,8 +302,8 @@ describe('query', function () {
                     .find();
                 should().exist(r);
                 expect(r).eql([
-                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                     {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                 ]);
             });
             it('should return empty result for non match', async function () {
@@ -325,8 +324,8 @@ describe('query', function () {
                     .find();
                 should().exist(r);
                 expect(r).eql([
-                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                     {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                 ]);
             });
             it('should return result for string', async function () {
@@ -357,8 +356,8 @@ describe('query', function () {
                     .find();
                 should().exist(r);
                 expect(r).eql([
-                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                     {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                 ]);
             });
             it('should return result for string', async function () {
@@ -389,8 +388,8 @@ describe('query', function () {
                     .find();
                 should().exist(r);
                 expect(r).eql([
-                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                     {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                 ]);
             });
             it('should return result for string', async function () {
@@ -400,8 +399,8 @@ describe('query', function () {
                     .find();
                 should().exist(r);
                 expect(r).eql([
-                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                     {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                 ]);
             });
             it('should return empty result for non match', async function () {
@@ -422,8 +421,8 @@ describe('query', function () {
                     .find();
                 should().exist(r);
                 expect(r).eql([
-                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                     {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                 ]);
             });
             it('should return result for string', async function () {
@@ -656,6 +655,73 @@ describe('query', function () {
                     .find();
                 should().exist(r);
                 expect(r).to.include.members(cids);
+            });
+        });
+
+        describe('orderBy', async function () {
+            it('should order result asc on specified field', async function () {
+                const r = await database().table('test')
+                    .query()
+                    .lessThan('price', 4000)
+                    .orderBy('price', 'asc');
+                should().exist(r);
+                expect(r).eql([
+                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                    {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                ]);
+            });
+            it('should order result desc on specified field', async function () {
+                const r = await database().table('test')
+                    .query()
+                    .lessThan('price', 4000)
+                    .orderBy('price', 'desc');
+                should().exist(r);
+                expect(r).eql([
+                    {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                ]);
+            });
+            it('should order result asc when specify orderBy only', async function () {
+                const r = await database().table('test')
+                    .query()
+                    .orderBy('price', 'asc');
+                should().exist(r);
+                expect(r).eql([
+                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                    {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                ]);
+            });
+            it('should order result desc when specify orderBy only', async function () {
+                const r = await database().table('test')
+                    .query()
+                    .orderBy('price', 'desc');
+                should().exist(r);
+                expect(r).eql([
+                    {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                ]);
+            });
+            it('should order result desc when specify orderBy only and obey limit', async function () {
+                const r = await database().table('test')
+                    .query()
+                    .orderBy('price', 'desc', {
+                        limit: 1
+                    });
+                should().exist(r);
+                expect(r).eql([
+                    {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                ]);
+            });
+            it('should order result desc when specify orderBy only and obey skip', async function () {
+                const r = await database().table('test')
+                    .query()
+                    .orderBy('price', 'desc', {
+                        skip: 1
+                    });
+                should().exist(r);
+                expect(r).eql([
+                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                ]);
             });
         });
 
