@@ -723,6 +723,32 @@ describe('query', function () {
                     {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
                 ]);
             });
+            it('should order result desc on specified field with skip and limit', async function () {
+                const r = await database().table('test')
+                    .query()
+                    .orderBy('price', 'desc', {
+                        skip: 1,
+                        limit: 1
+                    });
+                should().exist(r);
+                expect(r).eql([
+                    // {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                    {item: 'xps', price: 1000, id: 'xpsid', createdAt: 'leo', updatedAt: 'leo', createdBy: null},
+                ]);
+            });
+            it('should order result desc when specify orderBy only and obey skip and return cids only', async function () {
+                const r = await database().table('test')
+                    .query()
+                    .cids(true)
+                    .orderBy('price', 'desc', {
+                        skip: 1,
+                        limit: 1
+                    });
+                should().exist(r);
+                expect(r).eql([
+                    'Qmf8SWv4TEwEqyut4AScGhFvctUJG9jRBAE1Wa6knbSGGv'
+                ]);
+            });
         });
 
     });

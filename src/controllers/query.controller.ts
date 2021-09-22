@@ -9,8 +9,8 @@ import {DatabaseChangesController} from "./database-changes.controller";
 import {extractResultFromServer} from "../utils/data.util";
 
 export enum QueryOrder {
-    ASCENDING = 1,
-    DESCENDING = -1
+    ASCENDING = 'asc',
+    DESCENDING = 'desc'
 }
 
 export class QueryController {
