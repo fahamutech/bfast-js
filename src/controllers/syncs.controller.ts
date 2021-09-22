@@ -19,7 +19,7 @@ export class SyncsController {
         const snapS: SnapshotModel = {
             _id: this.name,
             docs: datas.reduce((a, b) => {
-                if (!!b.id) {
+                if (!b.hasOwnProperty('id')) {
                     throw {message: 'all datas must contain id field', reason: JSON.stringify(b)};
                 }
                 a[b.id] = b;
