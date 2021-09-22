@@ -14,7 +14,10 @@ export class DatabaseController {
                 private readonly appName: string) {
     }
 
-    async save<T>(model: T | T[], options?: RequestOptions): Promise<T> {
+    async save<T>(
+        model: T | T[],
+        options?: RequestOptions
+    ): Promise<T> {
         const credential = BFastConfig.getInstance().credential(this.appName);
         const createRule = await this.rulesController.createRule(this.domainName, model, credential, options);
         const response = await this.httpClientController.post(
@@ -35,7 +38,10 @@ export class DatabaseController {
         return extractResultFromServer(response.data, 'create', this.domainName);
     }
 
-    async getAll<T>(query?: { size?: number, skip?: number, hashes?: string[], cids?: boolean }, options?: RequestOptions): Promise<T[]> {
+    async getAll<T>(
+        query?: { size?: number, skip?: number, hashes?: string[], cids?: boolean },
+        options?: RequestOptions
+    ): Promise<T[]> {
         try {
             const totalCount = query && query.size ? query.size : await this.query().count(true).find(options);
             return await this.query()
@@ -49,10 +55,15 @@ export class DatabaseController {
         }
     }
 
-    async get<T>(id: string, hash?: string, options?: RequestOptions): Promise<T> {
+    async get<T>(
+        id: string,
+        cids = false,
+        options?: RequestOptions
+    ): Promise<T> {
         return this.query()
             .byId(id)
-            .hashes([hash ? hash : ''])
+            .hashes([])
+            .cids(cids)
             .find<T>(options);
     }
 

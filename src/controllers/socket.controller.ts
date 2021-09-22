@@ -12,7 +12,7 @@ export class SocketController {
                 onConnect?: Function,
                 onDisconnect?: Function) {
         const namespace = String(eventName)[0] === '/' ? eventName : '/' + eventName;
-        const url = namespace === '/v2/__changes__'
+        const url = namespace.trim().startsWith('/v2/__')
             ? BFastConfig.getInstance().databaseURL(appName, namespace)
             : BFastConfig.getInstance().functionsURL(namespace, appName);
         this.socket = io(url, {

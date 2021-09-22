@@ -8,6 +8,8 @@ const bfastFs = new BfastFunctions({
     }
 });
 
+global.WebSocket = require('ws');
+
 exports.mochaHooks = {
     async beforeAll() {
         process.env.APPLICATION_ID = config.applicationId;

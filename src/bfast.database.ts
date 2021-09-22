@@ -3,6 +3,7 @@ import {HttpClientController} from "./controllers/http-client.controller";
 import {AuthController} from "./controllers/auth.controller";
 import {RulesController} from "./controllers/rules.controller";
 import {BulkController} from "./controllers/bulk.controller";
+import {SyncsController} from "./controllers/syncs.controller";
 
 export class BfastDatabase {
 
@@ -12,11 +13,6 @@ export class BfastDatabase {
         private readonly authController: AuthController) {
     }
 
-    /**
-     * a domain/table/collection to deal with
-     * @param domainName {string} domain name
-     * @return {DatabaseController}
-     */
     domain<T>(domainName: string): DatabaseController {
         return new DatabaseController(
             domainName,
@@ -27,26 +23,26 @@ export class BfastDatabase {
         );
     }
 
-    /**
-     * same as #domain
-     * @return {DatabaseController}
-     */
     collection<T>(collectionName: string): DatabaseController {
         return this.domain<T>(collectionName);
     }
 
-    /**
-     * same as #domain
-     * @return {DatabaseController}
-     */
     table<T>(tableName: string): DatabaseController {
         return this.domain<T>(tableName);
     }
 
-    /**
-     * perform bulk to remote database
-     * @return {BulkController}
-     */
+    tree(name: string): DatabaseController{
+        return this.domain(name);
+    }
+
+    syncs(name: string): SyncsController {
+        return new SyncsController(
+            name,
+            this.domain('syncs'),
+            this.appName
+        );
+    }
+
     bulk(): BulkController {
         return new BulkController(
             this.appName, 
