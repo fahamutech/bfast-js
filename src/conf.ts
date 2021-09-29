@@ -1,6 +1,6 @@
-import { AuthAdapter } from "./adapters/auth.adapter";
-import { CacheAdapter } from "./adapters/cache.adapter";
-import { HttpClientAdapter } from "./adapters/http-client.adapter";
+import {AuthAdapter} from "./adapters/auth.adapter";
+import {CacheAdapter} from "./adapters/cache.adapter";
+import {HttpClientAdapter} from "./adapters/http-client.adapter";
 
 export class BFastConfig {
     static DEFAULT_APP = 'DEFAULT';
@@ -65,6 +65,36 @@ export class BFastConfig {
 
     };
 
+    databaseWsURL(appName: string, suffix = '/v2'): string {
+        const dbUrl = this.credentials[appName].databaseURL && this.credentials[appName].databaseURL;
+        if (dbUrl?.startsWith('https:')) {
+            let url = this.credentials[appName].databaseURL
+            // @ts-ignore
+            url = url.replace('https:', 'wss:')
+            if (suffix) {
+                return url + suffix;
+            } else {
+                return url;
+            }
+        }
+        if (dbUrl?.startsWith('http:')) {
+            let url = this.credentials[appName].databaseURL
+            // @ts-ignore
+            url = url.replace('http:', 'ws:');
+            if (suffix) {
+                return url + suffix;
+            } else {
+                return url;
+            }
+        }
+        if (suffix) {
+            return `wss://${this.credential(appName).projectId}-daas.bfast.fahamutech.com${suffix}`;
+        } else {
+            return `wss://${this.credential(appName).projectId}-daas.bfast.fahamutech.com`;
+        }
+
+    };
+
     cacheDatabaseName(name: string, appName: string): string {
         const adapters = this.credential(appName)?.adapters;
         let projectId = this.credential(appName).projectId;
@@ -75,7 +105,7 @@ export class BFastConfig {
             && this.credential(adapters.cache).projectId) {
             projectId = this.credential(adapters.cache).projectId;
             appName = adapters.cache;
-            }
+        }
         // } else if (adapters
         //     && adapters.auth
         //     && typeof adapters.auth === 'string'
