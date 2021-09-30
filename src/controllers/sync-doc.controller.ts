@@ -13,10 +13,10 @@ export class SyncDocController {
     constructor(private readonly appName: string,
                 private readonly name: string,
                 private readonly socketController: SocketController) {
-        // if (!SyncDocController.yDoc){
+        const room = BFastConfig.getInstance().credential(appName).projectId+'_'+name;
         this.yDoc = new Y.Doc();
-        new IndexeddbPersistence(name, this.yDoc);
-        new WebrtcProvider(name, this.yDoc
+        new IndexeddbPersistence(room, this.yDoc);
+        new WebrtcProvider(room, this.yDoc
             // {
             // signaling: [
             //     'wss://stun.l.google.com',
@@ -28,13 +28,11 @@ export class SyncDocController {
             // }
         );
         // `wss://demos.yjs.dev`
-        // console.log(BFastConfig.getInstance().databaseWsURL(appName,'/syncs'));
         new WebsocketProvider(
-            BFastConfig.getInstance().databaseWsURL(appName,'/syncs'),
-            name,
+            'wss://demos.yjs.dev',
+            room,
             this.yDoc
         );
-        // }
         this.yMap = this.yDoc.getMap(name);
     }
 
