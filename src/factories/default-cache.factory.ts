@@ -18,7 +18,7 @@ export class DefaultCacheFactory implements CacheAdapter {
             });
             return all;
         }
-        console.log('not in web or electron or worker', '---->getAll')
+        // console.log('not in web or electron or worker', '---->getAll')
         return [];
     }
 
@@ -29,7 +29,7 @@ export class DefaultCacheFactory implements CacheAdapter {
                 name: database
             });
         }
-        console.log('not in web or electron or worker', '---->instance')
+        // console.log('not in web or electron or worker', '---->instance')
         return undefined;
     }
 
@@ -37,7 +37,7 @@ export class DefaultCacheFactory implements CacheAdapter {
         if (isElectron || isBrowser || isWebWorker) {
             return DefaultCacheFactory._getCacheDatabase(database, collection)?.keys();
         }
-        console.log('not in web or electron or worker', '---->keys');
+        // console.log('not in web or electron or worker', '---->keys');
         return []
     }
 
@@ -46,7 +46,7 @@ export class DefaultCacheFactory implements CacheAdapter {
             await DefaultCacheFactory._getCacheDatabase(database, collection)?.clear();
             return true;
         }
-        console.log('not in web or electron or worker', '---->clearAll')
+        // console.log('not in web or electron or worker', '---->clearAll')
         return true;
     }
 
@@ -54,7 +54,7 @@ export class DefaultCacheFactory implements CacheAdapter {
         if (isElectron || isBrowser || isWebWorker) {
             return await DefaultCacheFactory._getCacheDatabase(database, collection)?.getItem(identifier);
         }
-        console.log('not in web or electron or worker', '---->get')
+        // console.log('not in web or electron or worker', '---->get')
         return null as any;
     }
 
@@ -62,7 +62,7 @@ export class DefaultCacheFactory implements CacheAdapter {
         if (isElectron || isBrowser || isWebWorker) {
             return DefaultCacheFactory._getCacheDatabase(database, collection).setItem(identifier, data);
         }
-        console.log('not in web or electron or worker', '---->set')
+        // console.log('not in web or electron or worker', '---->set')
         return null as any;
     }
 
@@ -71,7 +71,7 @@ export class DefaultCacheFactory implements CacheAdapter {
             await DefaultCacheFactory._getCacheDatabase(database, collection)?.removeItem(identifier);
             return true;
         }
-        console.log('not in web or electron or worker', '---->remove')
+        // console.log('not in web or electron or worker', '---->remove')
         return true;
     }
 

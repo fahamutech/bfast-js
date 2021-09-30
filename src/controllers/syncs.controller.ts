@@ -11,29 +11,31 @@ export class SyncsController {
                 private readonly appName: string) {
     }
 
-    async snapshot(cids = false): Promise<SnapshotModel | string> {
-        return this.databaseController.get(this.name, cids);
+    async snapshot(cids = false): Promise< any | string> {
+        return this.databaseController.getAll();
     }
 
-    async setSnapshot(datas: { [key: string]: any }[], cids = false): Promise<SnapshotModel | string> {
-        const snapS: SnapshotModel = {
-            _id: this.name,
-            docs: datas.reduce((a, b) => {
-                if (!b.hasOwnProperty('id')) {
-                    throw {message: 'all datas must contain id field', reason: JSON.stringify(b)};
-                }
-                a[b.id] = b;
-                return a;
-            }, {})
-        }
-        return this.databaseController.query()
-            .byId(snapS._id)
-            .cids(cids)
-            .updateBuilder()
-            .upsert(true)
-            .doc(snapS)
-            .update();
-    }
+    // async setSnapshot(datas: { [key: string]: any }[], cids = false): Promise<SnapshotModel | string> {
+    //     // const snapS: SnapshotModel = {
+    //     //     _id: this.name,
+    //     //     createdAt: 'n/a',
+    //     //     updatedAt: 'n/a',
+    //     //     docs: datas.reduce((a, b) => {
+    //     //         if (!b.hasOwnProperty('id')) {
+    //     //             throw {message: 'all datas must contain id field', reason: JSON.stringify(b)};
+    //     //         }
+    //     //         a[b.id] = b;
+    //     //         return a;
+    //     //     }, {})
+    //     // }
+    //     return this.databaseController.query()
+    //         .byId(snapS._id)
+    //         .cids(cids)
+    //         .updateBuilder()
+    //         .upsert(true)
+    //         .doc(snapS)
+    //         .update();
+    // }
 
     doc(onConnect: () => void, onDisconnect: () => void): SyncDocController {
         const applicationId = BFastConfig.getInstance().credential(this.appName).applicationId;
@@ -60,6 +62,7 @@ export class SyncsController {
             onDisconnect
         );
         return new SyncDocController(
+            this.appName,
             this.name,
             socketController
         );

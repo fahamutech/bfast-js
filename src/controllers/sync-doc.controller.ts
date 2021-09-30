@@ -4,33 +4,35 @@ import {IndexeddbPersistence} from 'y-indexeddb';
 import {YMap} from 'yjs/dist/src/types/YMap';
 import {SocketController} from "./socket.controller";
 import {WebrtcProvider} from "y-webrtc";
+import {BFastConfig} from "../conf";
 
 export class SyncDocController {
     private yDoc: Y.Doc | undefined;
     private readonly yMap: YMap<any>
 
-    constructor(private readonly name: string,
+    constructor(private readonly appName: string,
+                private readonly name: string,
                 private readonly socketController: SocketController) {
-        // if (!SyncDocController.yDoc){
-            this.yDoc = new Y.Doc();
-            new IndexeddbPersistence(name, this.yDoc);
-            new WebrtcProvider(name, this.yDoc
-                // {
-                // signaling: [
-                //     'wss://stun.l.google.com',
-                //     'wss://stun1.l.google.com',
-                //     'wss://stun2.l.google.com',
-                //     'wss://stun3.l.google.com',
-                //     'wss://stun4.l.google.com',
-                // ]
-                // }
-            );
-            new WebsocketProvider(
-                'wss://demos.yjs.dev',
-                name,
-                this.yDoc
-            );
-        // }
+        const room = BFastConfig.getInstance().credential(appName).projectId+'_'+name;
+        this.yDoc = new Y.Doc();
+        new IndexeddbPersistence(room, this.yDoc);
+        new WebrtcProvider(room, this.yDoc
+            // {
+            // signaling: [
+            //     'wss://stun.l.google.com',
+            //     'wss://stun1.l.google.com',
+            //     'wss://stun2.l.google.com',
+            //     'wss://stun3.l.google.com',
+            //     'wss://stun4.l.google.com',
+            // ]
+            // }
+        );
+        // `wss://demos.yjs.dev`
+        new WebsocketProvider(
+            'wss://demos.yjs.dev',
+            room,
+            this.yDoc
+        );
         this.yMap = this.yDoc.getMap(name);
     }
 
@@ -42,10 +44,10 @@ export class SyncDocController {
         return this.yMap.get(key);
     }
 
-    set(value: {[key: string]: any}): void {
-        if (value.hasOwnProperty('id')){
+    set(value: { [key: string]: any }): void {
+        if (value.hasOwnProperty('id')) {
             this.yMap.set(value.id, value);
-        }else {
+        } else {
             throw {message: 'please doc must have id field'}
         }
     }

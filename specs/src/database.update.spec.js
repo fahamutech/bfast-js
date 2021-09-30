@@ -2,7 +2,7 @@ const {expect, should} = require('chai')
 const {init, database} = require('../../dist/bfast.node');
 const {config, serverUrl, mongoRepSet} = require("../test.config");
 
-describe('query', function () {
+describe('update', function () {
     before(async function () {
         await mongoRepSet().start();
         init({
@@ -186,26 +186,26 @@ describe('query', function () {
                 should().not.exist(r);
                 expect(r).eql(null);
             });
-            it('should increment a doc field by query filter', async function () {
-                const r = await database().table('test')
-                    .query()
-                    .equalTo('item','dell')
-                    .updateBuilder()
-                    .increment('price', 10)
-                    .set('updatedAt','leo')
-                    .update();
-                should().exist(r);
-                expect(r).eql([{
-                    item: 'xps2',
-                    price: 1020,
-                    id: 'xido',
-                    detail: 'old',
-                    tag: 'brand',
-                    createdAt: 'leo',
-                    updatedAt: 'leo',
-                    createdBy: null
-                }]);
-            });
+            // it('should increment a doc field by query filter', async function () {
+            //     const r = await database().table('test')
+            //         .query()
+            //         .equalTo('item','dell')
+            //         .updateBuilder()
+            //         .increment('price', 10)
+            //         .set('updatedAt','leo')
+            //         .update();
+            //     should().exist(r);
+            //     expect(r).eql([{
+            //         item: 'xps2',
+            //         price: 1020,
+            //         id: 'xido',
+            //         detail: 'old',
+            //         tag: 'brand',
+            //         createdAt: 'leo',
+            //         updatedAt: 'leo',
+            //         createdBy: null
+            //     }]);
+            // });
             it('should upsert and increment a doc field by id when told so', async function () {
                 const r = await database().table('test')
                     .query()
@@ -241,26 +241,26 @@ describe('query', function () {
                     updatedAt: 'leo'
                 }]);
             });
-            it('should decrement a doc field by id', async function () {
-                const r = await database().table('test')
-                    .query()
-                    .byId('xido')
-                    .updateBuilder()
-                    .decrement('price', 10)
-                    .set('updatedAt','leo')
-                    .update();
-                should().exist(r);
-                expect(r).eql({
-                    item: 'xps2',
-                    price: 1010,
-                    id: 'xido',
-                    detail: 'old',
-                    tag: 'brand',
-                    createdAt: 'leo',
-                    updatedAt: 'leo',
-                    createdBy: null
-                });
-            });
+            // it('should decrement a doc field by id', async function () {
+            //     const r = await database().table('test')
+            //         .query()
+            //         .byId('xido')
+            //         .updateBuilder()
+            //         .decrement('price', 10)
+            //         .set('updatedAt','leo')
+            //         .update();
+            //     should().exist(r);
+            //     expect(r).eql({
+            //         item: 'xps2',
+            //         price: 1010,
+            //         id: 'xido',
+            //         detail: 'old',
+            //         tag: 'brand',
+            //         createdAt: 'leo',
+            //         updatedAt: 'leo',
+            //         createdBy: null
+            //     });
+            // });
             it('should upsert and decrement a doc field by id when told so', async function () {
                 const r = await database().table('test')
                     .query()
