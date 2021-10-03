@@ -6,6 +6,7 @@ import {SocketController} from "./socket.controller";
 import {WebrtcProvider} from "y-webrtc";
 import {BFastConfig} from "../conf";
 import {YMapEvent} from "yjs";
+import {isBrowser} from "../index";
 
 export class SyncDocController {
     private yDoc: Y.Doc | undefined;
@@ -16,7 +17,9 @@ export class SyncDocController {
                 private readonly socketController: SocketController) {
         const room = BFastConfig.getInstance().credential(appName).projectId + '_' + name;
         this.yDoc = new Y.Doc();
-        new IndexeddbPersistence(room, this.yDoc);
+        if (isBrowser) {
+            new IndexeddbPersistence(room, this.yDoc);
+        }
         new WebrtcProvider(room, this.yDoc
             // {
             // signaling: [
