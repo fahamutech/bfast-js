@@ -29,70 +29,70 @@ describe('syncs', function () {
         ])
     });
 
-    describe('setSnapshot', function () {
-        // this.timeout(5000);
-        // it('should save the snapshot of syncs data and return it', async function () {
-        //     const cid = await database().syncs('test').setSnapshot([
-        //         {
-        //             id: 'abc',
-        //             name: 'jack'
-        //         },
-        //         {
-        //             id: 'abcde',
-        //             name: 'josh'
-        //         }
-        //     ], false);
-        //     expect(cid).eql({
-        //         docs: {
-        //             abc: {id: 'abc', name: 'jack'},
-        //             abcde: {id: 'abcde', name: 'josh'}
-        //         },
-        //         createdAt: 'n/a',
-        //         updatedAt: 'n/a',
-        //         id: 'test'
-        //     })
-        // });
-        // it('should save the snapshot of syncs data and return cid', async function () {
-        //     const cid = await database().syncs('test').setSnapshot([
-        //         {
-        //             id: 'abc',
-        //             name: 'jack'
-        //         },
-        //         {
-        //             id: 'abcde',
-        //             name: 'josh'
-        //         }
-        //     ], true);
-        //     expect(typeof cid).equal('string');
-        // });
-    })
-
-    describe('getSnapshot', function () {
-        this.timeout(5000);
-        it('should get the snapshot of syncs data', async function () {
-            const cid = await database().syncs('test').snapshot(false);
-            expect(cid).eql([
-                {
-                    id: 'abc',
-                    name: 'jack',
-                    createdAt: 'leo',
-                    createdBy: null,
-                    updatedAt: 'leo',
-                },
-                {
-                    id: 'abcde',
-                    name: 'josh',
-                    createdBy: null,
-                    createdAt: 'leo',
-                    updatedAt: 'leo'
-                }
-            ]);
-        });
-        // it('should get the snapshot of syncs data and return cid', async function () {
-        //     const cid = await database().syncs('test').snapshot(true);
-        //     expect(typeof cid).equal('string');
-        // });
-    })
+    // describe('setSnapshot', function () {
+    //     // this.timeout(5000);
+    //     // it('should save the snapshot of syncs data and return it', async function () {
+    //     //     const cid = await database().syncs('test').setSnapshot([
+    //     //         {
+    //     //             id: 'abc',
+    //     //             name: 'jack'
+    //     //         },
+    //     //         {
+    //     //             id: 'abcde',
+    //     //             name: 'josh'
+    //     //         }
+    //     //     ], false);
+    //     //     expect(cid).eql({
+    //     //         docs: {
+    //     //             abc: {id: 'abc', name: 'jack'},
+    //     //             abcde: {id: 'abcde', name: 'josh'}
+    //     //         },
+    //     //         createdAt: 'n/a',
+    //     //         updatedAt: 'n/a',
+    //     //         id: 'test'
+    //     //     })
+    //     // });
+    //     // it('should save the snapshot of syncs data and return cid', async function () {
+    //     //     const cid = await database().syncs('test').setSnapshot([
+    //     //         {
+    //     //             id: 'abc',
+    //     //             name: 'jack'
+    //     //         },
+    //     //         {
+    //     //             id: 'abcde',
+    //     //             name: 'josh'
+    //     //         }
+    //     //     ], true);
+    //     //     expect(typeof cid).equal('string');
+    //     // });
+    // });
+    //
+    // describe('getSnapshot', function () {
+    //     this.timeout(5000);
+    //     it('should get the snapshot of syncs data', async function () {
+    //         const cid = await database().syncs('test').snapshot(false);
+    //         expect(cid).eql([
+    //             {
+    //                 id: 'abc',
+    //                 name: 'jack',
+    //                 createdAt: 'leo',
+    //                 createdBy: null,
+    //                 updatedAt: 'leo',
+    //             },
+    //             {
+    //                 id: 'abcde',
+    //                 name: 'josh',
+    //                 createdBy: null,
+    //                 createdAt: 'leo',
+    //                 updatedAt: 'leo'
+    //             }
+    //         ]);
+    //     });
+    //     // it('should get the snapshot of syncs data and return cid', async function () {
+    //     //     const cid = await database().syncs('test').snapshot(true);
+    //     //     expect(typeof cid).equal('string');
+    //     // });
+    // })
 
     describe('doc', function () {
         this.timeout(5000);
@@ -126,7 +126,7 @@ describe('syncs', function () {
                 }
             });
         });
-        it('should receive current doc snapshot', function (done) {
+        it('should observe doc changes or when syncs', function (done) {
             const doc = database().syncs('test').doc(
                 () => {
                     doc.set({
@@ -137,16 +137,23 @@ describe('syncs', function () {
                     });
                 }
             );
-            doc.onSnapshot(response => {
-                if (response.body.info) {
-                    return;
+            const r = doc.observe(response => {
+                // console.log(response);
+                should().exist(response.name);
+                should().exist(response.snapshot);
+                // expect(response.name).equal('create');
+                // expect(response.snapshot).equal('create');
+                // expect(response.snapshot).eql({
+                //     age: 20,
+                //     createdAt: 'leo',
+                //     updatedAt: 'leo',
+                //     id: 'agex'
+                // });
+                // done();
+                if (response.snapshot.id === 'agex'){
+                    done();
+                    r.close();
                 }
-                should().exist(response.body);
-                should().exist(response.body.change);
-                expect(typeof response.body.change).equal('object');
-                // console.log(response.body)
-                done();
-                doc.close();
             });
         });
     });
