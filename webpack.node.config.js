@@ -1,7 +1,7 @@
 const path = require('path');
 
 const clientConfig = {
-    target: ["node"],
+    target: "node",
     entry: './src/index.ts',
     mode: 'production',
     module: {
@@ -24,7 +24,8 @@ const clientConfig = {
     output: {
         filename: 'bfast.node.js',
         path: path.resolve(__dirname, './dist'),
-        libraryTarget: "commonjs"
+        libraryTarget: "commonjs",
+        // globalObject: "this"
     },
 };
 

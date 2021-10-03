@@ -7,30 +7,22 @@ import {WebrtcProvider} from "y-webrtc";
 import {BFastConfig} from "../conf";
 import {YMapEvent} from "yjs";
 import {isBrowser} from "../index";
+import {DatabaseController} from "./database.controller";
 
-export class SyncDocController {
+export class SyncChangesController {
     private yDoc: Y.Doc | undefined;
     private readonly yMap: YMap<any>
 
     constructor(private readonly appName: string,
                 private readonly name: string,
+                private readonly databaseController: DatabaseController,
                 private readonly socketController: SocketController) {
         const room = BFastConfig.getInstance().credential(appName).projectId + '_' + name;
         this.yDoc = new Y.Doc();
         if (isBrowser) {
             new IndexeddbPersistence(room, this.yDoc);
         }
-        new WebrtcProvider(room, this.yDoc
-            // {
-            // signaling: [
-            //     'wss://stun.l.google.com',
-            //     'wss://stun1.l.google.com',
-            //     'wss://stun2.l.google.com',
-            //     'wss://stun3.l.google.com',
-            //     'wss://stun4.l.google.com',
-            // ]
-            // }
-        );
+        new WebrtcProvider(room, this.yDoc);
         // `wss://demos.yjs.dev`
         new WebsocketProvider(
             'wss://demos.yjs.dev',
@@ -38,6 +30,21 @@ export class SyncDocController {
             this.yDoc
         );
         this.yMap = this.yDoc.getMap(name);
+    }
+
+    async snapshot(cids = false): Promise<any | string> {
+        return this.databaseController.getAll();
+    }
+
+    async load(): Promise<boolean> {
+        let pData: any[] = await this.databaseController.getAll(undefined, {useMasterKey: true});
+        if (!pData) {
+            pData = [];
+        }
+        for (const data of pData) {
+            this.set(data);
+        }
+        return true;
     }
 
     get size() {
@@ -49,10 +56,14 @@ export class SyncDocController {
     }
 
     set(value: { [key: string]: any }): void {
-        if (value.hasOwnProperty('id')) {
-            this.yMap.set(value.id, value);
+        if (value.id) {
+            value._id = value.id;
+            delete value.id;
+        }
+        if (value.hasOwnProperty('_id')) {
+            this.yMap.set(value._id, value);
         } else {
-            throw {message: 'please doc must have id field'}
+            throw {message: 'please doc must have id/_id field', data: JSON.stringify(value, null, 4)};
         }
     }
 
@@ -129,9 +140,9 @@ export class SyncDocController {
         }
     }
 
-    onSnapshot(fn: (data: { body: { info?: any, error?: any } }) => void) {
-        this.socketController.listener(fn);
-    }
+    // status(fn: (data: { body: { info?: any, error?: any } }) => void) {
+    //     this.socketController.listener(fn);
+    // }
 
     stop() {
         this.socketController.close();

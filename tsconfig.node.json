@@ -9,7 +9,7 @@
     "module": "ES2020",
     "target": "es2015",
     "lib": ["es2017", "es7", "es6", "dom"],
-    "allowJs": false,
+    "allowJs": true,
     "declaration": true,
     "strict": true,
     "esModuleInterop": true
