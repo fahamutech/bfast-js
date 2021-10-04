@@ -1,17 +1,20 @@
 import * as Y from 'yjs';
+import {YMapEvent} from 'yjs';
 import {WebsocketProvider} from "y-websocket";
 import {IndexeddbPersistence} from 'y-indexeddb';
 import {YMap} from 'yjs/dist/src/types/YMap';
 import {SocketController} from "./socket.controller";
 import {WebrtcProvider} from "y-webrtc";
 import {BFastConfig} from "../conf";
-import {YMapEvent} from "yjs";
-import {isBrowser} from "../index";
+import {isBrowser, isElectron, isWebWorker} from "../index";
 import {DatabaseController} from "./database.controller";
 
 export class SyncChangesController {
     private yDoc: Y.Doc | undefined;
-    private readonly yMap: YMap<any>
+    private readonly yMap: YMap<any>;
+    private readonly yDocPersistence;
+    private readonly yDocWebRtc;
+    private readonly yDocSocket;
 
     constructor(private readonly appName: string,
                 private readonly name: string,
@@ -19,12 +22,12 @@ export class SyncChangesController {
                 private readonly socketController: SocketController) {
         const room = BFastConfig.getInstance().credential(appName).projectId + '_' + name;
         this.yDoc = new Y.Doc();
-        if (isBrowser) {
-            new IndexeddbPersistence(room, this.yDoc);
+        if (isElectron || isBrowser || isWebWorker) {
+            this.yDocPersistence = new IndexeddbPersistence(room, this.yDoc);
         }
-        new WebrtcProvider(room, this.yDoc);
+        this.yDocWebRtc = new WebrtcProvider(room, this.yDoc);
         // `wss://demos.yjs.dev`
-        new WebsocketProvider(
+        this.yDocSocket = new WebsocketProvider(
             'wss://demos.yjs.dev',
             room,
             this.yDoc
@@ -59,6 +62,26 @@ export class SyncChangesController {
         if (value.id) {
             value._id = value.id;
             delete value.id;
+        }
+        if (value._created_at) {
+            value.createdAt = value._created_at;
+            delete value._created_at;
+        }
+        if (value._updated_at) {
+            value.updatedAt = value._updated_at;
+            delete value._updated_at;
+        }
+        if (typeof value?.createdAt === "object") {
+            value.createdAt = '2020-09-01';
+        }
+        if (typeof value?.updatedAt === "object") {
+            value.updatedAt = '2020-09-01';
+        }
+        if (!value.hasOwnProperty('createdAt')) {
+            value.createdAt = new Date().toISOString();
+        }
+        if (!value.hasOwnProperty('updatedAt')) {
+            value.updatedAt = new Date().toISOString();
         }
         if (value.hasOwnProperty('_id')) {
             this.yMap.set(value._id, value);
@@ -95,7 +118,7 @@ export class SyncChangesController {
         name: "create" | "update" | "delete",
         snapshot: any,
         // resumeToken: doc._id
-    }) => void): { stop: () => void } {
+    }) => void): { unobserve: () => void } {
         const observer = async (tEvent: YMapEvent<any>) => {
             for (const key of Array.from(tEvent.keys.keys())) {
                 switch (tEvent?.keys?.get(key)?.action) {
@@ -134,8 +157,8 @@ export class SyncChangesController {
         }
         this.yMap.observe(observer);
         return {
-            stop: () => {
-                this.yMap.unobserve(observer);
+            unobserve: () => {
+                this.yMap?.unobserve(observer);
             }
         }
     }
@@ -145,15 +168,20 @@ export class SyncChangesController {
     // }
 
     stop() {
-        this.socketController.close();
-        this.yDoc?.destroy();
-        this.yDoc = undefined;
+        this.close();
     }
 
     close() {
-        this.socketController.close();
-        this.yDoc?.destroy();
-        this.yDoc = undefined;
+        try {
+            this.socketController?.close();
+            this.yDocWebRtc?.destroy();
+            this.yDocSocket?.destroy();
+            this.yDocPersistence?.destroy();
+            this.yDoc?.destroy();
+            this.yDoc = undefined;
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     unobserve(fn: (...args: any) => void) {
