@@ -34,7 +34,7 @@ export class SyncsController {
             },
             onDisconnect
         );
-        return new SyncChangesController(
+        return SyncChangesController.getInstance(
             this.appName,
             this.name,
             this.databaseController,

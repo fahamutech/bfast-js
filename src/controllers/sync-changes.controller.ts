@@ -10,16 +10,30 @@ import {isBrowser, isElectron, isWebWorker} from "../index";
 import {DatabaseController} from "./database.controller";
 
 export class SyncChangesController {
-    private yDoc: Y.Doc | undefined;
-    private readonly yMap: YMap<any>;
-    private readonly yDocPersistence;
-    private readonly yDocWebRtc;
-    private readonly yDocSocket;
+    private static yDoc: Y.Doc | undefined;
+    private static yMap: YMap<any>;
+    private static yDocPersistence: IndexeddbPersistence | undefined;
+    private static yDocWebRtc: WebrtcProvider | undefined;
+    private static yDocSocket: WebsocketProvider | undefined;
+    private static instance: SyncChangesController | undefined;
 
-    constructor(private readonly appName: string,
-                private readonly name: string,
-                private readonly databaseController: DatabaseController,
-                private readonly socketController: SocketController) {
+    private constructor(
+        private readonly databaseController: DatabaseController,
+        private readonly socketController: SocketController
+    ) {
+    }
+
+    static getInstance(appName: string,
+                       name: string,
+                       databaseController: DatabaseController,
+                       socketController: SocketController): SyncChangesController {
+        if (this.instance) {
+            return this.instance;
+        }
+        this.instance = new SyncChangesController(
+            databaseController,
+            socketController
+        );
         const room = BFastConfig.getInstance().credential(appName).projectId + '_' + name;
         this.yDoc = new Y.Doc();
         if (isElectron || isBrowser || isWebWorker) {
@@ -33,6 +47,7 @@ export class SyncChangesController {
             this.yDoc
         );
         this.yMap = this.yDoc.getMap(name);
+        return this.instance;
     }
 
     async snapshot(cids = false): Promise<any | string> {
@@ -51,11 +66,11 @@ export class SyncChangesController {
     }
 
     get size() {
-        return this.yMap.size;
+        return SyncChangesController?.yMap.size;
     };
 
     get(key: string) {
-        return this.yMap.get(key);
+        return SyncChangesController?.yMap.get(key);
     }
 
     set(value: { [key: string]: any }): void {
@@ -84,34 +99,34 @@ export class SyncChangesController {
             value.updatedAt = new Date().toISOString();
         }
         if (value.hasOwnProperty('_id')) {
-            this.yMap.set(value._id, value);
+            SyncChangesController?.yMap.set(value._id, value);
         } else {
             throw {message: 'please doc must have id/_id field', data: JSON.stringify(value, null, 4)};
         }
     }
 
     delete(key: string): void {
-        this.yMap.delete(key)
+        SyncChangesController?.yMap.delete(key)
     }
 
     has(key: string): boolean {
-        return this.yMap.has(key);
+        return SyncChangesController?.yMap.has(key);
     }
 
     toJSON(): { [key: string]: any } {
-        return this.yMap.toJSON();
+        return SyncChangesController?.yMap.toJSON();
     }
 
     entries(): IterableIterator<any> {
-        return this.yMap.entries();
+        return SyncChangesController?.yMap.entries();
     }
 
     values(): IterableIterator<any> {
-        return this.yMap.values();
+        return SyncChangesController?.yMap.values();
     }
 
     keys(): IterableIterator<string> {
-        return this.yMap.keys();
+        return SyncChangesController?.yMap.keys();
     }
 
     observe(listener: (response: {
@@ -123,7 +138,7 @@ export class SyncChangesController {
             for (const key of Array.from(tEvent.keys.keys())) {
                 switch (tEvent?.keys?.get(key)?.action) {
                     case "add":
-                        const doc = this.yMap.get(key);
+                        const doc = SyncChangesController?.yMap.get(key);
                         if (doc._id) {
                             doc.id = doc._id;
                             delete doc._id;
@@ -142,7 +157,7 @@ export class SyncChangesController {
                         });
                         break;
                     case "update":
-                        const d = this.yMap.get(key);
+                        const d = SyncChangesController?.yMap.get(key);
                         const od = tEvent?.keys?.get(key)?.oldValue;
                         if (!Array.isArray(d) && JSON.stringify(d) !== JSON.stringify(od)) {
                             listener({
@@ -155,10 +170,10 @@ export class SyncChangesController {
                 }
             }
         }
-        this.yMap.observe(observer);
+        SyncChangesController.yMap.observe(observer);
         return {
             unobserve: () => {
-                this.yMap?.unobserve(observer);
+                SyncChangesController?.yMap?.unobserve(observer);
             }
         }
     }
@@ -173,18 +188,31 @@ export class SyncChangesController {
 
     close() {
         try {
+            SyncChangesController?.yDocWebRtc?.disconnect();
+            SyncChangesController?.yDocSocket?.disconnectBc();
+            SyncChangesController?.yDocPersistence?.destroy();
+            SyncChangesController?.yDoc?.destroy();
+
+            try {
+                SyncChangesController?.yDocWebRtc?.destroy();
+                SyncChangesController?.yDocSocket?.destroy();
+            } catch (e) {
+
+            }
+
+            SyncChangesController.yDoc = undefined;
+            SyncChangesController.instance = undefined;
+            SyncChangesController.yDocWebRtc = undefined;
+            SyncChangesController.yDocSocket = undefined;
+            SyncChangesController.yDocPersistence = undefined;
+            SyncChangesController.yDoc = undefined;
             this.socketController?.close();
-            this.yDocWebRtc?.destroy();
-            this.yDocSocket?.destroy();
-            this.yDocPersistence?.destroy();
-            this.yDoc?.destroy();
-            this.yDoc = undefined;
         } catch (e) {
-            console.log(e);
+            console.log(e, '**************');
         }
     }
 
     unobserve(fn: (...args: any) => void) {
-        this.yMap.unobserve(fn);
+        SyncChangesController?.yMap?.unobserve(fn);
     }
 }

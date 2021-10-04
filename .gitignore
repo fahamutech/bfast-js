@@ -11,3 +11,4 @@ node
 node/node_modules
 **/node_modules/**
 node/dist
+specs/index.html

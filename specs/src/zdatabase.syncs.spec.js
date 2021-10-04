@@ -89,7 +89,7 @@ describe('syncs', function () {
             });
         });
         describe('doc', function () {
-            this.timeout(5000);
+            this.timeout(8000);
             it('should connect to a syncs data type', function (done) {
                 const doc = database().syncs('test').changes(
                     () => {
@@ -101,7 +101,9 @@ describe('syncs', function () {
             it('should disconnect to a syncs data type', function (done) {
                 const doc = database().syncs('test').changes(
                     () => {
-                        doc.stop();
+                        setTimeout(() => {
+                            doc.close();
+                        }, 5000)
                     },
                     () => {
                         done();
@@ -158,7 +160,7 @@ describe('syncs', function () {
                     changes.set({
                         name: 'joshua'
                     });
-                }catch (e){
+                } catch (e) {
                     // console.log(e);
                     should().exist(e);
                     expect(e.message).equal('please doc must have id/_id field');
