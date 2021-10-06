@@ -122,9 +122,9 @@ export class BFastConfig {
         //     appName = adapters.http;
         // }
         if (name && name !== '') {
-            return `bfast_${projectId}_${appName}-app_${name}`;
+            return `bfast_${projectId}_${appName}_${name}`;
         } else {
-            return `bfast_${projectId}_${appName}-app_cache`;
+            return `bfast_${projectId}_${appName}`;
         }
     }
 

@@ -1,4 +1,3 @@
-// import {Socket, Manager} from 'socket.io-client';
 import {BFastConfig} from "../conf";
 
 //@ts-ignore

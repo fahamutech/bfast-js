@@ -213,7 +213,6 @@ export class QueryController {
             deleteRule,
             {
                 headers: {
-                    'x-bfast-application-id': credential.applicationId
                 }
             },
             {

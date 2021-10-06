@@ -4,7 +4,6 @@ import {QueryModel} from "../models/QueryModel";
 import {UpdateModel} from "../models/UpdateOperation";
 import {AuthController} from "./auth.controller";
 import {RequestOptions} from "./query.controller";
-import { AggregateModel } from "../models/aggregate.model";
 
 export class RulesController {
     constructor(private readonly authController: AuthController) {

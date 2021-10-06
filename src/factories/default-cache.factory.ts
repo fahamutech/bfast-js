@@ -1,9 +1,9 @@
 import {CacheAdapter} from "../adapters/cache.adapter";
 import {RequestOptions} from "../controllers/query.controller";
 import {isBrowser, isElectron, isWebWorker} from "../utils/platform.util";
-
+import {Dexie, Table} from "dexie";
 // @ts-ignore
-import * as localForage from "localforage";
+import sha1 from "crypto-js/sha1";
 
 export class DefaultCacheFactory implements CacheAdapter {
 
@@ -12,66 +12,101 @@ export class DefaultCacheFactory implements CacheAdapter {
 
     async getAll(database: string, collection: string): Promise<any[]> {
         if (isElectron || isBrowser || isWebWorker) {
-            const all: any[] = [];
-            await DefaultCacheFactory._getCacheDatabase(database, collection)?.iterate((value: any, _: string) => {
-                all.push(value);
-            });
-            return all;
+            const table = await DefaultCacheFactory.table(database, collection);
+            const keys = await this.keys(database, collection);
+            if (Array.isArray(keys)){
+               return await table?.bulkGet(keys) as any[];
+            }
+            return [];
         }
-        // console.log('not in web or electron or worker', '---->getAll')
         return [];
     }
 
-    private static _getCacheDatabase(database: string, collection: string): any {
+    static table(database: string, collection: string): Table | undefined {
         if (isElectron || isBrowser || isWebWorker) {
-            return localForage.createInstance({
-                storeName: collection,
-                name: database
+            const db = new Dexie(sha1(database).toString());
+            db.version(1).stores({
+                [collection]: ""
             });
+            return db.table(collection);
         }
-        // console.log('not in web or electron or worker', '---->instance')
         return undefined;
     }
 
     async keys(database: string, collection: string): Promise<string[] | undefined> {
         if (isElectron || isBrowser || isWebWorker) {
-            return DefaultCacheFactory._getCacheDatabase(database, collection)?.keys();
+            return await DefaultCacheFactory.table(database, collection)?.toCollection().keys() as string[];
         }
-        // console.log('not in web or electron or worker', '---->keys');
-        return []
+        return [];
     }
 
     async clearAll(database: string, collection: string): Promise<boolean> {
         if (isElectron || isBrowser || isWebWorker) {
-            await DefaultCacheFactory._getCacheDatabase(database, collection)?.clear();
+            await DefaultCacheFactory.table(database, collection)?.clear();
             return true;
         }
-        // console.log('not in web or electron or worker', '---->clearAll')
         return true;
     }
 
-    async get<T extends any>(identifier: string, database: string, collection: string, options: { secure?: boolean } = {secure: false}): Promise<T> {
+    async get<T>(
+        key: string,
+        database: string,
+        collection: string
+    ): Promise<T | null> {
         if (isElectron || isBrowser || isWebWorker) {
-            return await DefaultCacheFactory._getCacheDatabase(database, collection)?.getItem(identifier);
+            return DefaultCacheFactory.table(database, collection)?.get(key);
         }
-        // console.log('not in web or electron or worker', '---->get')
+        return null;
+    }
+
+    async getBulk<T>(keys: string[], database: string, collection: string): Promise<T[]> {
+        if (isElectron || isBrowser || isWebWorker) {
+            const table = DefaultCacheFactory.table(database, collection);
+            if (Array.isArray(keys)){
+                return await table?.bulkGet(keys) as any[];
+            }
+            return [];
+        }
+        return [];
+    }
+
+    async set(
+        key: string,
+        data: any,
+        database: string,
+        collection: string,
+        options: { dtl?: number, secure?: boolean } = {secure: false}
+    ): Promise<any> {
+        if (isElectron || isBrowser || isWebWorker) {
+            await DefaultCacheFactory.table(database, collection)?.put(data, key);
+            return data;
+        }
         return null as any;
     }
 
-    async set<T>(identifier: string, data: T, database: string, collection: string, options: { dtl?: number, secure?: boolean } = {secure: false}): Promise<T> {
+    async setBulk(
+        keys: string[],
+        data: any[],
+        database: string,
+        collection: string
+    ): Promise<any> {
         if (isElectron || isBrowser || isWebWorker) {
-            return DefaultCacheFactory._getCacheDatabase(database, collection).setItem(identifier, data);
+            await DefaultCacheFactory.table(database, collection)?.bulkPut(data, keys, {allKeys: true});
+            return keys;
         }
-        // console.log('not in web or electron or worker', '---->set')
         return null as any;
     }
 
-    async remove(identifier: string, database: string, collection: string, force = true): Promise<boolean> {
+    async remove(
+        key: string,
+        database: string,
+        collection: string,
+        force = true
+    ): Promise<boolean> {
         if (isElectron || isBrowser || isWebWorker) {
-            await DefaultCacheFactory._getCacheDatabase(database, collection)?.removeItem(identifier);
+            await DefaultCacheFactory.table(database, collection)?.delete(key);
             return true;
         }
-        // console.log('not in web or electron or worker', '---->remove')
         return true;
     }
 

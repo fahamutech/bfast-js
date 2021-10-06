@@ -24,9 +24,7 @@ export class DatabaseController {
             `${BFastConfig.getInstance().databaseURL(this.appName)}`,
             createRule,
             {
-                headers: {
-                    'x-bfast-application-id': credential.applicationId
-                }
+                headers: {}
             },
             {
                 context: this.domainName,

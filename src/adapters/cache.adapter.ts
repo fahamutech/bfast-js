@@ -1,9 +1,28 @@
 import {RequestOptions} from "../controllers/query.controller";
 
 export abstract class CacheAdapter {
-    abstract set<T>(identifier: string, data: T, database: string, collection: string, options?: { dtl?: number, secure?: boolean }): Promise<T>;
-
-    abstract get<T>(identifier: string, database: string, collection: string, options?: { secure?: boolean }): Promise<T>;
+    abstract set<T>(
+        key: string,
+        data: T,
+        database: string,
+        collection: string
+    ): Promise<T>;
+    abstract setBulk<T>(
+        keys: string[],
+        data: T[],
+        database: string,
+        collection: string
+    ): Promise<T[]>;
+    abstract get<T>(
+        key: string,
+        database: string,
+        collection: string,
+    ): Promise<T | null>;
+    abstract getBulk<T>(
+        keys: string[],
+        database: string,
+        collection: string,
+    ): Promise<T[]>;
 
     abstract keys(database: string, collection: string): Promise<string[] | undefined>;
 
@@ -11,7 +30,7 @@ export abstract class CacheAdapter {
 
     abstract getAll(database: string, collection: string): Promise<any[]>;
 
-    abstract remove(identifier: string, database: string, collection: string, force?: boolean): Promise<boolean>;
+    abstract remove(key: string, database: string, collection: string, force?: boolean): Promise<boolean>;
 
     abstract cacheEnabled(appName: string, options?: RequestOptions): boolean;
 }

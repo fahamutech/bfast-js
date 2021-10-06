@@ -1,5 +1,12 @@
 import {CacheAdapter} from "../adapters/cache.adapter";
 import {BFastConfig} from "../conf";
+import {
+    saveForRemotePersist,
+    removeFromRemotePersist,
+    retrieveAllForRemotePersist,
+    retrieveOneForRemotePersist
+} from '../utils/syncs.util'
+import {SyncsModel} from "../models/syncs.model";
 
 export class CacheController {
 
@@ -22,8 +29,26 @@ export class CacheController {
         return this.cacheAdapter.clearAll(this.database, this.collection);
     }
 
-    async get<T>(identifier: string, options: { secure?: boolean } = {secure: false}): Promise<T> {
-        return this.cacheAdapter.get<T>(identifier, this.database, this.collection, {secure: options.secure});
+    async get<T>(key: string, options: { secure?: boolean } = {secure: false}): Promise<T | null> {
+        if (!key) {
+            throw {message: 'key of the data to retrieve required'};
+        }
+        return this.cacheAdapter.get<T>(
+            key,
+            this.database,
+            this.collection
+        );
+    }
+
+    async getBulk<T>(keys: string[], options: { secure?: boolean } = {secure: false}): Promise<T[] | null> {
+        if (!Array.isArray(keys)) {
+            throw {message: 'Array of keys required'};
+        }
+        return this.cacheAdapter.getBulk<T>(
+            keys,
+            this.database,
+            this.collection
+        );
     }
 
     async getAll(): Promise<Array<any>> {
@@ -35,11 +60,63 @@ export class CacheController {
         return filter(all);
     }
 
-    async set<T>(identifier: string, data: T, options: { dtl?: number, secure?: boolean } = {secure: false}): Promise<T> {
-        return this.cacheAdapter.set(identifier, data, this.database, this.collection, options);
+    async set<T>(key: string, data: T, options: { dtl?: number, secure?: boolean } = {secure: false}): Promise<T> {
+        if (!key) {
+            throw {message: 'key for the data is required'};
+        }
+        if (!data) {
+            throw {message: 'data to save to cache required'};
+        }
+        return this.cacheAdapter.set(key, data, this.database, this.collection);
     }
 
-    async remove(identifier: string, force = true): Promise<boolean> {
-        return this.cacheAdapter.remove(identifier, this.database, this.collection, true);
+    async setBulk<T>(keys: string[], data: T[], options: { dtl?: number, secure?: boolean } = {secure: false}): Promise<T[]> {
+        if (!Array.isArray(keys)) {
+            throw {message: 'Array of keys required'};
+        }
+        if (!Array.isArray(data)) {
+            throw {message: 'Array of data required'};
+        }
+        return this.cacheAdapter.setBulk(keys, data, this.database, this.collection);
+    }
+
+    async remove(key: string, force = true): Promise<boolean> {
+        if (!key) {
+            throw {message: 'key for data to remove required'};
+        }
+        return this.cacheAdapter.remove(key, this.database, this.collection, true);
+    }
+
+    async saveForRemotePersist(data: SyncsModel) {
+        const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
+        return saveForRemotePersist(
+            projectId,
+            data,
+            this.cacheAdapter
+        );
+    }
+
+    async removeFromRemotePersist(key: string) {
+        const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
+        return removeFromRemotePersist(
+            key, projectId, this.cacheAdapter
+        );
+    }
+
+    async retrieveAllForRemotePersist() {
+        const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
+        return retrieveAllForRemotePersist(
+            projectId,
+            this.cacheAdapter
+        );
+    }
+
+    async retrieveOneForRemotePersist(key: string) {
+        const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
+        return retrieveOneForRemotePersist(
+            projectId,
+            key,
+            this.cacheAdapter
+        );
     }
 }

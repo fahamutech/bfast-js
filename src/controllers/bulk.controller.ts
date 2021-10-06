@@ -18,7 +18,7 @@ export class BulkController {
     }
 
     async commit(options?: {
-        before: (transactionRequests: TransactionModel[]) => Promise<TransactionModel[]>,
+        before?: (transactionRequests: TransactionModel[]) => Promise<TransactionModel[]>,
         after?: () => Promise<void>,
         useMasterKey?: boolean
     }): Promise<any> {
@@ -88,7 +88,6 @@ export class BulkController {
     }
 
     static _extractResultFromServer(data: any) {
-        // console.log(data);
         if (data && data.hasOwnProperty('transaction')) {
             delete data['transaction'].commit?.errors;
             return data.transaction.commit;

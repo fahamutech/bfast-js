@@ -22,5 +22,5 @@ export {
     isNode,
     isBrowser,
     isWebWorker,
-    isElectron
+    isElectron,
 }
