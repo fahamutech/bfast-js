@@ -83,8 +83,8 @@ export class SyncsController {
         try {
             SyncsController?.yDocWebRtc?.disconnect();
             SyncsController?.yDocSocket?.disconnectBc();
-            SyncsController?.yDocPersistence?.destroy();
-            SyncsController?.yDoc?.destroy();
+            // SyncsController?.yDocPersistence?.destroy();
+            // SyncsController?.yDoc?.destroy();
             try {
                 SyncsController?.yDocWebRtc?.destroy();
                 SyncsController?.yDocSocket?.destroy();
