@@ -24,7 +24,7 @@ export abstract class CacheAdapter {
         collection: string,
     ): Promise<T[]>;
 
-    abstract keys(database: string, collection: string): Promise<string[] | undefined>;
+    abstract keys(database: string, collection: string): Promise<string[]>;
 
     abstract clearAll(database: string, collection: string): Promise<boolean>;
 

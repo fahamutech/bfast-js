@@ -14,8 +14,8 @@ export class DefaultCacheFactory implements CacheAdapter {
         if (isElectron || isBrowser || isWebWorker) {
             const table = await DefaultCacheFactory.table(database, collection);
             const keys = await this.keys(database, collection);
-            if (Array.isArray(keys)){
-               return await table?.bulkGet(keys) as any[];
+            if (Array.isArray(keys)) {
+                return await table?.bulkGet(keys) as any[];
             }
             return [];
         }
@@ -33,9 +33,14 @@ export class DefaultCacheFactory implements CacheAdapter {
         return undefined;
     }
 
-    async keys(database: string, collection: string): Promise<string[] | undefined> {
+    async keys(database: string, collection: string): Promise<string[]> {
         if (isElectron || isBrowser || isWebWorker) {
-            return await DefaultCacheFactory.table(database, collection)?.toCollection().keys() as string[];
+            const keys = await DefaultCacheFactory.table(database, collection)?.toCollection().keys() as string[];
+            if (Array.isArray(keys)) {
+                return keys;
+            } else {
+                return [];
+            }
         }
         return [];
     }
@@ -62,7 +67,7 @@ export class DefaultCacheFactory implements CacheAdapter {
     async getBulk<T>(keys: string[], database: string, collection: string): Promise<T[]> {
         if (isElectron || isBrowser || isWebWorker) {
             const table = DefaultCacheFactory.table(database, collection);
-            if (Array.isArray(keys)){
+            if (Array.isArray(keys)) {
                 return await table?.bulkGet(keys) as any[];
             }
             return [];

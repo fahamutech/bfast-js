@@ -52,7 +52,7 @@ export function sanitiseDocIdForUser(doc: any) {
     return doc;
 }
 
-export async function saveForRemotePersist(
+export async function addSyncs(
     projectId: string,
     data: SyncsModel,
     cacheAdapter: CacheAdapter
@@ -66,33 +66,41 @@ export async function saveForRemotePersist(
     );
 }
 
-export async function retrieveAllForRemotePersist(
+export async function getSyncsKeys(
     projectId: string,
     cacheAdapter: CacheAdapter
-): Promise<{
-    action: 'create' | 'update' | 'delete',
-    payload: { [key: string]: any }
-}[]> {
+): Promise<string[]> {
+    return cacheAdapter.keys(projectId, ConstantUtil.SYNCS_TABLE);
+}
+
+export async function getAllSyncs(
+    projectId: string,
+    cacheAdapter: CacheAdapter
+): Promise<SyncsModel[]> {
     return cacheAdapter.getAll(projectId, ConstantUtil.SYNCS_TABLE);
 }
 
-export async function retrieveOneForRemotePersist(
+export async function getOneSyncs(
     projectId: string,
     key: string,
     cacheAdapter: CacheAdapter
-): Promise<{
-    action: 'create' | 'update' | 'delete',
-    payload: { [key: string]: any }
-}> {
+): Promise<SyncsModel> {
     return await cacheAdapter.get(key, projectId, ConstantUtil.SYNCS_TABLE) as any;
 }
 
-export async function removeFromRemotePersist(
+export async function removeOneSyncs(
     key: string,
     projectId: string,
     cacheAdapter: CacheAdapter
 ): Promise<any> {
     return cacheAdapter.remove(key, projectId, ConstantUtil.SYNCS_TABLE);
+}
+
+export async function removeAllSyncs(
+    projectId: string,
+    cacheAdapter: CacheAdapter
+): Promise<any> {
+    return cacheAdapter.clearAll(projectId, ConstantUtil.SYNCS_TABLE);
 }
 
 export function observe(
@@ -108,7 +116,7 @@ export function observe(
     for (const key of Array.from(tEvent.keys.keys())) {
         switch (tEvent?.keys?.get(key)?.action) {
             case "add":
-                saveForRemotePersist(
+                addSyncs(
                     projectId,
                     {
                         action: "create",
@@ -119,7 +127,7 @@ export function observe(
                 ).catch(console.log);
                 break;
             case "delete":
-                saveForRemotePersist(
+                addSyncs(
                     projectId,
                     {
                         action: "delete",
@@ -135,7 +143,7 @@ export function observe(
                 const shaOfOld = sha1(JSON.stringify(od)).toString();
                 const shaOfNew = sha1(JSON.stringify(d)).toString();
                 if (!Array.isArray(d) && (shaOfNew !== shaOfOld)) {
-                    saveForRemotePersist(
+                    addSyncs(
                         projectId,
                         {
                             action: "update",

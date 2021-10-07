@@ -1,10 +1,12 @@
 import {CacheAdapter} from "../adapters/cache.adapter";
 import {BFastConfig} from "../conf";
 import {
-    saveForRemotePersist,
-    removeFromRemotePersist,
-    retrieveAllForRemotePersist,
-    retrieveOneForRemotePersist
+    addSyncs,
+    removeOneSyncs,
+    getAllSyncs,
+    getOneSyncs,
+    removeAllSyncs,
+    getSyncsKeys
 } from '../utils/syncs.util'
 import {SyncsModel} from "../models/syncs.model";
 
@@ -30,9 +32,9 @@ export class CacheController {
     }
 
     async get<T>(key: string, options: { secure?: boolean } = {secure: false}): Promise<T | null> {
-        if (!key) {
-            throw {message: 'key of the data to retrieve required'};
-        }
+        // if (!key) {
+        //     throw {message: 'key of the data to retrieve required'};
+        // }
         return this.cacheAdapter.get<T>(
             key,
             this.database,
@@ -61,12 +63,12 @@ export class CacheController {
     }
 
     async set<T>(key: string, data: T, options: { dtl?: number, secure?: boolean } = {secure: false}): Promise<T> {
-        if (!key) {
-            throw {message: 'key for the data is required'};
-        }
-        if (!data) {
-            throw {message: 'data to save to cache required'};
-        }
+        // if (!key) {
+        //     throw {message: 'key for the data is required'};
+        // }
+        // if (!data) {
+        //     throw {message: 'data to save to cache required'};
+        // }
         return this.cacheAdapter.set(key, data, this.database, this.collection);
     }
 
@@ -81,41 +83,56 @@ export class CacheController {
     }
 
     async remove(key: string, force = true): Promise<boolean> {
-        if (!key) {
-            throw {message: 'key for data to remove required'};
-        }
+        // if (!key) {
+        //     throw {message: 'key for data to remove required'};
+        // }
         return this.cacheAdapter.remove(key, this.database, this.collection, true);
     }
 
-    async saveForRemotePersist(data: SyncsModel) {
+    async addSyncs(data: SyncsModel) {
         const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
-        return saveForRemotePersist(
+        return addSyncs(
             projectId,
             data,
             this.cacheAdapter
         );
     }
 
-    async removeFromRemotePersist(key: string) {
+    async removeOneSyncs(key: string) {
         const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
-        return removeFromRemotePersist(
+        return removeOneSyncs(
             key, projectId, this.cacheAdapter
         );
     }
 
-    async retrieveAllForRemotePersist() {
+    async removeAllSyncs() {
         const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
-        return retrieveAllForRemotePersist(
+        return removeAllSyncs(
+            projectId, this.cacheAdapter
+        );
+    }
+
+    async getAllSyncs() {
+        const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
+        return getAllSyncs(
             projectId,
             this.cacheAdapter
         );
     }
 
-    async retrieveOneForRemotePersist(key: string) {
+    async getOneSyncs(key: string) {
         const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
-        return retrieveOneForRemotePersist(
+        return getOneSyncs(
             projectId,
             key,
+            this.cacheAdapter
+        );
+    }
+
+    async getSyncsKeys() {
+        const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
+        return getSyncsKeys(
+            projectId,
             this.cacheAdapter
         );
     }
