@@ -6,9 +6,16 @@ import {YMapEvent} from "yjs";
 import sha1 from "crypto-js/sha1";
 import {SyncsModel} from "../models/syncs.model";
 
-export function set(value: { [key: string]: any }, yMap: YMap<any> | undefined): void {
+export function set(
+    value: { [key: string]: any },
+    yMap: YMap<any> | undefined
+): { s: boolean, m: string, r: string } {
     if (!yMap || !value) {
-        return;
+        return {
+            s: false,
+            m: 'one of parameter is null',
+            r: 'no',
+        };
     }
     if (value.id) {
         value._id = value.id;
@@ -36,8 +43,18 @@ export function set(value: { [key: string]: any }, yMap: YMap<any> | undefined):
     }
     if (value.hasOwnProperty('_id')) {
         yMap.set(value._id, value);
+        return {
+            m: 'done',
+            s: true,
+            r: 'Ok'
+        }
     } else {
-        throw {message: 'please doc must have id/_id field', data: JSON.stringify(value, null, 4)};
+        return {
+            s: false,
+            m: 'please doc must have id/_id field',
+            r: JSON.stringify(value, null, 4)
+        };
+        // throw {message: 'please doc must have id/_id field', data: JSON.stringify(value, null, 4)};
     }
 }
 
