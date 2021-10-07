@@ -13,7 +13,9 @@ import {YMap} from "yjs/dist/src/types/YMap";
 import {observe, set} from "../utils/syncs.util";
 
 export class SyncsController {
-    private static instance: SyncsController | undefined;
+    private static instance: {
+        [key: string]: SyncsController | undefined
+    } = {}
     private static fields: {
         [key: string]: {
             yDoc: Y.Doc | undefined;
@@ -36,10 +38,10 @@ export class SyncsController {
                        bulkController: BulkController,
                        cacheAdapter: CacheAdapter,
                        databaseController: DatabaseController): SyncsController {
-        if (this.instance) {
-            return this.instance;
+        if (this.instance[treeName] && this.fields[treeName]) {
+            return <SyncsController>this.instance[treeName];
         }
-        this.instance = new SyncsController(
+        this.instance[treeName] = new SyncsController(
             treeName,
             databaseController,
             bulkController
@@ -67,7 +69,7 @@ export class SyncsController {
                 cacheAdapter
             );
         })
-        return this.instance;
+        return <SyncsController>this.instance[treeName];
     }
 
     changes(): SyncChangesController {
@@ -97,13 +99,15 @@ export class SyncsController {
             } catch (e) {
             }
             SyncsController.fields[this.treeName].yDoc = undefined;
-            SyncsController.instance = undefined;
+            SyncsController.instance[this.treeName] = undefined;
             SyncsController.fields[this.treeName].yDocWebRtc = undefined;
             SyncsController.fields[this.treeName].yDocSocket = undefined;
             SyncsController.fields[this.treeName].yDocPersistence = undefined;
             SyncsController.fields[this.treeName].yMap = undefined;
         } catch (e) {
             console.log(e, '**************');
+        } finally {
+            // console.log(SyncsController.fields[this.treeName])
         }
     }
 

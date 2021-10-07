@@ -38,14 +38,14 @@ export class BfastDatabase {
         return this.domain(name);
     }
 
-    syncs(name: string): SyncsController {
+    syncs(treeName: string): SyncsController {
         return SyncsController.getInstance(
             this.appName,
-            name,
+            treeName,
             BFastConfig.getInstance().credential(this.appName).projectId,
             this.bulk(),
             this.cacheAdapter,
-            this.tree(name),
+            this.tree(treeName),
         );
     }
 

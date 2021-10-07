@@ -42,22 +42,6 @@ describe('syncs', function () {
                     count += 1;
                     docs.push(r.snapshot);
                     if (count === 2) {
-                        // expect(docs).eql([
-                        //     {
-                        //         id: 'abc',
-                        //         name: 'jack',
-                        //         createdAt: 'leo',
-                        //         createdBy: null,
-                        //         updatedAt: 'leo',
-                        //     },
-                        //     {
-                        //         id: 'abcde',
-                        //         name: 'josh',
-                        //         createdBy: null,
-                        //         createdAt: 'leo',
-                        //         updatedAt: 'leo'
-                        //     }
-                        // ]);
                         done();
                         changes.close();
                         changes.close();
@@ -119,8 +103,8 @@ describe('syncs', function () {
                     // });
                     // done();
                     // if (response.snapshot.id === 'agex') {
-                        done();
-                        changes.close();
+                    done();
+                    changes.close();
                     // }
                 });
                 changes.set({
@@ -144,6 +128,45 @@ describe('syncs', function () {
                     expect(e.message).equal('please doc must have id/_id field');
                     changes.close()
                 }
+            });
+        });
+        describe('multiple changes', function () {
+            it('should listening for changes from different domain', function (done) {
+                const changes = database().syncs('test').changes();
+                const changes2 = database().syncs('test2').changes();
+                changes.set({
+                    id: 'j',
+                    name: 'jo'
+                });
+                changes2.set({
+                    id: 'e',
+                    t: 'eth'
+                });
+                setTimeout(() => {
+                    // console.log(changes.toJSON(),'*****1****');
+                    // console.log(changes2.toJSON(),'*****2****');
+                    should().exist(changes.toJSON());
+                    should().exist(changes2.toJSON());
+                    expect(changes2.toJSON()).not.eql(changes.toJSON());
+                    done();
+                }, 1000);
+            });
+            it('should listening for changes from one and disconnect to another', function (done) {
+                const c1 = database().syncs('test').changes();
+                const c2 = database().syncs('test2').changes();
+                setTimeout(() => {
+                    c1.close();
+                    try {
+                        c1.toJSON();
+                    } catch (e) {
+                        // console.log(e);
+                        should().exist(e);
+                        should().exist(e.message);
+                        expect(e.message).equal('syncs destroyed, initialize again');
+                    }
+                    should().exist(c2.toJSON());
+                    done();
+                }, 1000);
             });
         });
     });
