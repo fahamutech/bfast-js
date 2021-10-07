@@ -3,9 +3,8 @@ import {RulesController} from "./rules.controller";
 import {AuthController} from "./auth.controller";
 import {FileOptions, RequestOptions} from "./query.controller";
 import {FileModel} from "../models/file.model";
-import {Readable} from 'stream';
 import {HttpClientController} from "./http-client.controller";
-import {isNode} from "../utils/platform.util";
+import {isBrowserLike} from "../utils/platform.util";
 // @ts-ignore
 import FormData from 'form-data'
 import {getConfig} from "../bfast";
@@ -20,14 +19,14 @@ export class StorageController {
     }
 
     async save(file: FileModel, uploadProgress: (progress: any) => void, options?: FileOptions): Promise<string> {
-        if (isNode) {
-            try{
-                if (file && file.filename && file.data && file.data instanceof Readable) {
+        if (!isBrowserLike) {
+            try {
+                if (file && file.filename && file.data) {
                     return this._handleFileUploadInNode(file, uploadProgress, BFastConfig.getInstance().credential(this.appName), options);
                 } else {
                     throw new Error('file object to save is invalid, data and filename is required field');
                 }
-            }catch (e){
+            } catch (e) {
                 console.log(e);
                 throw e;
             }
@@ -45,7 +44,7 @@ export class StorageController {
         return this._handleFileRuleRequest(filesRule, 'list');
     }
 
-    getUrl(filename: string){
+    getUrl(filename: string) {
         const config = getConfig(this.appName);
         return `${config.databaseURL(this.appName)}/storage/${config.credential(this.appName).applicationId}/file/${filename}`;
     }

@@ -1,6 +1,6 @@
 {
   "name": "bfast",
-  "version": "5.4.9",
+  "version": "5.4.10",
   "description": "javascript client sdk for bfast::cloud project",
   "repository": "https://github.com/fahamutech/bfast-js",
   "main": "dist/bfast.node.js",
@@ -33,7 +33,7 @@
     "axios": "~0.22.0",
     "bufferutil": "~4.0.4",
     "comlink": "~4.3.1",
-    "crypto-js": "^4.1.1",
+    "crypto-es": "~1.2.7",
     "dexie": "~3.0.3",
     "form-data": "~4.0.0",
     "socket.io-client": "~4.2.0",

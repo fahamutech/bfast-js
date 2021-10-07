@@ -3,7 +3,7 @@ import {CacheAdapter} from "../adapters/cache.adapter";
 import {ConstantUtil} from "./constant.util";
 import {YMapEvent} from "yjs";
 // @ts-ignore
-import sha1 from "crypto-js/sha1";
+import {SHA1} from "crypto-es/lib/sha1.js";
 import {SyncsModel} from "../models/syncs.model";
 
 export function set(
@@ -74,7 +74,7 @@ export async function addSyncs(
     data: SyncsModel,
     cacheAdapter: CacheAdapter
 ): Promise<any> {
-    const _sha1 = sha1(JSON.stringify(data)).toString();
+    const _sha1 = SHA1(JSON.stringify(data)).toString();
     return cacheAdapter.set(
         _sha1,
         data,
@@ -157,8 +157,8 @@ export function observe(
             case "update":
                 const d = sanitiseDocIdForUser(yMap?.get(key));
                 const od = sanitiseDocIdForUser(tEvent?.keys?.get(key)?.oldValue);
-                const shaOfOld = sha1(JSON.stringify(od)).toString();
-                const shaOfNew = sha1(JSON.stringify(d)).toString();
+                const shaOfOld = SHA1(JSON.stringify(od)).toString();
+                const shaOfNew = SHA1(JSON.stringify(d)).toString();
                 if (!Array.isArray(d) && (shaOfNew !== shaOfOld)) {
                     addSyncs(
                         projectId,

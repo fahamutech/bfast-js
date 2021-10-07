@@ -8,4 +8,6 @@ export const isWebWorker = (typeof self === 'undefined' ? 'undefined' : _typeof(
 export const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
 
 // @ts-ignore
-export const isElectron = (typeof window !=='undefined' && typeof window.process !=="undefined" && typeof window.process.type!=="undefined")
+export const isElectron = (typeof window !=='undefined' && typeof window.process !=="undefined" && typeof window.process.type!=="undefined");
+
+export const isBrowserLike = (isElectron || isBrowser || isWebWorker)

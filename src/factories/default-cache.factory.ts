@@ -3,7 +3,7 @@ import {RequestOptions} from "../controllers/query.controller";
 import {isBrowser, isElectron, isWebWorker} from "../utils/platform.util";
 import {Dexie, Table} from "dexie";
 // @ts-ignore
-import sha1 from "crypto-js/sha1";
+import {SHA1} from "crypto-es/lib/sha1";
 
 export class DefaultCacheFactory implements CacheAdapter {
 
@@ -24,7 +24,7 @@ export class DefaultCacheFactory implements CacheAdapter {
 
     static table(database: string, collection: string): Table | undefined {
         if (isElectron || isBrowser || isWebWorker) {
-            const db = new Dexie(sha1(database).toString());
+            const db = new Dexie(SHA1(database).toString());
             db.version(1).stores({
                 [collection]: ""
             });
