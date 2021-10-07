@@ -4,6 +4,7 @@ import {BulkController} from "./bulk.controller";
 import {CacheAdapter} from "../adapters/cache.adapter";
 import {BFastConfig} from "../conf";
 import * as Y from "yjs";
+import {Doc} from "yjs";
 import {isBrowser, isElectron, isWebWorker} from "../utils/platform.util";
 import {IndexeddbPersistence} from "y-indexeddb";
 import {WebrtcProvider} from "y-webrtc";
@@ -12,12 +13,16 @@ import {YMap} from "yjs/dist/src/types/YMap";
 import {observe, set} from "../utils/syncs.util";
 
 export class SyncsController {
-    private static yDoc: Y.Doc | undefined;
-    private static yMap: YMap<any> | undefined;
-    private static yDocPersistence: IndexeddbPersistence | undefined;
-    private static yDocWebRtc: WebrtcProvider | undefined;
-    private static yDocSocket: WebsocketProvider | undefined;
     private static instance: SyncsController | undefined;
+    private static fields: {
+        [key: string]: {
+            yDoc: Y.Doc | undefined;
+            yMap: YMap<any> | undefined;
+            yDocPersistence: IndexeddbPersistence | undefined;
+            yDocWebRtc: WebrtcProvider | undefined;
+            yDocSocket: WebsocketProvider | undefined;
+        }
+    } = {};
 
     private constructor(
         private readonly treeName: string,
@@ -40,24 +45,25 @@ export class SyncsController {
             bulkController
         );
         const room = BFastConfig.getInstance().credential(appName).projectId + '_' + treeName;
-        this.yDoc = new Y.Doc();
+        this.fields[treeName] = {} as any;
+        this.fields[treeName].yDoc = new Y.Doc();
         if (isElectron || isBrowser || isWebWorker) {
-            this.yDocPersistence = new IndexeddbPersistence(room, this.yDoc);
+            this.fields[treeName].yDocPersistence = new IndexeddbPersistence(room, <Doc>this.fields[treeName].yDoc);
         }
-        this.yDocWebRtc = new WebrtcProvider(room, this.yDoc);
+        this.fields[treeName].yDocWebRtc = new WebrtcProvider(room, <Doc>this.fields[treeName].yDoc);
         // `wss://demos.yjs.dev`
-        this.yDocSocket = new WebsocketProvider(
+        this.fields[treeName].yDocSocket = new WebsocketProvider(
             'wss://demos.yjs.dev',
             room,
-            this.yDoc
+            <Doc>this.fields[treeName].yDoc
         );
-        this.yMap = this.yDoc.getMap(treeName);
-        this.yMap.observe(arg0 => {
+        this.fields[treeName].yMap = this.fields[treeName]?.yDoc?.getMap(treeName);
+        this.fields[treeName]?.yMap?.observe(arg0 => {
             observe(
                 arg0,
                 projectId,
                 treeName,
-                this.yMap,
+                this.fields[treeName].yMap,
                 cacheAdapter
             );
         })
@@ -65,15 +71,15 @@ export class SyncsController {
     }
 
     changes(): SyncChangesController {
-        if (!SyncsController.yMap) {
+        if (!SyncsController.fields[this.treeName].yMap) {
             throw {message: 'syncs destroyed initialize again'}
         }
         return new SyncChangesController(
             () => {
-                if (!SyncsController.yMap) {
+                if (!SyncsController.fields[this.treeName].yMap) {
                     throw {message: 'syncs destroyed, initialize again'}
                 }
-                return SyncsController?.yMap
+                return <YMap<any>>SyncsController?.fields[this.treeName].yMap
             },
             () => this.close()
         );
@@ -81,28 +87,28 @@ export class SyncsController {
 
     close() {
         try {
-            SyncsController?.yDocWebRtc?.disconnect();
-            SyncsController?.yDocSocket?.disconnectBc();
+            SyncsController?.fields[this.treeName].yDocWebRtc?.disconnect();
+            SyncsController?.fields[this.treeName].yDocSocket?.disconnectBc();
             // SyncsController?.yDocPersistence?.destroy();
             // SyncsController?.yDoc?.destroy();
             try {
-                SyncsController?.yDocWebRtc?.destroy();
-                SyncsController?.yDocSocket?.destroy();
+                SyncsController?.fields[this.treeName].yDocWebRtc?.destroy();
+                SyncsController?.fields[this.treeName].yDocSocket?.destroy();
             } catch (e) {
             }
-            SyncsController.yDoc = undefined;
+            SyncsController.fields[this.treeName].yDoc = undefined;
             SyncsController.instance = undefined;
-            SyncsController.yDocWebRtc = undefined;
-            SyncsController.yDocSocket = undefined;
-            SyncsController.yDocPersistence = undefined;
-            SyncsController.yMap = undefined;
+            SyncsController.fields[this.treeName].yDocWebRtc = undefined;
+            SyncsController.fields[this.treeName].yDocSocket = undefined;
+            SyncsController.fields[this.treeName].yDocPersistence = undefined;
+            SyncsController.fields[this.treeName].yMap = undefined;
         } catch (e) {
             console.log(e, '**************');
         }
     }
 
     async download(): Promise<any[]> {
-        const vs = SyncsController?.yMap?.values();
+        const vs = SyncsController?.fields[this.treeName].yMap?.values();
         const docs = Array.from(vs ? vs : []).map(y => {
             if (y._id) {
                 y.id = y._id;
@@ -139,7 +145,7 @@ export class SyncsController {
             pData = [];
         }
         for (const data of pData) {
-            set(data, SyncsController?.yMap);
+            set(data, SyncsController?.fields[this.treeName].yMap);
         }
         return pData;
     }
