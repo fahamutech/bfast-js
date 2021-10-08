@@ -2,8 +2,7 @@ import {CacheAdapter} from "../adapters/cache.adapter";
 import {RequestOptions} from "../controllers/query.controller";
 import {isBrowser, isElectron, isWebWorker} from "../utils/platform.util";
 import {Dexie, Table} from "dexie";
-// @ts-ignore
-import {SHA1} from "crypto-es/lib/sha1";
+import {sha1} from "crypto-hash";
 
 export class DefaultCacheFactory implements CacheAdapter {
 
@@ -22,9 +21,9 @@ export class DefaultCacheFactory implements CacheAdapter {
         return [];
     }
 
-    static table(database: string, collection: string): Table | undefined {
+    static async table(database: string, collection: string): Promise<Table | undefined> {
         if (isElectron || isBrowser || isWebWorker) {
-            const db = new Dexie(SHA1(database).toString());
+            const db = new Dexie(await sha1(database));
             db.version(1).stores({
                 [collection]: ""
             });
@@ -35,7 +34,8 @@ export class DefaultCacheFactory implements CacheAdapter {
 
     async keys(database: string, collection: string): Promise<string[]> {
         if (isElectron || isBrowser || isWebWorker) {
-            const keys = await DefaultCacheFactory.table(database, collection)?.toCollection().keys() as string[];
+            const t = await DefaultCacheFactory.table(database, collection);
+            const keys = await t?.toCollection().keys() as string[];
             if (Array.isArray(keys)) {
                 return keys;
             } else {
@@ -47,7 +47,8 @@ export class DefaultCacheFactory implements CacheAdapter {
 
     async clearAll(database: string, collection: string): Promise<boolean> {
         if (isElectron || isBrowser || isWebWorker) {
-            await DefaultCacheFactory.table(database, collection)?.clear();
+            const t = await DefaultCacheFactory.table(database, collection);
+            await t?.clear();
             return true;
         }
         return true;
@@ -59,14 +60,15 @@ export class DefaultCacheFactory implements CacheAdapter {
         collection: string
     ): Promise<T | null> {
         if (isElectron || isBrowser || isWebWorker) {
-            return DefaultCacheFactory.table(database, collection)?.get(key);
+            const t = await DefaultCacheFactory.table(database, collection);
+            return t?.get(key);
         }
         return null;
     }
 
     async getBulk<T>(keys: string[], database: string, collection: string): Promise<T[]> {
         if (isElectron || isBrowser || isWebWorker) {
-            const table = DefaultCacheFactory.table(database, collection);
+            const table = await DefaultCacheFactory.table(database, collection);
             if (Array.isArray(keys)) {
                 return await table?.bulkGet(keys) as any[];
             }
@@ -83,7 +85,8 @@ export class DefaultCacheFactory implements CacheAdapter {
         options: { dtl?: number, secure?: boolean } = {secure: false}
     ): Promise<any> {
         if (isElectron || isBrowser || isWebWorker) {
-            await DefaultCacheFactory.table(database, collection)?.put(data, key);
+            const t = await DefaultCacheFactory.table(database, collection);
+            await t?.put(data, key);
             return data;
         }
         return null as any;
@@ -96,7 +99,8 @@ export class DefaultCacheFactory implements CacheAdapter {
         collection: string
     ): Promise<any> {
         if (isElectron || isBrowser || isWebWorker) {
-            await DefaultCacheFactory.table(database, collection)?.bulkPut(data, keys, {allKeys: true});
+            const t = await DefaultCacheFactory.table(database, collection);
+            await t?.bulkPut(data, keys, {allKeys: true});
             return keys;
         }
         return null as any;
@@ -109,7 +113,8 @@ export class DefaultCacheFactory implements CacheAdapter {
         force = true
     ): Promise<boolean> {
         if (isElectron || isBrowser || isWebWorker) {
-            await DefaultCacheFactory.table(database, collection)?.delete(key);
+            const t = await DefaultCacheFactory.table(database, collection);
+            await t?.delete(key);
             return true;
         }
         return true;

@@ -51,11 +51,10 @@ export class SyncsController {
         this.fields[treeName].yDoc = new Y.Doc();
         if (isElectron || isBrowser || isWebWorker) {
             this.fields[treeName].yDocPersistence = new IndexeddbPersistence(room, <Doc>this.fields[treeName].yDoc);
+            this.fields[treeName].yDocWebRtc = new WebrtcProvider(room, <Doc>this.fields[treeName].yDoc);
         }
-        this.fields[treeName].yDocWebRtc = new WebrtcProvider(room, <Doc>this.fields[treeName].yDoc);
-        // `wss://demos.yjs.dev`
         this.fields[treeName].yDocSocket = new WebsocketProvider(
-            'wss://demos.yjs.dev',
+            'wss://yjs.bfast.fahamutech.com',
             room,
             <Doc>this.fields[treeName].yDoc
         );
@@ -67,8 +66,8 @@ export class SyncsController {
                 treeName,
                 this.fields[treeName].yMap,
                 cacheAdapter
-            );
-        })
+            ).catch(console.log);
+        });
         return <SyncsController>this.instance[treeName];
     }
 
@@ -94,8 +93,15 @@ export class SyncsController {
             // SyncsController?.yDocPersistence?.destroy();
             // SyncsController?.yDoc?.destroy();
             try {
-                SyncsController?.fields[this.treeName].yDocWebRtc?.destroy();
+                SyncsController?.fields[this.treeName].yDocSocket?.disconnect();
+            } catch (e) {
+            }
+            try {
                 SyncsController?.fields[this.treeName].yDocSocket?.destroy();
+            } catch (e) {
+            }
+            try {
+                SyncsController?.fields[this.treeName].yDocWebRtc?.destroy();
             } catch (e) {
             }
             SyncsController.fields[this.treeName].yDoc = undefined;
