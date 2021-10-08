@@ -15,7 +15,7 @@ export class SyncChangesController {
         return this.yMap().get(key);
     }
 
-    set(value: { [key: string]: any }): any {
+    set(value: { id: string, [key: string]: any }): any {
         return set(value, this.yMap());
     }
 
