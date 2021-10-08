@@ -6,7 +6,7 @@ import {sha1} from "crypto-hash";
 import {SyncsModel} from "../models/syncs.model";
 
 export function set(
-    value: { [key: string]: any },
+    value: { id: string, [key: string]: any },
     yMap: YMap<any> | undefined
 ): { s: boolean, m: string, r: string } {
     if (!yMap || !value) {
@@ -16,15 +16,11 @@ export function set(
             r: 'no',
         };
     }
-    if (value.id) {
-        value._id = value.id;
-        delete value.id;
-    }
-    if (value._created_at) {
+    if (value._created_at && typeof value._created_at === "string" ) {
         value.createdAt = value._created_at;
         delete value._created_at;
     }
-    if (value._updated_at) {
+    if (value._updated_at && typeof value._updated_at === "string" ) {
         value.updatedAt = value._updated_at;
         delete value._updated_at;
     }
@@ -40,8 +36,8 @@ export function set(
     if (!value.hasOwnProperty('updatedAt')) {
         value.updatedAt = new Date().toISOString();
     }
-    if (value.hasOwnProperty('_id')) {
-        yMap.set(value._id, value);
+    if (value.hasOwnProperty('id')) {
+        yMap.set(value.id, value);
         return {
             m: 'done',
             s: true,
@@ -50,7 +46,7 @@ export function set(
     } else {
         return {
             s: false,
-            m: 'please doc must have id/_id field',
+            m: 'please doc must have id field',
             r: JSON.stringify(value, null, 4)
         };
         // throw {message: 'please doc must have id/_id field', data: JSON.stringify(value, null, 4)};

@@ -125,7 +125,7 @@ describe('syncs', function () {
                 } catch (e) {
                     // console.log(e);
                     should().exist(e);
-                    expect(e.message).equal('please doc must have id/_id field');
+                    expect(e.message).equal('please doc must have id field');
                     changes.close()
                 }
             });
