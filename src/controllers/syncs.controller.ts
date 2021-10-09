@@ -10,7 +10,7 @@ import {IndexeddbPersistence} from "y-indexeddb";
 import {WebrtcProvider} from "y-webrtc";
 import {WebsocketProvider} from "y-websocket";
 import {YMap} from "yjs/dist/src/types/YMap";
-import {observe, set} from "../utils/syncs.util";
+import {set} from "../utils/syncs.util";
 
 export class SyncsController {
     private static instance: {
@@ -28,6 +28,8 @@ export class SyncsController {
 
     private constructor(
         private readonly treeName: string,
+        private readonly projectId: string,
+        private readonly cacheAdapter: CacheAdapter,
         private readonly databaseController: DatabaseController,
         private readonly bulkController: BulkController) {
     }
@@ -43,6 +45,8 @@ export class SyncsController {
         }
         this.instance[treeName] = new SyncsController(
             treeName,
+            projectId,
+            cacheAdapter,
             databaseController,
             bulkController
         );
@@ -59,15 +63,15 @@ export class SyncsController {
             <Doc>this.fields[treeName].yDoc
         );
         this.fields[treeName].yMap = this.fields[treeName]?.yDoc?.getMap(treeName);
-        this.fields[treeName]?.yMap?.observe(arg0 => {
-            observe(
-                arg0,
-                projectId,
-                treeName,
-                this.fields[treeName].yMap,
-                cacheAdapter
-            ).catch(console.log);
-        });
+        // this.fields[treeName]?.yMap?.observe(arg0 => {
+        //     observe(
+        //         arg0,
+        //         projectId,
+        //         treeName,
+        //         this.fields[treeName].yMap,
+        //         cacheAdapter
+        //     ).catch(console.log);
+        // });
         return <SyncsController>this.instance[treeName];
     }
 
@@ -76,6 +80,9 @@ export class SyncsController {
             throw {message: 'syncs destroyed initialize again'}
         }
         return new SyncChangesController(
+            this.projectId,
+            this.treeName,
+            this.cacheAdapter,
             () => {
                 if (!SyncsController.fields[this.treeName].yMap) {
                     throw {message: 'syncs destroyed, initialize again'}

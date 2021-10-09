@@ -1,9 +1,13 @@
 import {YMapEvent} from 'yjs';
 import {YMap} from 'yjs/dist/src/types/YMap';
-import {set} from "../utils/syncs.util";
+import {addSyncs, set} from "../utils/syncs.util";
+import {CacheAdapter} from "../adapters/cache.adapter";
 
 export class SyncChangesController {
-    constructor(private readonly yMap: () => YMap<any>,
+    constructor(private readonly projectId: string,
+                private readonly treeName: string,
+                private readonly cacheAdapter: CacheAdapter,
+                private readonly yMap: () => YMap<any>,
                 private readonly destroy: () => void) {
     }
 
@@ -16,11 +20,31 @@ export class SyncChangesController {
     }
 
     set(value: { id: string, [key: string]: any }): any {
-        return set(value, this.yMap());
+        const r = set(value, this.yMap());
+        if (!!r?.s) {
+            addSyncs(
+                this.projectId,
+                {
+                    action: "create",
+                    tree: this.treeName,
+                    payload: value
+                },
+                this.cacheAdapter
+            ).catch(console.log);
+        }
     }
 
     delete(key: string): void {
-        this.yMap().delete(key)
+        this.yMap().delete(key);
+        addSyncs(
+            this.projectId,
+            {
+                action: "delete",
+                tree: this.treeName,
+                payload: {id: key}
+            },
+            this.cacheAdapter
+        ).catch(console.log);
     }
 
     has(key: string): boolean {
@@ -48,20 +72,12 @@ export class SyncChangesController {
         snapshot: any,
     }) => void): { unobserve: () => void } {
         const observer = async (tEvent: YMapEvent<any>) => {
-            function sanitiseDocId(doc: any) {
-                if (!doc) {
-                    return null;
-                }
-                doc.id = doc._id;
-                delete doc._id;
-                return doc;
-            }
             for (const key of Array.from(tEvent.keys.keys())) {
                 switch (tEvent?.keys?.get(key)?.action) {
                     case "add":
                         listener({
                             name: "create",
-                            snapshot: sanitiseDocId(this.yMap().get(key))
+                            snapshot: this.yMap().get(key)
                         });
                         break;
                     case "delete":
@@ -76,7 +92,7 @@ export class SyncChangesController {
                         if (!Array.isArray(d) && JSON.stringify(d) !== JSON.stringify(od)) {
                             listener({
                                 name: "update",
-                                snapshot: sanitiseDocId(d)
+                                snapshot: d
                             });
                         }
                         break;

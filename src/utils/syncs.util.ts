@@ -1,7 +1,6 @@
 import {YMap} from "yjs/dist/src/types/YMap";
 import {CacheAdapter} from "../adapters/cache.adapter";
 import {ConstantUtil} from "./constant.util";
-import {YMapEvent} from "yjs";
 import {sha1} from "crypto-hash";
 import {SyncsModel} from "../models/syncs.model";
 
@@ -69,6 +68,10 @@ export async function addSyncs(
     data: SyncsModel,
     cacheAdapter: CacheAdapter
 ): Promise<any> {
+    if (!data?.payload?.hasOwnProperty('id')){
+        console.log('can not add data for syncs it does not have id field');
+        return;
+    }
     const _sha1 = await sha1(JSON.stringify(data));
     return cacheAdapter.set(
         _sha1,
@@ -115,57 +118,57 @@ export async function removeAllSyncs(
     return cacheAdapter.clearAll(projectId, ConstantUtil.SYNCS_TABLE);
 }
 
-export async function observe(
-    tEvent: YMapEvent<any>,
-    projectId: string,
-    tree: string,
-    yMap: YMap<any> | undefined,
-    cacheAdapter: CacheAdapter
-) {
-    if (!yMap) {
-        return;
-    }
-    for (const key of Array.from(tEvent.keys.keys())) {
-        switch (tEvent?.keys?.get(key)?.action) {
-            case "add":
-                addSyncs(
-                    projectId,
-                    {
-                        action: "create",
-                        tree,
-                        payload: sanitiseDocIdForUser(yMap.get(key))
-                    },
-                    cacheAdapter
-                ).catch(console.log);
-                break;
-            case "delete":
-                addSyncs(
-                    projectId,
-                    {
-                        action: "delete",
-                        tree,
-                        payload: {id: key}
-                    },
-                    cacheAdapter
-                ).catch(console.log);
-                break;
-            case "update":
-                const d = sanitiseDocIdForUser(yMap?.get(key));
-                const od = sanitiseDocIdForUser(tEvent?.keys?.get(key)?.oldValue);
-                const shaOfOld = await sha1(JSON.stringify(od));
-                const shaOfNew = await sha1(JSON.stringify(d));
-                if (!Array.isArray(d) && (shaOfNew !== shaOfOld)) {
-                    addSyncs(
-                        projectId,
-                        {
-                            action: "update",
-                            tree,
-                            payload: sanitiseDocIdForUser(yMap?.get(key))
-                        },
-                        cacheAdapter
-                    ).catch(console.log);
-                }
-                break;
-        }
-    }
-}
+// export async function observe(
+//     tEvent: YMapEvent<any>,
+//     projectId: string,
+//     tree: string,
+//     yMap: YMap<any> | undefined,
+//     cacheAdapter: CacheAdapter
+// ) {
+//     if (!yMap) {
+//         return;
+//     }
+//     for (const key of Array.from(tEvent.keys.keys())) {
+//         switch (tEvent?.keys?.get(key)?.action) {
+//             case "add":
+//                 addSyncs(
+//                     projectId,
+//                     {
+//                         action: "create",
+//                         tree,
+//                         payload: sanitiseDocIdForUser(yMap.get(key))
+//                     },
+//                     cacheAdapter
+//                 ).catch(console.log);
+//                 break;
+//             case "delete":
+//                 addSyncs(
+//                     projectId,
+//                     {
+//                         action: "delete",
+//                         tree,
+//                         payload: {id: key}
+//                     },
+//                     cacheAdapter
+//                 ).catch(console.log);
+//                 break;
+//             case "update":
+//                 const d = sanitiseDocIdForUser(yMap?.get(key));
+//                 const od = sanitiseDocIdForUser(tEvent?.keys?.get(key)?.oldValue);
+//                 const shaOfOld = await sha1(JSON.stringify(od));
+//                 const shaOfNew = await sha1(JSON.stringify(d));
+//                 if (!Array.isArray(d) && (shaOfNew !== shaOfOld)) {
+//                     addSyncs(
+//                         projectId,
+//                         {
+//                             action: "update",
+//                             tree,
+//                             payload: sanitiseDocIdForUser(yMap?.get(key))
+//                         },
+//                         cacheAdapter
+//                     ).catch(console.log);
+//                 }
+//                 break;
+//         }
+//     }
+// }
