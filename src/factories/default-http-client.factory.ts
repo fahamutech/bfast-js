@@ -27,6 +27,10 @@ export class DefaultHttpClientFactory implements HttpClientAdapter {
     }
 
     async post<T = any, R = RestResponse<T>>(url: string, data: any, config: RestRequestConfig, info: HttpRequestInfoModel): Promise<R> {
+        config = Object.assign(config, {
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
+        })
         return axios.post(url, data, config as any);
     }
 
