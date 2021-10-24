@@ -1,13 +1,6 @@
 import {CacheAdapter} from "../adapters/cache.adapter";
 import {BFastConfig} from "../conf";
-import {
-    addSyncs,
-    removeOneSyncs,
-    getAllSyncs,
-    getOneSyncs,
-    removeAllSyncs,
-    getSyncsKeys
-} from '../utils/syncs.util'
+import {addSyncs, removeOneSyncs, getAllSyncs, getOneSyncs, removeAllSyncs, getSyncsKeys} from '../utils/syncs.util'
 import {SyncsModel} from "../models/syncs.model";
 
 export class CacheController {
