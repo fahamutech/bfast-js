@@ -32,30 +32,39 @@ export class QueryController {
                 private readonly appName: string) {
     }
 
-    orderBy(field: string, value: 'asc' | 'desc' = 'asc', options?: RequestOptions) {
-        if (this?.query?.filter[field]?.$fn) {
-            Object.assign(this.query.filter[field], {
-                $orderBy: value
-            });
-        } else {
-            Object.assign(this.query.filter, {
-                [field]: {
-                    $fn: 'return true',
-                    $orderBy: value
-                }
-            });
+    orderBy(field: string, value: 'asc' | 'desc'  = 'asc'): QueryController {
+        let _value = 1;
+        if (value === "asc"){
+            _value = 1;
         }
-        if (typeof options?.limit === "number"){
-            Object.assign(this.query.filter[field], {
-                $limit: options.limit
-            });
+        if (value === "desc"){
+            _value = -1;
         }
-        if (typeof options?.skip === "number"){
-            Object.assign(this.query.filter[field], {
-                $skip: options.skip
-            });
-        }
-        return this.find(options);
+        // if (this?.query?.filter[field]?.$fn) {
+        //     Object.assign(this.query.filter[field], {
+        //         $orderBy: value
+        //     });
+        // } else {
+        //     Object.assign(this.query.filter, {
+        //         [field]: {
+        //             $fn: 'return true',
+        //             $orderBy: value
+        //         }
+        //     });
+        // }
+        // if (typeof options?.limit === "number"){
+        //     Object.assign(this.query.filter[field], {
+        //         $limit: options.limit
+        //     });
+        // }
+        // if (typeof options?.skip === "number"){
+        //     Object.assign(this.query.filter[field], {
+        //         $skip: options.skip
+        //     });
+        // }
+        // return this.find(options);
+        this.query.orderBy?.push({[field]: _value});
+        return this;
     }
 
     cids(value: boolean) {
@@ -98,60 +107,54 @@ export class QueryController {
     }
 
     notEqualTo(field: string, value: any): QueryController {
-
         Object.assign(this.query.filter, {
             [field]: {
-                $fn: `return it !== ${QueryController.parseFnValue(value)};`
+                $ne: value
             }
         });
         return this;
     }
 
     greaterThan(field: string, value: any): QueryController {
-
         Object.assign(this.query.filter, {
             [field]: {
-                $fn: `return it > ${QueryController.parseFnValue(value)};`
+                $gt: value
             }
         });
         return this;
     }
 
     greaterThanOrEqual(field: string, value: any): QueryController {
-
         Object.assign(this.query.filter, {
             [field]: {
-                $fn: `return it >= ${QueryController.parseFnValue(value)};`
+                $gte: value
             }
         });
         return this;
     }
 
     includesIn(field: string, value: any[]): QueryController {
-
         Object.assign(this.query.filter, {
             [field]: {
-                $fn: `return ${QueryController.parseFnValue(value)}.includes(it);`
+                $in: value
             }
         });
         return this;
     }
 
     notIncludesIn(field: string, value: any[]): QueryController {
-
         Object.assign(this.query.filter, {
             [field]: {
-                $fn: `return !${QueryController.parseFnValue(value)}.includes(it);`
+                $nin: value
             }
         });
         return this;
     }
 
     lessThan(field: string, value: any): QueryController {
-
         Object.assign(this.query.filter, {
             [field]: {
-                $fn: `return it < ${QueryController.parseFnValue(value)};`
+                $lt: value
             }
         });
         return this;
@@ -161,17 +164,16 @@ export class QueryController {
 
         Object.assign(this.query.filter, {
             [field]: {
-                $fn: `return it <= ${QueryController.parseFnValue(value)};`
+                $lte: value
             }
         });
         return this;
     }
 
     exists(field: string): QueryController {
-
         Object.assign(this.query.filter, {
             [field]: {
-                $fn: `return it?true:false;`
+                $exists: true
             }
         });
         return this;
@@ -181,7 +183,8 @@ export class QueryController {
 
         Object.assign(this.query.filter, {
             [field]: {
-                $fn: `return it?.toString()?.search(new RegExp(${QueryController.parseFnValue(regex)}, ${QueryController.parseFnValue(flags)})) >= 0;`
+                $regex: regex,
+                $options: flags
             }
         });
         return this;
@@ -212,8 +215,7 @@ export class QueryController {
             BFastConfig.getInstance().databaseURL(this.appName),
             deleteRule,
             {
-                headers: {
-                }
+                headers: {}
             },
             {
                 context: this.domain,

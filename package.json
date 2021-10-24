@@ -1,6 +1,6 @@
 {
   "name": "bfast",
-  "version": "5.4.16",
+  "version": "6.0.0-alpha.0",
   "description": "javascript client sdk for bfast::cloud project",
   "repository": "https://github.com/fahamutech/bfast-js",
   "main": "dist/bfast.node.js",
@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@types/node": "~14.14.31",
-    "bfast-database-core": "~2.1.10",
+    "bfast-database-core": "~3.0.0-alpha.1",
     "bfast-function": "~1.13.5",
     "chai": "^4.3.4",
     "ipfs-only-hash": "~4.0.0",

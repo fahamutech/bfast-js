@@ -2,11 +2,11 @@ import {AppCredentials} from "../conf";
 import {TransactionModel} from "../models/TransactionModel";
 import {QueryModel} from "../models/QueryModel";
 import {UpdateModel} from "../models/UpdateOperation";
-import {AuthController} from "./auth.controller";
 import {RequestOptions} from "./query.controller";
+import {AggregateModel} from "../models/aggregate.model";
 
 export class RulesController {
-    constructor(private readonly authController: AuthController) {
+    constructor() {
     }
 
     async createRule(domain: string, data: any, appCredential: AppCredentials, options?: RequestOptions): Promise<Object> {
@@ -94,24 +94,24 @@ export class RulesController {
         return this.addToken(updateRule);
     }
 
-    // async aggregateRule(
-    //     domain: string,
-    //     pipeline: any[] | AggregateModel,
-    //     appCredentials: AppCredentials,
-    //     options?: RequestOptions
-    // ): Promise<Object> {
-    //     const aggregateRule = {};
-    //     if (options && options?.useMasterKey === true) {
-    //         Object.assign(aggregateRule, {
-    //             'masterKey': appCredentials.appPassword
-    //         });
-    //     }
-    //     Object.assign(aggregateRule, {
-    //         applicationId: appCredentials.applicationId,
-    //         [`aggregate${domain}`]: pipeline
-    //     });
-    //     return this.addToken(aggregateRule);
-    // }
+    async aggregateRule(
+        domain: string,
+        pipeline: any[] | AggregateModel,
+        appCredentials: AppCredentials,
+        options?: RequestOptions
+    ): Promise<Object> {
+        const aggregateRule = {};
+        if (options && options?.useMasterKey === true) {
+            Object.assign(aggregateRule, {
+                'masterKey': appCredentials.appPassword
+            });
+        }
+        Object.assign(aggregateRule, {
+            applicationId: appCredentials.applicationId,
+            [`aggregate${domain}`]: pipeline
+        });
+        return this.addToken(aggregateRule);
+    }
 
     async queryRule(domain: string, queryModel: QueryModel, appCredentials: AppCredentials, options?: RequestOptions): Promise<Object> {
         const queryRule = {};

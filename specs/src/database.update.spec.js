@@ -98,21 +98,20 @@ describe('update', function () {
             it('should upsert a doc field by query filter when told so', async function () {
                 const r = await database().table('test')
                     .query()
-                    .equalTo('item','myself')
+                    .byId('xpn')
                     .updateBuilder()
                     .upsert(true)
-                    .set('id','xpn')
                     .set('item', 'xps9')
                     .set('updatedAt','leo')
                     .set('createdAt','leo')
                     .update();
                 should().exist(r);
-                expect(r).eql([{
+                expect(r).eql({
                     id: 'xpn',
-                    item: 'myself',
+                    item: 'xps9',
                     updatedAt: 'leo',
                     createdAt: 'leo'
-                }]);
+                });
             });
             it('should creat non exist field', async function () {
                 const r = await database().table('test')
@@ -226,20 +225,21 @@ describe('update', function () {
             it('should upsert and increment a doc field by filter when told so', async function () {
                 const r = await database().table('test')
                     .query()
-                    .equalTo('loc','man')
+                    .byId('josh3')
+                    // .equalTo('loc','man')
                     .updateBuilder()
                     .upsert(true)
                     .increment('qty', 10)
-                    .set('id','josh3')
+                    // .set('id','josh3')
                     .set('updatedAt','leo')
                     .update();
                 should().exist(r);
-                expect(r).eql([{
+                expect(r).eql({
                     qty: 10,
                     id: 'josh3',
-                    loc: 'man',
+                    // loc: 'man',
                     updatedAt: 'leo'
-                }]);
+                });
             });
             // it('should decrement a doc field by id', async function () {
             //     const r = await database().table('test')

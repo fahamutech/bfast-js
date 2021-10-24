@@ -1,11 +1,9 @@
-const {BfastDatabaseCore, EnvUtil} = require('bfast-database-core');
+const {loadEnv,initialize} = require('bfast-database-core');
 const bfast = require("../../dist/bfast.node");
 const {config} = require("../test.config");
-const envUtil = new EnvUtil();
-let myConfig = envUtil.loadEnv();
+let myConfig = loadEnv();
 myConfig = Object.assign(myConfig, config)
-const bfd = new BfastDatabaseCore();
-const webService = bfd.init(myConfig);
+const webService = initialize(myConfig);
 
 bfast.init({
     applicationId: myConfig.applicationId,
@@ -18,8 +16,6 @@ bfast.init({
 module.exports.rests = webService.rest().rules;
 module.exports.restsjwk = webService.rest().jwk;
 module.exports.changes = webService.realtime(myConfig).changes;
-module.exports.syncs = webService.realtime(myConfig).syncs;
-module.exports.syncsEndpoint = webService.realtime(myConfig).syncsEndpoint;
 for (const fR of Object.keys(webService.storage())) {
     module.exports[fR] = webService.storage()[fR];
 }
