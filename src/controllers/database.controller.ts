@@ -4,6 +4,7 @@ import {RulesController} from "./rules.controller";
 import {HttpClientController} from "./http-client.controller";
 import {AuthController} from "./auth.controller";
 import {extractResultFromServer} from "../utils/data.util";
+import {AggregateController} from "./aggregate.controller";
 
 export class DatabaseController {
 
@@ -45,7 +46,7 @@ export class DatabaseController {
             return await this.query()
                 .skip(query && query.skip ? query.skip : 0)
                 .size(totalCount as number)
-                .cids(query && query.cids ? query.cids : false)
+                // .cids(query && query.cids ? query.cids : false)
                 .hashes(query && query.hashes ? query.hashes : [])
                 .find(options);
         } catch (e) {
@@ -55,13 +56,13 @@ export class DatabaseController {
 
     async get<T>(
         id: string,
-        cids = false,
+        // cids = false,
         options?: RequestOptions
     ): Promise<T> {
         return this.query()
             .byId(id)
             .hashes([])
-            .cids(cids)
+            // .cids(cids)
             .find<T>(options);
     }
 
@@ -73,6 +74,17 @@ export class DatabaseController {
             this.authController,
             this.appName);
     }
+
+    aggregate(): AggregateController{
+        return new AggregateController(
+            this.domainName,
+            this.httpClientController,
+            this.rulesController,
+            this.authController,
+            this.appName
+        );
+    }
+
 
     static _getErrorMessage(e: any) {
         if (e.message) {

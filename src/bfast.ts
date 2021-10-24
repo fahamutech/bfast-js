@@ -29,7 +29,7 @@ export function database(appName: string = BFastConfig.DEFAULT_APP): BfastDataba
         httpAdapter(config, appName)
     )
     const authController = new AuthController(appName, authCache, authAdapter(config, appName));
-    const rulesController = new RulesController(authController)
+    const rulesController = new RulesController()
     return new BfastDatabase(
         appName,
         restController,
@@ -87,7 +87,7 @@ export function storage(appName = BFastConfig.DEFAULT_APP): StorageController {
         authCacheController,
         authAdapter(config, appName)
     );
-    const rulesController = new RulesController(authController)
+    const rulesController = new RulesController()
     return new StorageController(
         new HttpClientController(
             appName,

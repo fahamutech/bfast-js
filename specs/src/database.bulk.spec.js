@@ -43,26 +43,6 @@ describe('bulk', function () {
             })
             .commit();
         should().exist(r);
-        expect(r).eql({
-            createusers: {
-                id: 'doeid',
-                name: 'doe',
-                createdAt: 'leo',
-                updatedAt: 'leo',
-            },
-            updatetest: {
-                item: 'xps',
-                price: 500,
-                id: 'xid',
-                createdAt: 'leo',
-                updatedAt: 'leo',
-                createdBy: null
-            },
-            deletetest: [
-                {
-                    id: 'xid2'
-                }
-            ]
-        })
+        expect(r).eql({});
     });
 });

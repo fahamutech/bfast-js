@@ -46,7 +46,7 @@ export class StorageController {
 
     getUrl(filename: string) {
         const config = getConfig(this.appName);
-        return `${config.databaseURL(this.appName)}/storage/${config.credential(this.appName).applicationId}/file/${filename}`;
+        return `${config.databaseURL(this.appName,'')}/storage/${config.credential(this.appName).applicationId}/file/${filename}`;
     }
 
     async delete(filename: string, options?: RequestOptions): Promise<string> {
@@ -135,7 +135,7 @@ export class StorageController {
             uploadProgress,
             options
         );
-        let databaseUrl = BFastConfig.getInstance().databaseURL(this.appName);
+        let databaseUrl = BFastConfig.getInstance().databaseURL(this.appName,'');
         return databaseUrl + response.data.urls[0];
     }
 
@@ -158,7 +158,7 @@ export class StorageController {
         const response = await this._fileUploadRequest(
             formData, headers, appCredentials.applicationId, uploadProgress, options
         )
-        let databaseUrl = BFastConfig.getInstance().databaseURL(this.appName);
+        let databaseUrl = BFastConfig.getInstance().databaseURL(this.appName,'');
         return databaseUrl + response.data.urls[0];
     }
 }

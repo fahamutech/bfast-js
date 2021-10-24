@@ -1,4 +1,4 @@
-const {EnvUtil} = require('bfast-database-core');
+const {getEnv} = require('bfast-database-core');
 const mongodb = require('mongodb');
 
 const mongoMemoryReplSet = () => {
@@ -27,13 +27,13 @@ exports.config = {
     projectId: 'bfast_test',
     port: '3111',
     logs: false,
-    web3Token: new EnvUtil().getEnv(process.env['WEB_3_TOKEN']),
+    web3Token: getEnv(process.env['WEB_3_TOKEN']),
     adapters: {
         s3Storage: undefined
     },
     masterKey: 'bfast_test',
     taarifaToken: undefined,
-    mongoDbUri: 'mongodb://localhost/_test',
+    databaseURI: 'mongodb://localhost/_test',
     rsaKeyPairInJson: {
         "p": "_09LOKJdsMbbJBD-NckTpyer4Hh2D5tz7RJwDsbHAt2zjmQWeAfIA2DVZY-ftwWMA3C77yf0huM5xVfU6DsJL72WtdCCCPggyfKkMuMYfch-MFV6imt6-Fwm9gAH_-BuuToabwjBHGehV_I-Jy0D_wWdIc5hTIGZtDj5rg0cQ8k",
         "kty": "RSA",
