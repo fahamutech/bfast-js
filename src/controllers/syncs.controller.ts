@@ -55,13 +55,21 @@ export class SyncsController {
         this.fields[treeName].yDoc = new Y.Doc();
         if (isElectron || isBrowser || isWebWorker) {
             this.fields[treeName].yDocPersistence = new IndexeddbPersistence(room, <Doc>this.fields[treeName].yDoc);
-            this.fields[treeName].yDocWebRtc = new WebrtcProvider(room, <Doc>this.fields[treeName].yDoc);
+            this.fields[treeName].yDocPersistence?.on('synced', () => {
+                this.fields[treeName].yDocWebRtc = new WebrtcProvider(room, <Doc>this.fields[treeName].yDoc);
+                this.fields[treeName].yDocSocket = new WebsocketProvider(
+                    'wss://yjs.bfast.fahamutech.com',
+                    room,
+                    <Doc>this.fields[treeName].yDoc
+                );
+            });
+        } else {
+            this.fields[treeName].yDocSocket = new WebsocketProvider(
+                'wss://yjs.bfast.fahamutech.com',
+                room,
+                <Doc>this.fields[treeName].yDoc
+            );
         }
-        this.fields[treeName].yDocSocket = new WebsocketProvider(
-            'wss://yjs.bfast.fahamutech.com',
-            room,
-            <Doc>this.fields[treeName].yDoc
-        );
         this.fields[treeName].yMap = this.fields[treeName]?.yDoc?.getMap(treeName);
         // this.fields[treeName]?.yMap?.observe(arg0 => {
         //     observe(
