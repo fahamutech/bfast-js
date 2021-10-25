@@ -32,12 +32,12 @@ export class QueryController {
                 private readonly appName: string) {
     }
 
-    orderBy(field: string, value: 'asc' | 'desc'  = 'asc'): QueryController {
+    orderBy(field: string, value: 'asc' | 'desc' = 'asc'): QueryController {
         let _value = 1;
-        if (value === "asc"){
+        if (value === "asc") {
             _value = 1;
         }
-        if (value === "desc"){
+        if (value === "desc") {
             _value = -1;
         }
         // if (this?.query?.filter[field]?.$fn) {
@@ -93,8 +93,11 @@ export class QueryController {
     }
 
     equalTo(field: string, value: any): QueryController {
-        Object.assign(this.query.filter, {
-            [field]: value
+        if (!this.query.filter.hasOwnProperty(field)) {
+            this.query.filter[field] = {};
+        }
+        Object.assign(this.query.filter[field], {
+            $eq: value
         });
         return this;
     }
@@ -107,85 +110,92 @@ export class QueryController {
     }
 
     notEqualTo(field: string, value: any): QueryController {
-        Object.assign(this.query.filter, {
-            [field]: {
-                $ne: value
-            }
+        if (!this.query.filter.hasOwnProperty(field)) {
+            this.query.filter[field] = {};
+        }
+        Object.assign(this.query.filter[field], {
+            $ne: value
         });
         return this;
     }
 
     greaterThan(field: string, value: any): QueryController {
-        Object.assign(this.query.filter, {
-            [field]: {
-                $gt: value
-            }
+        if (!this.query.filter.hasOwnProperty(field)) {
+            this.query.filter[field] = {};
+        }
+        Object.assign(this.query.filter[field], {
+            $gt: value
         });
         return this;
     }
 
     greaterThanOrEqual(field: string, value: any): QueryController {
-        Object.assign(this.query.filter, {
-            [field]: {
-                $gte: value
-            }
+        if (!this.query.filter.hasOwnProperty(field)) {
+            this.query.filter[field] = {};
+        }
+        Object.assign(this.query.filter[field], {
+            $gte: value
         });
         return this;
     }
 
     includesIn(field: string, value: any[]): QueryController {
-        Object.assign(this.query.filter, {
-            [field]: {
-                $in: value
-            }
+        if (!this.query.filter.hasOwnProperty(field)) {
+            this.query.filter[field] = {};
+        }
+        Object.assign(this.query.filter[field], {
+            $in: value
         });
         return this;
     }
 
     notIncludesIn(field: string, value: any[]): QueryController {
-        Object.assign(this.query.filter, {
-            [field]: {
-                $nin: value
-            }
+        if (!this.query.filter.hasOwnProperty(field)) {
+            this.query.filter[field] = {};
+        }
+        Object.assign(this.query.filter[field], {
+            $nin: value
         });
         return this;
     }
 
     lessThan(field: string, value: any): QueryController {
-        Object.assign(this.query.filter, {
-            [field]: {
-                $lt: value
-            }
+        if (!this.query.filter.hasOwnProperty(field)) {
+            this.query.filter[field] = {};
+        }
+        Object.assign(this.query.filter[field], {
+            $lt: value
         });
         return this;
     }
 
     lessThanOrEqual(field: string, value: any): QueryController {
-
-        Object.assign(this.query.filter, {
-            [field]: {
-                $lte: value
-            }
+        if (!this.query.filter.hasOwnProperty(field)) {
+            this.query.filter[field] = {};
+        }
+        Object.assign(this.query.filter[field], {
+            $lte: value
         });
         return this;
     }
 
     exists(field: string): QueryController {
-        Object.assign(this.query.filter, {
-            [field]: {
-                $exists: true
-            }
+        if (!this.query.filter.hasOwnProperty(field)) {
+            this.query.filter[field] = {};
+        }
+        Object.assign(this.query.filter[field], {
+            $exists: true
         });
         return this;
     }
 
     searchByRegex(field: string, regex: string, flags = 'ig'): QueryController {
-
-        Object.assign(this.query.filter, {
-            [field]: {
-                $regex: regex,
-                $options: flags
-            }
+        if (!this.query.filter.hasOwnProperty(field)) {
+            this.query.filter[field] = {};
+        }
+        Object.assign(this.query.filter[field], {
+            $regex: regex,
+            $options: flags
         });
         return this;
     }
