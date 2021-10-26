@@ -120,11 +120,13 @@ export class SyncsController {
             } catch (e) {
             }
             SyncsController.fields[this.treeName].yDoc = undefined;
-            SyncsController.instance[this.treeName] = undefined;
             SyncsController.fields[this.treeName].yDocWebRtc = undefined;
             SyncsController.fields[this.treeName].yDocSocket = undefined;
             SyncsController.fields[this.treeName].yDocPersistence = undefined;
             SyncsController.fields[this.treeName].yMap = undefined;
+            SyncsController.instance[this.treeName] = undefined;
+            delete SyncsController.instance[this.treeName];
+            delete SyncsController.fields[this.treeName];
         } catch (e) {
             console.log(e, '**************');
         } finally {

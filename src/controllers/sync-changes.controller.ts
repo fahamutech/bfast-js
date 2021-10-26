@@ -1,6 +1,6 @@
 import {YMapEvent} from 'yjs';
 import {YMap} from 'yjs/dist/src/types/YMap';
-import {addSyncs, set} from "../utils/syncs.util";
+import {set} from "../utils/syncs.util";
 import {CacheAdapter} from "../adapters/cache.adapter";
 
 export class SyncChangesController {
