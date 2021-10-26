@@ -27,4 +27,4 @@ export * from './factories/cache-adapter.factory';
     // isBrowserLike
 // }
 
-export * from './utils/syncs.util';
+// export * from './utils/syncs.util';

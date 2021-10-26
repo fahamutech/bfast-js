@@ -85,7 +85,6 @@ export class CacheController {
     async addSyncs(data: SyncsModel) {
         const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
         return addSyncs(
-            projectId,
             data,
             this.cacheAdapter
         );
@@ -105,7 +104,7 @@ export class CacheController {
         );
     }
 
-    async getAllSyncs() {
+    async getAllSyncs(): Promise<SyncsModel[]> {
         const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
         return getAllSyncs(
             projectId,
@@ -113,7 +112,7 @@ export class CacheController {
         );
     }
 
-    async getOneSyncs(key: string) {
+    async getOneSyncs(key: string): Promise<SyncsModel> {
         const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
         return getOneSyncs(
             projectId,
@@ -122,7 +121,7 @@ export class CacheController {
         );
     }
 
-    async getSyncsKeys() {
+    async getSyncsKeys(): Promise<string[]> {
         const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
         return getSyncsKeys(
             projectId,
