@@ -24,7 +24,7 @@ export class BfastFunctions {
             this.appName,
             config.DEFAULT_CACHE_DB_BFAST,
             config.DEFAULT_CACHE_COLLECTION_USER,
-            cacheAdapter(config,this.appName)
+            cacheAdapter(this.appName)
         );
         const restController = new HttpClientController(
             this.appName,

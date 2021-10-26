@@ -20,31 +20,31 @@ export class SyncChangesController {
     }
 
     set(value: { id: string, [key: string]: any }): any {
-        const r = set(value, this.yMap());
-        if (!!r?.s) {
-            addSyncs(
-                this.projectId,
-                {
-                    action: "create",
-                    tree: this.treeName,
-                    payload: value
-                },
-                this.cacheAdapter
-            ).catch(console.log);
-        }
+        set(value, this.yMap());
+        // if (!!r?.s) {
+        //     addSyncs(
+        //         this.projectId,
+        //         {
+        //             action: "create",
+        //             tree: this.treeName,
+        //             payload: value
+        //         },
+        //         this.cacheAdapter
+        //     ).catch(console.log);
+        // }
     }
 
     delete(key: string): void {
         this.yMap().delete(key);
-        addSyncs(
-            this.projectId,
-            {
-                action: "delete",
-                tree: this.treeName,
-                payload: {id: key}
-            },
-            this.cacheAdapter
-        ).catch(console.log);
+        // addSyncs(
+        //     this.projectId,
+        //     {
+        //         action: "delete",
+        //         tree: this.treeName,
+        //         payload: {id: key}
+        //     },
+        //     this.cacheAdapter
+        // ).catch(console.log);
     }
 
     has(key: string): boolean {

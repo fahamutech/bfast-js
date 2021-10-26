@@ -22,7 +22,7 @@ export function database(appName: string = BFastConfig.DEFAULT_APP): BfastDataba
         appName,
         config.DEFAULT_CACHE_DB_BFAST,
         config.DEFAULT_CACHE_COLLECTION_USER,
-        cacheAdapter(config, appName)
+        cacheAdapter(appName)
     );
     const restController = new HttpClientController(
         appName,
@@ -35,7 +35,7 @@ export function database(appName: string = BFastConfig.DEFAULT_APP): BfastDataba
         restController,
         rulesController,
         authController,
-        cacheAdapter(config, appName)
+        cacheAdapter(appName)
     );
 }
 export function functions(appName = BFastConfig.DEFAULT_APP): BfastFunctions {
@@ -57,7 +57,7 @@ export function cache(
         appName,
         databaseName,
         collectionName,
-        cacheAdapter(config, appName)
+        cacheAdapter(appName)
     );
 }
 export function auth(appName = BFastConfig.DEFAULT_APP) {
@@ -66,7 +66,7 @@ export function auth(appName = BFastConfig.DEFAULT_APP) {
         appName,
         config.DEFAULT_CACHE_DB_BFAST,
         config.DEFAULT_CACHE_COLLECTION_USER,
-        cacheAdapter(config, appName)
+        cacheAdapter(appName)
     );
     return new AuthController(
         appName,
@@ -80,7 +80,7 @@ export function storage(appName = BFastConfig.DEFAULT_APP): StorageController {
         appName,
         config.DEFAULT_CACHE_DB_BFAST,
         config.DEFAULT_CACHE_COLLECTION_USER,
-        cacheAdapter(config, appName)
+        cacheAdapter(appName)
     );
     const authController = new AuthController(
         appName,
