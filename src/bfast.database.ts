@@ -38,7 +38,7 @@ export class BfastDatabase {
         return this.domain(name);
     }
 
-    syncs(treeName: string): SyncsController {
+    syncs(treeName: string, synced?: () => void): SyncsController {
         return SyncsController.getInstance(
             this.appName,
             treeName,
@@ -46,6 +46,7 @@ export class BfastDatabase {
             this.bulk(),
             this.cacheAdapter,
             this.tree(treeName),
+            synced
         );
     }
 

@@ -13,9 +13,7 @@ import {YMap} from "yjs/dist/src/types/YMap";
 import {set} from "../utils/syncs.util";
 
 export class SyncsController {
-    private static instance: {
-        [key: string]: SyncsController | undefined
-    } = {}
+    private static instance: { [key: string]: SyncsController | undefined } = {};
     private static fields: {
         [key: string]: {
             yDoc: Y.Doc | undefined;
@@ -39,7 +37,9 @@ export class SyncsController {
                        projectId: string,
                        bulkController: BulkController,
                        cacheAdapter: CacheAdapter,
-                       databaseController: DatabaseController): SyncsController {
+                       databaseController: DatabaseController,
+                       synced?: (() => void)
+    ): SyncsController {
         if (this.instance[treeName] && this.fields[treeName]) {
             return <SyncsController>this.instance[treeName];
         }
@@ -62,6 +62,7 @@ export class SyncsController {
                     room,
                     <Doc>this.fields[treeName].yDoc
                 );
+                if (synced) synced();
             });
         } else {
             this.fields[treeName].yDocSocket = new WebsocketProvider(
@@ -71,15 +72,6 @@ export class SyncsController {
             );
         }
         this.fields[treeName].yMap = this.fields[treeName]?.yDoc?.getMap(treeName);
-        // this.fields[treeName]?.yMap?.observe(arg0 => {
-        //     observe(
-        //         arg0,
-        //         projectId,
-        //         treeName,
-        //         this.fields[treeName].yMap,
-        //         cacheAdapter
-        //     ).catch(console.log);
-        // });
         return <SyncsController>this.instance[treeName];
     }
 
@@ -103,14 +95,14 @@ export class SyncsController {
 
     close() {
         try {
-            SyncsController?.fields[this.treeName].yDocWebRtc?.disconnect();
-            SyncsController?.fields[this.treeName].yDocSocket?.disconnectBc();
+            // SyncsController?.fields[this.treeName].yDocWebRtc?.disconnect();
+            // SyncsController?.fields[this.treeName].yDocSocket?.disconnectBc();
             // SyncsController?.yDocPersistence?.destroy();
             // SyncsController?.yDoc?.destroy();
-            try {
-                SyncsController?.fields[this.treeName].yDocSocket?.disconnect();
-            } catch (e) {
-            }
+            // try {
+            //     SyncsController?.fields[this.treeName].yDocSocket?.disconnect();
+            // } catch (e) {
+            // }
             try {
                 SyncsController?.fields[this.treeName].yDocSocket?.destroy();
             } catch (e) {
@@ -119,12 +111,13 @@ export class SyncsController {
                 SyncsController?.fields[this.treeName].yDocWebRtc?.destroy();
             } catch (e) {
             }
-            SyncsController.fields[this.treeName].yDoc = undefined;
-            SyncsController.fields[this.treeName].yDocWebRtc = undefined;
-            SyncsController.fields[this.treeName].yDocSocket = undefined;
-            SyncsController.fields[this.treeName].yDocPersistence = undefined;
-            SyncsController.fields[this.treeName].yMap = undefined;
-            SyncsController.instance[this.treeName] = undefined;
+            try {
+                SyncsController?.fields[this.treeName].yDocPersistence?.destroy();
+            } catch (e) {
+            }
+            // SyncsController.fields[this.treeName].yDoc = undefined;
+            // SyncsController.fields[this.treeName].yMap = undefined;
+            // SyncsController.instance[this.treeName] = undefined;
             delete SyncsController.instance[this.treeName];
             delete SyncsController.fields[this.treeName];
         } catch (e) {
