@@ -7,7 +7,6 @@ import * as Y from "yjs";
 import {Doc} from "yjs";
 import {isBrowser, isElectron, isWebWorker} from "../utils/platform.util";
 import {IndexeddbPersistence} from "y-indexeddb";
-import {WebrtcProvider} from "y-webrtc";
 import {WebsocketProvider} from "y-websocket";
 import {YMap} from "yjs/dist/src/types/YMap";
 import {set} from "../utils/syncs.util";
@@ -19,7 +18,6 @@ export class SyncsController {
             yDoc: Y.Doc | undefined;
             yMap: YMap<any> | undefined;
             yDocPersistence: IndexeddbPersistence | undefined;
-            yDocWebRtc: WebrtcProvider | undefined;
             yDocSocket: WebsocketProvider | undefined;
         }
     } = {};
@@ -56,7 +54,6 @@ export class SyncsController {
         if (isElectron || isBrowser || isWebWorker) {
             this.fields[treeName].yDocPersistence = new IndexeddbPersistence(room, <Doc>this.fields[treeName].yDoc);
             this.fields[treeName].yDocPersistence?.on('synced', () => {
-                this.fields[treeName].yDocWebRtc = new WebrtcProvider(room, <Doc>this.fields[treeName].yDoc);
                 this.fields[treeName].yDocSocket = new WebsocketProvider(
                     'wss://yjs.bfast.fahamutech.com',
                     room,
@@ -95,35 +92,19 @@ export class SyncsController {
 
     close() {
         try {
-            // SyncsController?.fields[this.treeName].yDocWebRtc?.disconnect();
-            // SyncsController?.fields[this.treeName].yDocSocket?.disconnectBc();
-            // SyncsController?.yDocPersistence?.destroy();
-            // SyncsController?.yDoc?.destroy();
-            // try {
-            //     SyncsController?.fields[this.treeName].yDocSocket?.disconnect();
-            // } catch (e) {
-            // }
             try {
                 SyncsController?.fields[this.treeName].yDocSocket?.destroy();
-            } catch (e) {
-            }
-            try {
-                SyncsController?.fields[this.treeName].yDocWebRtc?.destroy();
             } catch (e) {
             }
             try {
                 SyncsController?.fields[this.treeName].yDocPersistence?.destroy();
             } catch (e) {
             }
-            // SyncsController.fields[this.treeName].yDoc = undefined;
-            // SyncsController.fields[this.treeName].yMap = undefined;
-            // SyncsController.instance[this.treeName] = undefined;
             delete SyncsController.instance[this.treeName];
             delete SyncsController.fields[this.treeName];
         } catch (e) {
             console.log(e, '**************');
         } finally {
-            // console.log(SyncsController.fields[this.treeName])
         }
     }
 
