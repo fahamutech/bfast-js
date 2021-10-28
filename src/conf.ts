@@ -98,11 +98,13 @@ export class BFastConfig {
     cacheDatabaseName(name: string, appName: string): string {
         const adapters = this.credential(appName)?.adapters;
         let projectId = this.credential(appName).projectId;
-        if (adapters
+        if (
+            adapters
             && adapters.cache
             && typeof adapters.cache === 'string'
             && this.credential(adapters.cache)
-            && this.credential(adapters.cache).projectId) {
+            && this.credential(adapters.cache).projectId
+        ) {
             projectId = this.credential(adapters.cache).projectId;
             appName = adapters.cache;
         }

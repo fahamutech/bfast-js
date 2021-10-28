@@ -1,12 +1,11 @@
 import {YMap} from "yjs/dist/src/types/YMap";
 import {CacheAdapter} from "../adapters/cache.adapter";
 import {ConstantUtil} from "./constant.util";
-import {sha1} from "crypto-hash";
 import {SyncsModel} from "../models/syncs.model";
+import {sha1} from "crypto-hash";
 
 export function set(
-    value: { id: string, [key: string]: any },
-    yMap: YMap<any> | undefined
+    value: { id: string, [key: string]: any }, yMap: YMap<any> | undefined
 ): { s: boolean, m: string, r: string } {
     if (!yMap || !value) {
         return {
@@ -15,11 +14,11 @@ export function set(
             r: 'no',
         };
     }
-    if (value._created_at && typeof value._created_at === "string" ) {
+    if (value._created_at && typeof value._created_at === "string") {
         value.createdAt = value._created_at;
         delete value._created_at;
     }
-    if (value._updated_at && typeof value._updated_at === "string" ) {
+    if (value._updated_at && typeof value._updated_at === "string") {
         value.updatedAt = value._updated_at;
         delete value._updated_at;
     }
@@ -52,11 +51,8 @@ export function set(
     }
 }
 
-export async function addSyncs(
-    data: SyncsModel,
-    cacheAdapter: CacheAdapter
-): Promise<any> {
-    if (!data?.payload?.hasOwnProperty('id')){
+export async function addSyncs(data: SyncsModel, database: string, cacheAdapter: CacheAdapter): Promise<any> {
+    if (!data?.payload?.hasOwnProperty('id')) {
         console.log('can not add data for syncs it does not have id field');
         return null;
     }
@@ -64,44 +60,27 @@ export async function addSyncs(
     return cacheAdapter.set(
         _sha1,
         data,
-        data.projectId,
+        database,
         ConstantUtil.SYNCS_TABLE
     );
 }
 
-export async function getSyncsKeys(
-    projectId: string,
-    cacheAdapter: CacheAdapter
-): Promise<string[]> {
-    return cacheAdapter.keys(projectId, ConstantUtil.SYNCS_TABLE);
+export async function getSyncsKeys(database: string, cacheAdapter: CacheAdapter): Promise<string[]> {
+    return cacheAdapter.keys(database, ConstantUtil.SYNCS_TABLE);
 }
 
-export async function getAllSyncs(
-    projectId: string,
-    cacheAdapter: CacheAdapter
-): Promise<SyncsModel[]> {
-    return cacheAdapter.getAll(projectId, ConstantUtil.SYNCS_TABLE);
+export async function getAllSyncs(database: string, cacheAdapter: CacheAdapter): Promise<SyncsModel[]> {
+    return cacheAdapter.getAll(database, ConstantUtil.SYNCS_TABLE);
 }
 
-export async function getOneSyncs(
-    projectId: string,
-    key: string,
-    cacheAdapter: CacheAdapter
-): Promise<SyncsModel> {
-    return await cacheAdapter.get(key, projectId, ConstantUtil.SYNCS_TABLE) as any;
+export async function getOneSyncs(database: string, key: string, cacheAdapter: CacheAdapter): Promise<SyncsModel> {
+    return await cacheAdapter.get(key, database, ConstantUtil.SYNCS_TABLE) as any;
 }
 
-export async function removeOneSyncs(
-    key: string,
-    projectId: string,
-    cacheAdapter: CacheAdapter
-): Promise<any> {
-    return cacheAdapter.remove(key, projectId, ConstantUtil.SYNCS_TABLE);
+export async function removeOneSyncs(key: string, database: string, cacheAdapter: CacheAdapter): Promise<any> {
+    return cacheAdapter.remove(key, database, ConstantUtil.SYNCS_TABLE);
 }
 
-export async function removeAllSyncs(
-    projectId: string,
-    cacheAdapter: CacheAdapter
-): Promise<any> {
-    return cacheAdapter.clearAll(projectId, ConstantUtil.SYNCS_TABLE);
+export async function removeAllSyncs(database: string, cacheAdapter: CacheAdapter): Promise<any> {
+    return cacheAdapter.clearAll(database, ConstantUtil.SYNCS_TABLE);
 }

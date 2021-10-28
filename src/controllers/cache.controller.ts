@@ -83,49 +83,26 @@ export class CacheController {
     }
 
     async addSyncs(data: SyncsModel) {
-        const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
-        return addSyncs(
-            data,
-            this.cacheAdapter
-        );
+        return addSyncs(data, this.database, this.cacheAdapter);
     }
 
     async removeOneSyncs(key: string) {
-        const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
-        return removeOneSyncs(
-            key, projectId, this.cacheAdapter
-        );
+        return removeOneSyncs(key, this.database, this.cacheAdapter);
     }
 
     async removeAllSyncs() {
-        const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
-        return removeAllSyncs(
-            projectId, this.cacheAdapter
-        );
+        return removeAllSyncs(this.database, this.cacheAdapter);
     }
 
     async getAllSyncs(): Promise<SyncsModel[]> {
-        const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
-        return getAllSyncs(
-            projectId,
-            this.cacheAdapter
-        );
+        return getAllSyncs(this.database, this.cacheAdapter);
     }
 
     async getOneSyncs(key: string): Promise<SyncsModel> {
-        const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
-        return getOneSyncs(
-            projectId,
-            key,
-            this.cacheAdapter
-        );
+        return getOneSyncs(this.database, key, this.cacheAdapter);
     }
 
     async getSyncsKeys(): Promise<string[]> {
-        const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
-        return getSyncsKeys(
-            projectId,
-            this.cacheAdapter
-        );
+        return getSyncsKeys(this.database, this.cacheAdapter);
     }
 }
