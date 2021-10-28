@@ -11,7 +11,7 @@ export class DefaultCacheFactory implements CacheAdapter {
 
     async getAll(database: string, collection: string): Promise<any[]> {
         if (isElectron || isBrowser || isWebWorker) {
-            const table = await DefaultCacheFactory.table(database, collection);
+            const table = await this.table(database, collection);
             const keys = await this.keys(database, collection);
             if (Array.isArray(keys)) {
                 return await table?.bulkGet(keys) as any[];
@@ -21,11 +21,14 @@ export class DefaultCacheFactory implements CacheAdapter {
         return [];
     }
 
-    static async table(database: string, collection: string): Promise<Table | undefined> {
+    async table(database: string, collection: string): Promise<Table | undefined> {
         if (isElectron || isBrowser || isWebWorker) {
-            const db = new Dexie(await sha1(database));
+            database = database + collection;
+            const db = new Dexie(await sha1(database.trim()));
             db.version(1).stores({
                 [collection]: ""
+            }).upgrade(_ => {
+                console.log('index db upgraded');
             });
             return db.table(collection);
         }
@@ -34,7 +37,7 @@ export class DefaultCacheFactory implements CacheAdapter {
 
     async keys(database: string, collection: string): Promise<string[]> {
         if (isElectron || isBrowser || isWebWorker) {
-            const t = await DefaultCacheFactory.table(database, collection);
+            const t = await this.table(database, collection);
             const keys = await t?.toCollection().keys() as string[];
             if (Array.isArray(keys)) {
                 return keys;
@@ -47,7 +50,7 @@ export class DefaultCacheFactory implements CacheAdapter {
 
     async clearAll(database: string, collection: string): Promise<boolean> {
         if (isElectron || isBrowser || isWebWorker) {
-            const t = await DefaultCacheFactory.table(database, collection);
+            const t = await this.table(database, collection);
             await t?.clear();
             return true;
         }
@@ -55,12 +58,10 @@ export class DefaultCacheFactory implements CacheAdapter {
     }
 
     async get<T>(
-        key: string,
-        database: string,
-        collection: string
+        key: string, database: string, collection: string
     ): Promise<T | null> {
         if (isElectron || isBrowser || isWebWorker) {
-            const t = await DefaultCacheFactory.table(database, collection);
+            const t = await this.table(database, collection);
             return t?.get(key);
         }
         return null;
@@ -68,7 +69,7 @@ export class DefaultCacheFactory implements CacheAdapter {
 
     async getBulk<T>(keys: string[], database: string, collection: string): Promise<T[]> {
         if (isElectron || isBrowser || isWebWorker) {
-            const table = await DefaultCacheFactory.table(database, collection);
+            const table = await this.table(database, collection);
             if (Array.isArray(keys)) {
                 return await table?.bulkGet(keys) as any[];
             }
@@ -78,14 +79,11 @@ export class DefaultCacheFactory implements CacheAdapter {
     }
 
     async set(
-        key: string,
-        data: any,
-        database: string,
-        collection: string,
+        key: string, data: any, database: string, collection: string,
         options: { dtl?: number, secure?: boolean } = {secure: false}
     ): Promise<any> {
         if (isElectron || isBrowser || isWebWorker) {
-            const t = await DefaultCacheFactory.table(database, collection);
+            const t = await this.table(database, collection);
             await t?.put(data, key);
             return data;
         }
@@ -93,13 +91,10 @@ export class DefaultCacheFactory implements CacheAdapter {
     }
 
     async setBulk(
-        keys: string[],
-        data: any[],
-        database: string,
-        collection: string
+        keys: string[], data: any[], database: string, collection: string
     ): Promise<any> {
         if (isElectron || isBrowser || isWebWorker) {
-            const t = await DefaultCacheFactory.table(database, collection);
+            const t = await this.table(database, collection);
             await t?.bulkPut(data, keys, {allKeys: true});
             return keys;
         }
@@ -107,13 +102,10 @@ export class DefaultCacheFactory implements CacheAdapter {
     }
 
     async remove(
-        key: string,
-        database: string,
-        collection: string,
-        force = true
+        key: string, database: string, collection: string, force = true
     ): Promise<boolean> {
         if (isElectron || isBrowser || isWebWorker) {
-            const t = await DefaultCacheFactory.table(database, collection);
+            const t = await this.table(database, collection);
             await t?.delete(key);
             return true;
         }
