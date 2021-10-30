@@ -39,6 +39,9 @@ export class SyncsController {
         synced?: (() => void)
     ): SyncsController {
         if (this.instance[treeName] && this.fields[treeName]) {
+            if (typeof synced === "function") {
+                synced();
+            }
             return <SyncsController>this.instance[treeName];
         }
         this.instance[treeName] = new SyncsController(
@@ -49,7 +52,7 @@ export class SyncsController {
             bulkController
         );
         const r = BFastConfig.getInstance().credential(appName).projectId + '/' + treeName + '/' + appName;
-        const room =  sha1(r);
+        const room = sha1(r);
         this.fields[treeName] = {} as any;
         this.fields[treeName].yDoc = new Y.Doc();
         if (isElectron || isBrowser || isWebWorker) {
