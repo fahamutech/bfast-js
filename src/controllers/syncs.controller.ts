@@ -10,15 +10,14 @@ import {IndexeddbPersistence} from "y-indexeddb";
 import {WebsocketProvider} from "y-websocket";
 import {YMap} from "yjs/dist/src/types/YMap";
 import {set} from "../utils/syncs.util";
+// @ts-ignore
+import * as sha1 from "js-sha1";
 
 export class SyncsController {
-    private static instance: { [key: string]: SyncsController | undefined } = {};
+    private static instance: { [key: string]: SyncsController } = {};
     private static fields: {
         [key: string]: {
-            yDoc: Y.Doc | undefined;
-            yMap: YMap<any> | undefined;
-            yDocPersistence: IndexeddbPersistence | undefined;
-            yDocSocket: WebsocketProvider | undefined;
+            yDoc: Y.Doc; yMap: YMap<any>; yDocPersistence: IndexeddbPersistence; yDocSocket: WebsocketProvider;
         }
     } = {};
 
@@ -30,13 +29,14 @@ export class SyncsController {
         private readonly bulkController: BulkController) {
     }
 
-    static getInstance(appName: string,
-                       treeName: string,
-                       projectId: string,
-                       bulkController: BulkController,
-                       cacheAdapter: CacheAdapter,
-                       databaseController: DatabaseController,
-                       synced?: (() => void)
+    static getInstance(
+        appName: string,
+        treeName: string,
+        projectId: string,
+        bulkController: BulkController,
+        cacheAdapter: CacheAdapter,
+        databaseController: DatabaseController,
+        synced?: (() => void)
     ): SyncsController {
         if (this.instance[treeName] && this.fields[treeName]) {
             return <SyncsController>this.instance[treeName];
@@ -48,28 +48,32 @@ export class SyncsController {
             databaseController,
             bulkController
         );
-        const room = BFastConfig.getInstance().credential(appName).projectId + '_' + treeName;
+        const r = BFastConfig.getInstance().credential(appName).projectId + '/' + treeName + '/' + appName;
+        const room =  sha1(r);
         this.fields[treeName] = {} as any;
         this.fields[treeName].yDoc = new Y.Doc();
         if (isElectron || isBrowser || isWebWorker) {
-            this.fields[treeName].yDocPersistence = new IndexeddbPersistence(room, <Doc>this.fields[treeName].yDoc);
-            this.fields[treeName].yDocPersistence?.on('synced', () => {
+            this.fields[treeName].yDocPersistence = new IndexeddbPersistence(room, this.fields[treeName].yDoc);
+            this.fields[treeName].yDocPersistence.once('synced', () => {
                 this.fields[treeName].yDocSocket = new WebsocketProvider(
                     'wss://yjs.bfast.fahamutech.com',
                     room,
                     <Doc>this.fields[treeName].yDoc
                 );
-                if (synced) synced();
+                if (typeof synced === "function") {
+                    synced();
+                }
             });
         } else {
+            console.log('not in browser');
             this.fields[treeName].yDocSocket = new WebsocketProvider(
                 'wss://yjs.bfast.fahamutech.com',
                 room,
-                <Doc>this.fields[treeName].yDoc
+                this.fields[treeName].yDoc
             );
         }
-        this.fields[treeName].yMap = this.fields[treeName]?.yDoc?.getMap(treeName);
-        return <SyncsController>this.instance[treeName];
+        this.fields[treeName].yMap = this.fields[treeName].yDoc.getMap(treeName);
+        return this.instance[treeName];
     }
 
     changes(): SyncChangesController {
@@ -93,12 +97,26 @@ export class SyncsController {
     close() {
         try {
             try {
-                SyncsController?.fields[this.treeName].yDocSocket?.destroy();
+                SyncsController.fields[this.treeName].yDoc.destroy();
             } catch (e) {
+                console.log(e, 'destroy ydoc');
+            }
+            try {
+                if (SyncsController.fields[this.treeName].yMap.doc) {
+                    SyncsController.fields[this.treeName].yMap.doc?.destroy()
+                }
+            } catch (e) {
+                console.log(e, 'destroy ydoc');
+            }
+            try {
+                SyncsController?.fields[this.treeName].yDocSocket.destroy();
+            } catch (e) {
+                console.log(e, 'destroy socket');
             }
             try {
                 SyncsController?.fields[this.treeName].yDocPersistence?.destroy();
             } catch (e) {
+                console.log(e, 'destroy persistence');
             }
             delete SyncsController.instance[this.treeName];
             delete SyncsController.fields[this.treeName];

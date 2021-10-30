@@ -2,7 +2,8 @@ import {CacheAdapter} from "../adapters/cache.adapter";
 import {RequestOptions} from "../controllers/query.controller";
 import {isBrowser, isElectron, isWebWorker} from "../utils/platform.util";
 import {Dexie, Table} from "dexie";
-import {sha1} from "crypto-hash";
+// @ts-ignore
+import * as sha1 from "js-sha1";
 
 export class DefaultCacheFactory implements CacheAdapter {
 

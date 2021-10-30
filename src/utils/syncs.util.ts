@@ -2,7 +2,8 @@ import {YMap} from "yjs/dist/src/types/YMap";
 import {CacheAdapter} from "../adapters/cache.adapter";
 import {ConstantUtil} from "./constant.util";
 import {SyncsModel} from "../models/syncs.model";
-import {sha1} from "crypto-hash";
+// @ts-ignore
+import * as sha1 from "js-sha1";
 
 export function set(
     value: { id: string, [key: string]: any }, yMap: YMap<any> | undefined
