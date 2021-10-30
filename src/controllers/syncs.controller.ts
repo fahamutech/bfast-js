@@ -4,7 +4,6 @@ import {BulkController} from "./bulk.controller";
 import {CacheAdapter} from "../adapters/cache.adapter";
 import {BFastConfig} from "../conf";
 import * as Y from "yjs";
-import {Doc} from "yjs";
 import {isBrowser, isElectron, isWebWorker} from "../utils/platform.util";
 import {IndexeddbPersistence} from "y-indexeddb";
 import {WebsocketProvider} from "y-websocket";
@@ -36,7 +35,7 @@ export class SyncsController {
         bulkController: BulkController,
         cacheAdapter: CacheAdapter,
         databaseController: DatabaseController,
-        synced?: ((syncs: SyncsController) => void)
+        synced?: (syncs: SyncsController) => void
     ): SyncsController {
         if (this.instance[treeName] && this.fields[treeName]) {
             if (typeof synced === "function") {
