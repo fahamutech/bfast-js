@@ -36,13 +36,13 @@ export class SyncsController {
         bulkController: BulkController,
         cacheAdapter: CacheAdapter,
         databaseController: DatabaseController,
-        synced?: (() => void)
+        synced?: ((syncs: SyncsController) => void)
     ): SyncsController {
         if (this.instance[treeName] && this.fields[treeName]) {
             if (typeof synced === "function") {
-                synced();
+                synced(this.instance[treeName]);
             }
-            return <SyncsController>this.instance[treeName];
+            return this.instance[treeName];
         }
         this.instance[treeName] = new SyncsController(
             treeName,
@@ -55,27 +55,30 @@ export class SyncsController {
         const room = sha1(r);
         this.fields[treeName] = {} as any;
         this.fields[treeName].yDoc = new Y.Doc();
+        this.fields[treeName].yMap = this.fields[treeName].yDoc.getMap(treeName);
         if (isElectron || isBrowser || isWebWorker) {
             this.fields[treeName].yDocPersistence = new IndexeddbPersistence(room, this.fields[treeName].yDoc);
             this.fields[treeName].yDocPersistence.once('synced', () => {
+                if (typeof synced === "function") {
+                    synced(this.instance[treeName]);
+                }
                 this.fields[treeName].yDocSocket = new WebsocketProvider(
                     'wss://yjs.bfast.fahamutech.com',
                     room,
-                    <Doc>this.fields[treeName].yDoc
+                    this.fields[treeName].yDoc
                 );
-                if (typeof synced === "function") {
-                    synced();
-                }
             });
         } else {
-            console.log('not in browser');
+            // console.log('not in browser');
             this.fields[treeName].yDocSocket = new WebsocketProvider(
                 'wss://yjs.bfast.fahamutech.com',
                 room,
                 this.fields[treeName].yDoc
             );
+            if (typeof synced === "function") {
+                synced(this.instance[treeName]);
+            }
         }
-        this.fields[treeName].yMap = this.fields[treeName].yDoc.getMap(treeName);
         return this.instance[treeName];
     }
 
