@@ -13,11 +13,12 @@ export class DefaultCacheFactory implements CacheAdapter {
     async getAll(database: string, collection: string): Promise<any[]> {
         if (isElectron || isBrowser || isWebWorker) {
             return this.withDexie(database, collection, async table1 => {
-                const keys = await this.keys(database, collection);
-                if (Array.isArray(keys)) {
-                    return await table1.bulkGet(keys) as any[];
-                }
-                return [];
+                // const keys = await this.keys(database, collection);
+                return table1.toCollection().toArray();
+                // if (Array.isArray(keys)) {
+                //     return await table1.bulkGet(keys) as any[];
+                // }
+                // return [];
             });
         }
         return [];
