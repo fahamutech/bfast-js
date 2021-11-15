@@ -4,22 +4,22 @@ import {SocketController} from "./controllers/socket.controller";
 import {HttpRequestModel} from "./models/HttpRequestModel";
 import {EventResponseModel, HttpResponseModel} from "./models/HttpResponseModel";
 import {HttpNextModel} from "./models/HttpNextModel";
-import { AuthController } from "./controllers/auth.controller";
-import { BFastConfig } from "./conf";
-import { CacheController } from "./controllers/cache.controller";
+import {AuthController} from "./controllers/auth.controller";
+import {CacheController} from "./controllers/cache.controller";
 import {isNode} from "./utils/platform.util";
 import {cacheAdapter} from "./factories/cache-adapter.factory";
 import {httpAdapter} from "./factories/http-adapter.factory";
 import {authAdapter} from "./factories/auth-adapter.factory";
+import {getConfig} from './bfast';
 
 export class BfastFunctions {
     constructor(private readonly appName: string,
-        private authController: AuthController,
-        private httpClientController: HttpClientController) {
+                private authController: AuthController,
+                private httpClientController: HttpClientController) {
     }
 
-    private init(){
-        const config = BFastConfig.getInstance();
+    private init() {
+        const config = getConfig()
         const authCache = new CacheController(
             this.appName,
             config.DEFAULT_CACHE_DB_BFAST,
@@ -28,17 +28,17 @@ export class BfastFunctions {
         );
         const restController = new HttpClientController(
             this.appName,
-            httpAdapter(config,this.appName)
+            httpAdapter(config, this.appName)
         )
         const authController = new AuthController(
             this.appName,
             authCache,
-            authAdapter(config,this.appName)
+            authAdapter(config, this.appName)
         );
-        if(!this.authController){
+        if (!this.authController) {
             this.authController = authController;
         }
-        if(!this.httpClientController){
+        if (!this.httpClientController) {
             this.httpClientController = restController;
         }
     }

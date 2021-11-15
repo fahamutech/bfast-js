@@ -4,13 +4,14 @@ const {config, serverUrl} = require("../test.config");
 const {sales} = require('../sales');
 
 describe('save', function () {
-    before(function () {
+    before(async function () {
         init({
             applicationId: config.applicationId,
             projectId: config.projectId,
             databaseURL: serverUrl,
             functionsURL: serverUrl,
         });
+        await database().table('test').query().exists('name').delete();
     });
     it('should save a single doc data', async function () {
         const doe = await database().table('test').save({
@@ -22,26 +23,26 @@ describe('save', function () {
         expect(doe.age).equal(20);
     });
     it('should save a single doc data with id and date metadata', async function () {
-        const date = new Date().toDateString();
+        const date1 = new Date().toISOString();
         const doe = await database().table('test').save({
             name: 'john',
             age: 20,
             id: 'josh',
-            createdAt: date,
-            updatedAt: date
+            createdAt: date1,
+            updatedAt: date1
         });
         should().exist(doe);
         expect(doe).eql({
             name: 'john',
             age: 20,
             id: 'josh',
-            createdAt: date,
+            createdAt: date1,
             createdBy: null,
-            updatedAt: date
+            updatedAt: date1
         });
     });
     it('should save many docs', async function () {
-        const date = new Date().toDateString();
+        const date = new Date().toISOString();
         const doe = await database().table('test').save([
             {
                 name: 'john',
@@ -130,7 +131,7 @@ describe('save', function () {
             should().exist(e);
         }
     });
-    it('should save large data with many nodes', async function(){
+    it('should save large data with many nodes', async function () {
         const s = await database().table('sales').save(sales);
         should().exist(s);
         expect(s).length(sales.length);

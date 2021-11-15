@@ -1,10 +1,10 @@
-import { TransactionModel } from "../models/TransactionModel";
-import { BFastConfig } from "../conf";
-import { RulesController } from "./rules.controller";
-import { QueryModel } from "../models/QueryModel";
-import { UpdateModel } from "../models/UpdateOperation";
-import { HttpClientController } from "./http-client.controller";
-import { AuthController } from "./auth.controller";
+import {TransactionModel} from "../models/TransactionModel";
+import {RulesController} from "./rules.controller";
+import {QueryModel} from "../models/QueryModel";
+import {UpdateModel} from "../models/UpdateOperation";
+import {HttpClientController} from "./http-client.controller";
+import {AuthController} from "./auth.controller";
+import {getConfig} from '../bfast';
 
 export class BulkController {
 
@@ -30,11 +30,11 @@ export class BulkController {
                 this.transactionRequests = result;
             }
         }
-        const credential = BFastConfig.getInstance().credential(this.appName);
+        const credential = getConfig().credential(this.appName);
         const transactionRule = await this.rulesController.bulk(this.transactionRequests,
             credential, { useMasterKey: options?.useMasterKey });
         const response = await this.httpClientController.post(
-            BFastConfig.getInstance().databaseURL(this.appName),
+            getConfig().databaseURL(this.appName),
             transactionRule,
             {
                 headers: {

@@ -2,6 +2,7 @@ import { UserModel } from "../models/UserModel";
 import { AuthAdapter, AuthOptions } from "../adapters/auth.adapter";
 import { BFastConfig } from "../conf";
 import { HttpClientController } from "../controllers/http-client.controller";
+import {getConfig} from '../bfast';
 
 export class DefaultAuthFactory implements AuthAdapter {
 
@@ -16,7 +17,7 @@ export class DefaultAuthFactory implements AuthAdapter {
     async logIn<T extends UserModel>(username: string, password: string, appName: string, options?: AuthOptions): Promise<T> {
         const authRule = {};
         Object.assign(authRule, {
-            'applicationId': BFastConfig.getInstance().credential(appName).applicationId
+            'applicationId': getConfig().credential(appName).applicationId
         });
         Object.assign(authRule, {
             auth: {
@@ -27,7 +28,7 @@ export class DefaultAuthFactory implements AuthAdapter {
             }
         });
         const response = await this.httpClientController.post<T>(
-            BFastConfig.getInstance().databaseURL(appName),
+            getConfig().databaseURL(appName),
             authRule,
             {
                 headers: {
@@ -55,7 +56,7 @@ export class DefaultAuthFactory implements AuthAdapter {
     async requestPasswordReset<T extends UserModel>(email: string, appName: string, options?: AuthOptions): Promise<any> {
         const authRule = {};
         Object.assign(authRule, {
-            'applicationId': BFastConfig.getInstance().credential(appName).applicationId
+            'applicationId': getConfig().credential(appName).applicationId
         });
         Object.assign(authRule, {
             auth: {
@@ -65,11 +66,11 @@ export class DefaultAuthFactory implements AuthAdapter {
             }
         });
         const response = await this.httpClientController.post<T>(
-            BFastConfig.getInstance().databaseURL(appName),
+            getConfig().databaseURL(appName),
             authRule,
             {
                 headers: {
-                    'x-bfast-application-id': BFastConfig.getInstance().credential(appName).applicationId
+                    'x-bfast-application-id': getConfig().credential(appName).applicationId
                 }
             },
             {
@@ -89,7 +90,7 @@ export class DefaultAuthFactory implements AuthAdapter {
     async signUp<T extends UserModel>(username: string, password: string, attrs: { [key: string]: any } = {}, appName: string, options?: AuthOptions): Promise<T> {
         const authRule = {};
         Object.assign(authRule, {
-            'applicationId': BFastConfig.getInstance().credential(appName).applicationId
+            'applicationId': getConfig().credential(appName).applicationId
         });
         Object.assign(attrs, {
             username,
@@ -102,10 +103,10 @@ export class DefaultAuthFactory implements AuthAdapter {
             }
         });
         const response = await this.httpClientController.post<T>(
-            BFastConfig.getInstance().databaseURL(appName), authRule,
+            getConfig().databaseURL(appName), authRule,
             {
                 headers: {
-                    'x-parse-application-id': BFastConfig.getInstance().credential(appName).applicationId
+                    'x-parse-application-id': getConfig().credential(appName).applicationId
                 }
             },
             {
@@ -132,7 +133,7 @@ export class DefaultAuthFactory implements AuthAdapter {
         // if (user && user.token) {
         //     const postHeaders = this._geHeadersWithToken(user, options);
         //     const response = await this.restApi.put<UserModel>(
-        //         BFastConfig.getInstance().databaseURL(this.appName, '/users/' + user.objectId),
+        //         getConfig().databaseURL(this.appName, '/users/' + user.objectId),
         //         userModel, {
         //             headers: postHeaders
         //         });

@@ -14,6 +14,19 @@ describe('update', function () {
         await database().table('test').save([
             {item: 'xps', price: 1000, id: 'xido', createdAt: 'leo', updatedAt: 'leo'},
             {item: 'chrome', price: 3000, id: 'chm', createdAt: 'leo', updatedAt: 'leo'},
+            {
+                item: 'josh',
+                price: 100,
+                id: 'ethan',
+                createdAt: 'leo', updatedAt: 'leo',
+                status: 'new',
+                flags: {
+                    a: {
+                        q: 1,
+                        g: 2
+                    }
+                }
+            },
         ]);
     });
 
@@ -25,7 +38,7 @@ describe('update', function () {
                     .byId('xido')
                     .updateBuilder()
                     .set('item', 'dell')
-                    .set('updatedAt','leo')
+                    .set('updatedAt', 'leo')
                     .update();
                 should().exist(r);
                 expect(r).eql({
@@ -43,7 +56,7 @@ describe('update', function () {
                     .byId('xido45r')
                     .updateBuilder()
                     .set('item', 'dell')
-                    .set('updatedAt','leo')
+                    .set('updatedAt', 'leo')
                     .update();
                 should().not.exist(r);
                 expect(r).eql(null);
@@ -55,8 +68,8 @@ describe('update', function () {
                     .updateBuilder()
                     .upsert(true)
                     .set('item', 'andr')
-                    .set('updatedAt','leo')
-                    .set('createdAt','leo')
+                    .set('updatedAt', 'leo')
+                    .set('createdAt', 'leo')
                     .update();
                 should().exist(r);
                 expect(r).eql({
@@ -69,10 +82,10 @@ describe('update', function () {
             it('should update a doc field by query filter', async function () {
                 const r = await database().table('test')
                     .query()
-                    .equalTo('item','dell')
+                    .equalTo('item', 'dell')
                     .updateBuilder()
                     .set('item', 'xps2')
-                    .set('updatedAt','leo')
+                    .set('updatedAt', 'leo')
                     .update();
                 should().exist(r);
                 expect(r).eql([{
@@ -87,10 +100,10 @@ describe('update', function () {
             it('should not update a doc field by query filter', async function () {
                 const r = await database().table('test')
                     .query()
-                    .equalTo('item','myself')
+                    .equalTo('item', 'myself')
                     .updateBuilder()
                     .set('item', 'xps2')
-                    .set('updatedAt','leo')
+                    .set('updatedAt', 'leo')
                     .update();
                 should().exist(r);
                 expect(r).eql([]);
@@ -102,8 +115,8 @@ describe('update', function () {
                     .updateBuilder()
                     .upsert(true)
                     .set('item', 'xps9')
-                    .set('updatedAt','leo')
-                    .set('createdAt','leo')
+                    .set('updatedAt', 'leo')
+                    .set('createdAt', 'leo')
                     .update();
                 should().exist(r);
                 expect(r).eql({
@@ -119,13 +132,13 @@ describe('update', function () {
                     .byId('xido')
                     .updateBuilder()
                     .set('detail', 'old')
-                    .set('updatedAt','leo')
+                    .set('updatedAt', 'leo')
                     .update();
                 should().exist(r);
                 expect(r).eql({
                     item: 'xps2',
                     price: 1000,
-                    detail:'old',
+                    detail: 'old',
                     id: 'xido',
                     createdAt: 'leo',
                     updatedAt: 'leo',
@@ -135,16 +148,16 @@ describe('update', function () {
             it('should creat non exist field when use query filter', async function () {
                 const r = await database().table('test')
                     .query()
-                    .equalTo('item','xps2')
+                    .equalTo('item', 'xps2')
                     .updateBuilder()
                     .set('tag', 'brand')
-                    .set('updatedAt','leo')
+                    .set('updatedAt', 'leo')
                     .update();
                 should().exist(r);
                 expect(r).eql([{
                     item: 'xps2',
                     price: 1000,
-                    detail:'old',
+                    detail: 'old',
                     tag: 'brand',
                     id: 'xido',
                     createdAt: 'leo',
@@ -160,7 +173,7 @@ describe('update', function () {
                     .byId('xido')
                     .updateBuilder()
                     .increment('price', 10)
-                    .set('updatedAt','leo')
+                    .set('updatedAt', 'leo')
                     .update();
                 should().exist(r);
                 expect(r).eql({
@@ -180,7 +193,7 @@ describe('update', function () {
                     .byId('xido45roo')
                     .updateBuilder()
                     .increment('price', 90)
-                    .set('updatedAt','leo')
+                    .set('updatedAt', 'leo')
                     .update();
                 should().not.exist(r);
                 expect(r).eql(null);
@@ -212,8 +225,8 @@ describe('update', function () {
                     .updateBuilder()
                     .upsert(true)
                     .increment('qty', 10)
-                    .set('id','josh')
-                    .set('updatedAt','leo')
+                    .set('id', 'josh')
+                    .set('updatedAt', 'leo')
                     .update();
                 should().exist(r);
                 expect(r).eql({
@@ -231,7 +244,7 @@ describe('update', function () {
                     .upsert(true)
                     .increment('qty', 10)
                     // .set('id','josh3')
-                    .set('updatedAt','leo')
+                    .set('updatedAt', 'leo')
                     .update();
                 should().exist(r);
                 expect(r).eql({
@@ -268,8 +281,8 @@ describe('update', function () {
                     .updateBuilder()
                     .upsert(true)
                     .decrement('qty', 10)
-                    .set('id','joshxido')
-                    .set('updatedAt','leo')
+                    .set('id', 'joshxido')
+                    .set('updatedAt', 'leo')
                     .update();
                 should().exist(r);
                 expect(r).eql({
@@ -277,6 +290,72 @@ describe('update', function () {
                     id: 'joshxido',
                     updatedAt: 'leo'
                 });
+            });
+        });
+        describe('$unset', function () {
+            it('should remove a doc field by id', async function () {
+                const r = await database().table('test')
+                    .query()
+                    .byId('ethan')
+                    .updateBuilder()
+                    .unset('item')
+                    .set('updatedAt', 'leo')
+                    .update();
+                should().exist(r);
+                should().not.exist(r.item)
+                expect(r).eql({
+                    price: 100,
+                    id: 'ethan',
+                    createdAt: 'leo', updatedAt: 'leo',
+                    status: 'new',
+                    createdBy: null,
+                    flags: {
+                        a: {
+                            q: 1,
+                            g: 2
+                        }
+                    }
+                });
+            });
+            it('should remove an embedded field by id', async function () {
+                const r = await database().table('test')
+                    .query()
+                    .byId('ethan')
+                    .updateBuilder()
+                    .unset('flags.a.q')
+                    .set('updatedAt', 'leo')
+                    .update();
+                should().exist(r);
+                expect(r).eql({
+                    price: 100,
+                    id: 'ethan',
+                    createdAt: 'leo', updatedAt: 'leo',
+                    status: 'new',
+                    createdBy: null,
+                    flags: {
+                        a: {
+                            g: 2
+                        }
+                    }
+                });
+            });
+            it('should remove an embedded field by filter', async function () {
+                const r = await database().table('test')
+                    .query()
+                    .equalTo('price', 100)
+                    .updateBuilder()
+                    .unset('flags.a')
+                    .set('updatedAt', 'leo')
+                    .update();
+                should().exist(r);
+                expect(r).eql([{
+                    price: 100,
+                    id: 'ethan',
+                    createdAt: 'leo', updatedAt: 'leo',
+                    status: 'new',
+                    createdBy: null,
+                    flags: {}
+                }]);
             });
         });
     });

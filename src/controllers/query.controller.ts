@@ -1,4 +1,3 @@
-import {BFastConfig} from "../conf";
 import {RulesController} from "./rules.controller";
 import {SocketController} from "./socket.controller";
 import {QueryModel} from "../models/QueryModel";
@@ -7,6 +6,7 @@ import {HttpClientController} from "./http-client.controller";
 import {AuthController} from "./auth.controller";
 import {DatabaseChangesController} from "./database-changes.controller";
 import {extractResultFromServer} from "../utils/data.util";
+import {getConfig} from '../bfast';
 
 export enum QueryOrder {
     ASCENDING = 'asc',
@@ -219,10 +219,10 @@ export class QueryController {
     }
 
     async delete<T>(options?: RequestOptions): Promise<T> {
-        const credential = BFastConfig.getInstance().credential(this.appName);
+        const credential = getConfig().credential(this.appName);
         const deleteRule = await this.rulesController.deleteRule(this.domain, this.buildQuery(), credential, options);
         const response = await this.httpClientController.post(
-            BFastConfig.getInstance().databaseURL(this.appName),
+            getConfig().databaseURL(this.appName),
             deleteRule,
             {
                 headers: {}
@@ -252,9 +252,9 @@ export class QueryController {
         onDisconnect?: () => void,
         options: RequestOptions = {useMasterKey: false}
     ): DatabaseChangesController {
-        const applicationId = BFastConfig.getInstance().credential(this.appName).applicationId;
-        const projectId = BFastConfig.getInstance().credential(this.appName).projectId;
-        const masterKey = BFastConfig.getInstance().credential(this.appName).appPassword;
+        const applicationId = getConfig().credential(this.appName).applicationId;
+        const projectId = getConfig().credential(this.appName).projectId;
+        const masterKey = getConfig().credential(this.appName).appPassword;
         let match: any;
         if (this.buildQuery() && typeof this.buildQuery().filter === "object") {
             match = this.buildQuery().filter as object;
@@ -283,13 +283,13 @@ export class QueryController {
 
     async find<T>(options?: RequestOptions): Promise<T> {
         const queryRule = await this.rulesController.queryRule(this.domain, this.buildQuery(),
-            BFastConfig.getInstance().credential(this.appName), options);
+            getConfig().credential(this.appName), options);
         return this.queryRuleRequest(queryRule);
     }
 
     async queryRuleRequest(queryRule: any): Promise<any> {
         const response = await this.httpClientController.post(
-            BFastConfig.getInstance().databaseURL(this.appName),
+            getConfig().databaseURL(this.appName),
             queryRule,
             {},
             {

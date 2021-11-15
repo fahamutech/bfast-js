@@ -1,29 +1,31 @@
-import { BFastConfig } from "../conf";
-import { AuthController } from "./auth.controller";
-import { HttpClientController } from "./http-client.controller";
-import { RequestOptions } from "./query.controller";
-import { RulesController } from "./rules.controller";
+import {AuthController} from "./auth.controller";
+import {HttpClientController} from "./http-client.controller";
+import {RequestOptions} from "./query.controller";
+import {RulesController} from "./rules.controller";
 import {AggregateModel} from "../models/aggregate.model";
+import {getConfig} from '../bfast';
 
-export class AggregateController{
+export class AggregateController {
     private aggregateModel: AggregateModel = {
         hashes: [],
         pipelines: []
     }
+
     constructor(private readonly domain: string,
                 private readonly httpClientController: HttpClientController,
                 private readonly rulesController: RulesController,
                 private readonly authController: AuthController,
-                private readonly appName: string){}
+                private readonly appName: string) {
+    }
 
-    hashes(localDataHashes: string[]): AggregateController{
+    hashes(localDataHashes: string[]): AggregateController {
         Object.assign(this.aggregateModel, {
             hashes: localDataHashes
         });
         return this;
     }
 
-    stage(stage: any): AggregateController{
+    stage(stage: any): AggregateController {
         const _set = new Set(this.aggregateModel.pipelines);
         _set.add(stage);
         Object.assign(this.aggregateModel, {
@@ -32,11 +34,11 @@ export class AggregateController{
         return this;
     }
 
-    async find(options?: RequestOptions){
+    async find(options?: RequestOptions) {
         const aggregateRule = await this.rulesController.aggregateRule(
             this.domain,
             this.aggregateModel,
-            BFastConfig.getInstance().credential(this.appName),
+            getConfig().credential(this.appName),
             options
         );
         return this.aggregateRuleRequest(aggregateRule);
@@ -44,7 +46,7 @@ export class AggregateController{
 
     private async aggregateRuleRequest(pipelineRule: any): Promise<any> {
         const response = await this.httpClientController.post(
-            BFastConfig.getInstance().databaseURL(this.appName),
+            getConfig().databaseURL(this.appName),
             pipelineRule,
             {},
             {
@@ -59,7 +61,7 @@ export class AggregateController{
             return data[`aggregate${this.domain}`];
         } else {
             const errors = data.errors;
-            let aggregateError: any = { message: "Aggregation not succeed" };
+            let aggregateError: any = {message: "Aggregation not succeed"};
             Object.keys(errors).forEach(value => {
                 if (value.includes('aggregate')) {
                     aggregateError = errors[value];

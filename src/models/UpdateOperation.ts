@@ -1,4 +1,5 @@
 export interface UpdateModel {
     $set?: {},
-    $inc?: {}
+    $inc?: {},
+    $unset?: {}
 }

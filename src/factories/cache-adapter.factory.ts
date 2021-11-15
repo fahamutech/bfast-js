@@ -1,9 +1,9 @@
 import {CacheAdapter} from "../adapters/cache.adapter";
 import {DefaultCacheFactory} from "./default-cache.factory";
-import {BFastConfig} from "../conf";
+import {getConfig} from '../bfast';
 
 export function cacheAdapter(appName: string): CacheAdapter {
-    const config = BFastConfig.getInstance();
+    const config = getConfig();
     const credentials = config.credential(appName);
     const adapters = credentials?.adapters;
     if (adapters && adapters.cache && typeof adapters.cache === "function") {

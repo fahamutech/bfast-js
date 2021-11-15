@@ -1,10 +1,10 @@
 import {QueryController, RequestOptions} from "./query.controller";
-import {BFastConfig} from "../conf";
 import {RulesController} from "./rules.controller";
 import {HttpClientController} from "./http-client.controller";
 import {AuthController} from "./auth.controller";
 import {extractResultFromServer} from "../utils/data.util";
 import {AggregateController} from "./aggregate.controller";
+import {getConfig} from '../bfast';
 
 export class DatabaseController {
 
@@ -19,10 +19,10 @@ export class DatabaseController {
         model: T | T[],
         options?: RequestOptions
     ): Promise<T> {
-        const credential = BFastConfig.getInstance().credential(this.appName);
+        const credential = getConfig().credential(this.appName);
         const createRule = await this.rulesController.createRule(this.domainName, model, credential, options);
         const response = await this.httpClientController.post(
-            `${BFastConfig.getInstance().databaseURL(this.appName)}`,
+            `${getConfig().databaseURL(this.appName)}`,
             createRule,
             {
                 headers: {}

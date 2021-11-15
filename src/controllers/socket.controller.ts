@@ -2,6 +2,7 @@ import {BFastConfig} from "../conf";
 
 //@ts-ignore
 import {io} from 'socket.io-client';
+import {getConfig} from '../bfast';
 
 export class SocketController {
     public readonly socket: any;
@@ -12,8 +13,8 @@ export class SocketController {
                 onDisconnect?: Function) {
         const namespace = String(eventName)[0] === '/' ? eventName : '/' + eventName;
         const url = namespace.trim().startsWith('/v2/__')
-            ? BFastConfig.getInstance().databaseURL(appName, namespace)
-            : BFastConfig.getInstance().functionsURL(namespace, appName);
+            ? getConfig().databaseURL(appName, namespace)
+            : getConfig().functionsURL(namespace, appName);
         this.socket = io(url, {
             autoConnect: false,
             reconnection: true,

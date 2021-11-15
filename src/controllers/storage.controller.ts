@@ -22,7 +22,7 @@ export class StorageController {
         if (!isBrowserLike) {
             try {
                 if (file && file.filename && file.data) {
-                    return this._handleFileUploadInNode(file, uploadProgress, BFastConfig.getInstance().credential(this.appName), options);
+                    return this._handleFileUploadInNode(file, uploadProgress, getConfig().credential(this.appName), options);
                 } else {
                     throw new Error('file object to save is invalid, data and filename is required field');
                 }
@@ -32,7 +32,7 @@ export class StorageController {
             }
         } else {
             if (file && file.data && file.data instanceof File && file.filename) {
-                return this._handleFileUploadInWeb(file, uploadProgress, BFastConfig.getInstance().credential(this.appName), options);
+                return this._handleFileUploadInWeb(file, uploadProgress, getConfig().credential(this.appName), options);
             } else {
                 throw new Error('file object to save is invalid, data and filename is required field');
             }
@@ -40,24 +40,25 @@ export class StorageController {
     }
 
     async list(query: { keyword?: string, size?: number, skip?: number, after?: string } = {}, options?: RequestOptions): Promise<any[]> {
-        const filesRule = await this.rulesController.storage("list", query, BFastConfig.getInstance().credential(this.appName), options);
+        const filesRule = await this.rulesController.storage("list", query, getConfig().credential(this.appName), options);
         return this._handleFileRuleRequest(filesRule, 'list');
     }
 
     getUrl(filename: string) {
-        const config = getConfig(this.appName);
-        return `${config.databaseURL(this.appName,'')}/storage/${config.credential(this.appName).applicationId}/file/${filename}`;
+        const config = getConfig();
+        return `${config.databaseURL(this.appName, '')}/storage/${config.credential(this.appName).applicationId}/file/${filename}`;
     }
 
     async delete(filename: string, options?: RequestOptions): Promise<string> {
-        const filesRule = await this.rulesController.storage("delete", {filename}, BFastConfig.getInstance().credential(this.appName), options);
+        const filesRule = await this.rulesController.storage("delete", {filename},
+            getConfig().credential(this.appName), options);
         return this._handleFileRuleRequest(filesRule, 'delete');
     }
 
     private async _handleFileRuleRequest(storageRule: any, action: string): Promise<any> {
-        const credential = BFastConfig.getInstance().credential(this.appName);
+        const credential = getConfig().credential(this.appName);
         const response = await this.httpClientController.post(
-            BFastConfig.getInstance().databaseURL(this.appName),
+            getConfig().databaseURL(this.appName),
             storageRule,
             {
                 headers: {
@@ -93,7 +94,7 @@ export class StorageController {
             });
         }
         return this.httpClientController.post<{ urls: string[] }>(
-            BFastConfig.getInstance().databaseURL(this.appName, '/storage/' + applicationId),
+            getConfig().databaseURL(this.appName, '/storage/' + applicationId),
             formData,
             {
                 onUploadProgress: progress,
@@ -135,7 +136,7 @@ export class StorageController {
             uploadProgress,
             options
         );
-        let databaseUrl = BFastConfig.getInstance().databaseURL(this.appName,'');
+        let databaseUrl = getConfig().databaseURL(this.appName, '');
         return databaseUrl + response.data.urls[0];
     }
 
@@ -158,7 +159,7 @@ export class StorageController {
         const response = await this._fileUploadRequest(
             formData, headers, appCredentials.applicationId, uploadProgress, options
         )
-        let databaseUrl = BFastConfig.getInstance().databaseURL(this.appName,'');
+        let databaseUrl = getConfig().databaseURL(this.appName, '');
         return databaseUrl + response.data.urls[0];
     }
 }

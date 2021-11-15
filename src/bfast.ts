@@ -11,13 +11,13 @@ import {httpAdapter} from "./factories/http-adapter.factory";
 import {authAdapter} from "./factories/auth-adapter.factory";
 
 export function init(options: AppCredentials, appName: string = BFastConfig.DEFAULT_APP) {
-    BFastConfig.getInstance().setCredential(options, appName);
+    getConfig().setCredential(options, appName);
 }
-export function getConfig(appName = BFastConfig.DEFAULT_APP): BFastConfig {
+export function getConfig(): BFastConfig {
     return BFastConfig.getInstance();
 }
 export function database(appName: string = BFastConfig.DEFAULT_APP): BfastDatabase {
-    const config = BFastConfig.getInstance();
+    const config = getConfig();
     const authCache = new CacheController(
         appName,
         config.DEFAULT_CACHE_DB_BFAST,
@@ -34,8 +34,7 @@ export function database(appName: string = BFastConfig.DEFAULT_APP): BfastDataba
         appName,
         restController,
         rulesController,
-        authController,
-        cacheAdapter(appName)
+        authController
     );
 }
 export function functions(appName = BFastConfig.DEFAULT_APP): BfastFunctions {
@@ -46,7 +45,7 @@ export function cache(
     options?: { database: string, collection: string },
     appName = BFastConfig.DEFAULT_APP
 ): CacheController {
-    const config = BFastConfig.getInstance();
+    const config = getConfig();
     const databaseName = (options && options.database)
         ? options.database
         : config.DEFAULT_CACHE_DB_BFAST;
@@ -61,7 +60,7 @@ export function cache(
     );
 }
 export function auth(appName = BFastConfig.DEFAULT_APP) {
-    const config = BFastConfig.getInstance();
+    const config = getConfig();
     const cacheController = new CacheController(
         appName,
         config.DEFAULT_CACHE_DB_BFAST,
@@ -75,7 +74,7 @@ export function auth(appName = BFastConfig.DEFAULT_APP) {
     );
 }
 export function storage(appName = BFastConfig.DEFAULT_APP): StorageController {
-    const config = BFastConfig.getInstance();
+    const config = getConfig();
     const authCacheController = new CacheController(
         appName,
         config.DEFAULT_CACHE_DB_BFAST,

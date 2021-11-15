@@ -1,16 +1,17 @@
 import {UpdateModel} from "../models/UpdateOperation";
-import {BFastConfig} from "../conf";
 import {RulesController} from "./rules.controller";
 import {QueryModel} from "../models/QueryModel";
 import {RequestOptions} from "./query.controller";
 import {HttpClientController} from "./http-client.controller";
 import {AuthController} from "./auth.controller";
 import {extractResultFromServer} from "../utils/data.util";
+import {getConfig} from '../bfast';
 
 export class UpdateController {
     private updateModel: UpdateModel = {
         $set: {},
-        $inc: {}
+        $inc: {},
+        $unset: {}
     };
     private _upsert = false;
 
@@ -33,6 +34,16 @@ export class UpdateController {
         }
         Object.assign(this.updateModel.$set, {
             [field]: value
+        });
+        return this;
+    }
+
+    unset(field: string): UpdateController {
+        if (field === 'id' || field === '_id') {
+            return this;
+        }
+        Object.assign(this.updateModel.$unset, {
+            [field]: 1
         });
         return this;
     }
@@ -63,7 +74,7 @@ export class UpdateController {
     }
 
     async update(options?: RequestOptions): Promise<any> {
-        const credential = BFastConfig.getInstance().credential(this.appName);
+        const credential = getConfig().credential(this.appName);
         Object.keys(this.updateModel).forEach(key => {
             try {
                 // @ts-ignore
@@ -84,7 +95,7 @@ export class UpdateController {
             options
         );
         const response = await this.httpClientController.post(
-            BFastConfig.getInstance().databaseURL(this.appName),
+            getConfig().databaseURL(this.appName),
             updateRule,
             {},
             {

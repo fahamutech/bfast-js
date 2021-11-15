@@ -1,7 +1,7 @@
 import {CacheAdapter} from "../adapters/cache.adapter";
-import {BFastConfig} from "../conf";
-import {addSyncs, removeOneSyncs, getAllSyncs, getOneSyncs, removeAllSyncs, getSyncsKeys} from '../utils/syncs.util'
+import {addSyncs, getAllSyncs, getOneSyncs, getSyncsKeys, removeAllSyncs, removeOneSyncs} from '../utils/syncs.util'
 import {SyncsModel} from "../models/syncs.model";
+import {getConfig} from '../bfast';
 
 export class CacheController {
 
@@ -10,9 +10,9 @@ export class CacheController {
                 private readonly collection: string,
                 private readonly cacheAdapter: CacheAdapter) {
         if (database && !database.startsWith('bfast/')) {
-            this.database = BFastConfig.getInstance().cacheDatabaseName(database, appName);
+            this.database = getConfig().cacheDatabaseName(database, appName);
         }
-        this.collection = BFastConfig.getInstance().cacheCollectionName(collection, appName);
+        this.collection = getConfig().cacheCollectionName(collection, appName);
     }
 
     async keys(): Promise<string[]> {
