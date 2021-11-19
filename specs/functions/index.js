@@ -26,6 +26,12 @@ module.exports.fp = bfast.functions().onPostHttpRequest(
         response.send('fp');
     }
 );
+module.exports.fpe = bfast.functions().onPostHttpRequest(
+    '/fpe',
+    (request, response) => {
+        response.status(400).json({message:'fpe'});
+    }
+);
 module.exports.fg = bfast.functions().onGetHttpRequest(
     '/fg',
     (request, response) => {

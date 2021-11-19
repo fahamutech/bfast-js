@@ -20,9 +20,7 @@ export class FunctionsController {
             } else {
                 Object.assign(postConfig, config);
             }
-            // const user = await this.authAdapter.currentUser();
-            // postConfig.headers['authorization'] = `Bearer ${user?.sessionToken}`;
-            const value = await this.httpClientController.post(
+            return this.httpClientController.post(
                 getConfig().functionsURL(this.functionPath, this.appName) as string,
                 body ? body : {},
                 postConfig,
@@ -32,8 +30,13 @@ export class FunctionsController {
                     type: 'faas',
                     token: await this.authController.getToken()
                 }
-            );
-            return value.data;
+            ).then(response => {
+                return response.data;
+            }).catch(reason => {
+                throw reason && reason.response && reason.response.data
+                    ? reason.response.data
+                    : {message: reason.toString()};
+            });
         } else {
             throw {code: -1, message: 'Please provide function path'};
         }
@@ -46,7 +49,7 @@ export class FunctionsController {
         } else {
             Object.assign(deleteConfig, config);
         }
-        const response = await this.httpClientController.delete(
+        return this.httpClientController.delete(
             getConfig().functionsURL(this.functionPath, this.appName) as string,
             deleteConfig,
             {
@@ -55,8 +58,13 @@ export class FunctionsController {
                 type: 'faas',
                 token: await this.authController.getToken()
             }
-        );
-        return response.data;
+        ).then(response => {
+            return response.data;
+        }).catch(reason => {
+            throw reason && reason.response && reason.response.data
+                ? reason.response.data
+                : {message: reason.toString()};
+        });
     }
 
     async get<T>(config?: RestRequestConfig): Promise<T> {
@@ -66,7 +74,7 @@ export class FunctionsController {
         } else {
             Object.assign(getConfig_, config);
         }
-        const response = await this.httpClientController.get(
+        return this.httpClientController.get(
             getConfig().functionsURL(this.functionPath, this.appName) as string,
             getConfig_,
             {
@@ -75,8 +83,13 @@ export class FunctionsController {
                 type: 'faas',
                 token: await this.authController.getToken()
             }
-        );
-        return response.data;
+        ).then(response => {
+            return response.data;
+        }).catch(reason => {
+            throw reason && reason.response && reason.response.data
+                ? reason.response.data
+                : {message: reason.toString()};
+        });
     }
 
     async put<T>(body?: { [p: string]: any }, config?: RestRequestConfig): Promise<T> {
@@ -86,7 +99,7 @@ export class FunctionsController {
         } else {
             Object.assign(putConfig, config);
         }
-        const response = await this.httpClientController.put(
+        return this.httpClientController.put(
             getConfig().functionsURL(this.functionPath, this.appName) as string,
             body ? body : {},
             putConfig,
@@ -96,8 +109,13 @@ export class FunctionsController {
                 type: 'faas',
                 token: await this.authController.getToken()
             }
-        );
-        return response.data;
+        ).then(response => {
+            return response.data;
+        }).catch(reason => {
+            throw reason && reason.response && reason.response.data
+                ? reason.response.data
+                : {message: reason.toString()};
+        });
     }
 
 

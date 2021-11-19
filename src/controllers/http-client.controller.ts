@@ -1,5 +1,5 @@
-import { HttpClientAdapter, RestRequestConfig, RestResponse } from "../adapters/http-client.adapter";
-import { HttpRequestInfoModel } from "../models/http-request-info.model";
+import {HttpClientAdapter, RestRequestConfig, RestResponse} from "../adapters/http-client.adapter";
+import {HttpRequestInfoModel} from "../models/http-request-info.model";
 
 export class HttpClientController {
 
@@ -16,10 +16,10 @@ export class HttpClientController {
         const headers = Object.assign(config && config.headers ? config.headers : {}, {
             'x-bfast-token': token.toString().trim()
         });
-        if(config){
+        if (config) {
             config.headers = headers;
             return config;
-        }else{
+        } else {
             return {}
         }
     }

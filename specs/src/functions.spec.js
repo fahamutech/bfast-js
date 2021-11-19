@@ -1,5 +1,5 @@
 const {expect, should} = require('chai')
-const {init, storage, functions} = require('../../dist/bfast.node');
+const {init, functions} = require('../../dist/bfast.node');
 const {config, serverUrl, mongoRepSet} = require("../test.config");
 
 describe('functions', function () {
@@ -16,6 +16,16 @@ describe('functions', function () {
         it('should send a post request', async function () {
             const r = await functions().request('/fp').post();
             expect(r).equal('fp');
+        });
+    });
+    describe('post', function () {
+        it('should handle post failure', function (done) {
+            functions().request('/fpe').post().catch(r=>{
+                should().exist(r);
+                should().exist(r.message);
+                expect(r.message).equal('fpe');
+                done();
+            });
         });
     });
     describe('put', function () {
