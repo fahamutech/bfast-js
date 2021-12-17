@@ -6,3 +6,4 @@ export * from './adapters/auth.adapter';
 export * from './adapters/cache.adapter';
 export * from './adapters/http-client.adapter';
 export * from './factories/cache-adapter.factory';
+export * from './conf';

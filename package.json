@@ -1,6 +1,6 @@
 {
   "name": "bfast",
-  "version": "6.0.0-alpha.17",
+  "version": "6.0.0-alpha.18",
   "description": "javascript client sdk for bfast::cloud project",
   "repository": "https://github.com/fahamutech/bfast-js",
   "main": "dist/bfast.node.js",
@@ -36,7 +36,8 @@
     "dexie": "~3.0.3",
     "form-data": "~4.0.0",
     "socket.io-client": "~4.2.0",
-    "utf-8-validate": "~5.0.6"
+    "utf-8-validate": "~5.0.6",
+    "is-electron": "^2.2.1"
   },
   "devDependencies": {
     "@types/node": "~14.14.31",
