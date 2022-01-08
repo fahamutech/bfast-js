@@ -12,12 +12,12 @@ export class HttpClientController {
         config: RestRequestConfig,
         token: string | null,
     ): Promise<RestRequestConfig> {
-        token = token ? token : '';
-        const headers = Object.assign(config && config.headers ? config.headers : {}, {
-            'x-bfast-token': token.toString().trim()
-        });
+        // token = token ? token : '';
+        // const headers = Object.assign(config && config.headers ? config.headers : {}, {
+        //     'x-bfast-token': token.toString().trim()
+        // });
         if (config) {
-            config.headers = headers;
+            // config.headers = headers;
             return config;
         } else {
             return {}
