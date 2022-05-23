@@ -30,7 +30,7 @@
   "dependencies": {
     "axios": "~0.22.0",
     "bufferutil": "~4.0.4",
-    "dexie": "~3.0.3",
+    "dexie": "~3.2.2",
     "form-data": "~4.0.0",
     "is-electron": "^2.2.1",
     "js-sha1": "~0.6.0",
