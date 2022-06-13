@@ -13,7 +13,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@master
         with:
-          node-version: 14.x
+          node-version: 16.x
       - name: Create mongo Docker container
         id: build_mongo_docker
         uses: DigiPie/mongo-action@v1.0.1
@@ -22,6 +22,7 @@ jobs:
           port: 27017
       - name: Publish if version has been updated
         run: |
+          npm install -g dns
           npm install -g ipfs
           jsipfs init
           jsipfs config --json Addresses.API '["/ip4/127.0.0.1/tcp/5001"]'
