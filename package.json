@@ -1,6 +1,6 @@
 {
   "name": "bfast",
-  "version": "6.0.1",
+  "version": "7.0.0",
   "description": "",
   "repository": "https://github.com/fahamutech/bfast-js",
   "main": "dist/bfast.node.js",
@@ -28,28 +28,26 @@
   "author": "Fahamu Tech",
   "license": "MIT",
   "dependencies": {
-    "axios": "~0.27.2",
-    "bufferutil": "~4.0.6",
-    "dexie": "~3.2.2",
-    "form-data": "~4.0.0",
-    "is-electron": "~2.2.1",
-    "js-sha1": "~0.6.0",
-    "socket.io-client": "~4.5.1",
-    "utf-8-validate": "~5.0.9"
+    "axios": "~1.11.0",
+    "bufferutil": "~4.0.9",
+    "dexie": "~4.2.0",
+    "form-data": "~4.0.4",
+    "is-electron": "~2.2.2",
+    "js-sha1": "~0.7.0",
+    "socket.io-client": "~4.8.1",
+    "utf-8-validate": "~6.0.5"
   },
   "devDependencies": {
-    "@types/node": "~14.14.31",
-    "bfast-database-core": "~4.0.0-alpha.16",
-    "bfast-function": "~2.0.0-alpha.9",
-    "chai": "~4.3.6",
+    "@types/node": "~24.3.0",
+    "bfast-function": "~3.0.0",
+    "chai": "~6.0.1",
     "ipfs-only-hash": "~4.0.0",
-    "mocha": "~10.0.0",
-    "mongodb": "~4.7.0",
-    "ts-loader": "~9.3.0",
-    "typescript": "~4.4.3",
-    "webpack": "~5.76.0",
-    "webpack-cli": "~4.9.2",
-    "ws": "~8.7.0"
+    "mocha": "~11.7.1",
+    "ts-loader": "~9.5.4",
+    "typescript": "~5.9.2",
+    "webpack": "~5.101.3",
+    "webpack-cli": "~6.0.1",
+    "ws": "~8.18.3"
   },
   "keywords": []
 }

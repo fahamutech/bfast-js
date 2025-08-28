@@ -1,60 +1,11 @@
-import {FunctionsController} from "./controllers/functions.controller";
-import {HttpClientController} from "./controllers/http-client.controller";
 import {SocketController} from "./controllers/socket.controller";
 import {HttpRequestModel} from "./models/HttpRequestModel";
 import {EventResponseModel, HttpResponseModel} from "./models/HttpResponseModel";
 import {HttpNextModel} from "./models/HttpNextModel";
-import {AuthController} from "./controllers/auth.controller";
-import {CacheController} from "./controllers/cache.controller";
 import {isNode} from "./utils/platform.util";
-import {cacheAdapter} from "./factories/cache-adapter.factory";
-import {httpAdapter} from "./factories/http-adapter.factory";
-import {authAdapter} from "./factories/auth-adapter.factory";
-import {getConfig} from './bfast';
 
 export class BfastFunctions {
-    constructor(private readonly appName: string,
-                private authController: AuthController,
-                private httpClientController: HttpClientController) {
-    }
-
-    private init() {
-        const config = getConfig()
-        const authCache = new CacheController(
-            this.appName,
-            config.DEFAULT_CACHE_DB_BFAST,
-            config.DEFAULT_CACHE_COLLECTION_USER,
-            cacheAdapter(this.appName)
-        );
-        const restController = new HttpClientController(
-            this.appName,
-            httpAdapter(config, this.appName)
-        )
-        const authController = new AuthController(
-            this.appName,
-            authCache,
-            authAdapter(config, this.appName)
-        );
-        if (!this.authController) {
-            this.authController = authController;
-        }
-        if (!this.httpClientController) {
-            this.httpClientController = restController;
-        }
-    }
-
-    /**
-     * exec a http client request
-     * @param path {string} function name
-     */
-    request(path: string): FunctionsController {
-        this.init();
-        return new FunctionsController(
-            path,
-            this.httpClientController,
-            this.authController,
-            this.appName
-        );
+    constructor(private readonly appName: string) {
     }
 
     /**
